@@ -1,3 +1,4 @@
+import { AppHeader } from '@/components/app-header';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
@@ -9,7 +10,10 @@ export default function ProtectedLayout({
   return (
     <SidebarProvider defaultOpen={false} open={false}>
       <AppSidebar />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        <AppHeader />
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }

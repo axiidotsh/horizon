@@ -21,14 +21,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import {
+  BrainIcon,
   CalendarIcon,
+  ChartColumnIncreasingIcon,
   CheckCircle2Icon,
   LayoutDashboardIcon,
   LogOutIcon,
-  MessageSquareIcon,
   MonitorIcon,
   MoonIcon,
   SettingsIcon,
@@ -46,7 +46,7 @@ const navItems = [
   {
     title: 'Chat',
     url: '/chat',
-    icon: MessageSquareIcon,
+    icon: BrainIcon,
   },
   {
     title: 'Tasks',
@@ -56,7 +56,7 @@ const navItems = [
   {
     title: 'Habits',
     url: '/habits',
-    icon: CheckCircle2Icon,
+    icon: ChartColumnIncreasingIcon,
   },
   {
     title: 'Calendar',
@@ -70,16 +70,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="my-2">
-        <div className="flex items-center justify-center">
-          <PlaceholderLogo className="size-6" />
-        </div>
+      <SidebarHeader className="h-16 gap-0 border-b p-0">
+        <PlaceholderLogo className="m-auto size-6" />
       </SidebarHeader>
-      <SidebarSeparator className="mx-0" />
-      <SidebarContent>
+      <SidebarContent className="mx-auto mt-1">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-0.5">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
@@ -94,53 +91,49 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size="lg">
-                  <Avatar className="size-8">
-                    <AvatarImage src="/avatars/user.png" alt="User" />
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" side="right" className="w-56">
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <MonitorIcon className="mr-2 size-4" />
-                    <span>Theme</span>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem onSelect={() => setTheme('light')}>
-                      <SunIcon className="mr-2 size-4" />
-                      <span>Light</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setTheme('dark')}>
-                      <MoonIcon className="mr-2 size-4" />
-                      <span>Dark</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setTheme('system')}>
-                      <MonitorIcon className="mr-2 size-4" />
-                      <span>System</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-                <DropdownMenuItem asChild>
-                  <Link href="/settings">
-                    <SettingsIcon className="mr-2 size-4" />
-                    <span>Settings</span>
-                  </Link>
+      <SidebarFooter className="flex h-16 items-center justify-center border-t">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton size="lg">
+              <Avatar className="size-8 rounded-md">
+                <AvatarImage src="/avatars/user.png" alt="User" />
+                <AvatarFallback className="rounded-md">U</AvatarFallback>
+              </Avatar>
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="right" className="w-56">
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <MonitorIcon className="mr-2 size-4" />
+                <span>Theme</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onSelect={() => setTheme('light')}>
+                  <SunIcon className="mr-2 size-4" />
+                  <span>Light</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <LogOutIcon className="mr-2 size-4" />
-                  <span>Log out</span>
+                <DropdownMenuItem onSelect={() => setTheme('dark')}>
+                  <MoonIcon className="mr-2 size-4" />
+                  <span>Dark</span>
                 </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
+                <DropdownMenuItem onSelect={() => setTheme('system')}>
+                  <MonitorIcon className="mr-2 size-4" />
+                  <span>System</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuItem asChild>
+              <Link href="/settings">
+                <SettingsIcon className="mr-2 size-4" />
+                <span>Settings</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <LogOutIcon className="mr-2 size-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
   );
