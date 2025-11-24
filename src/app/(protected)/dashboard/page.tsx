@@ -7,6 +7,7 @@ import {
   TrendingUpIcon,
   TrophyIcon,
 } from 'lucide-react';
+import { DashboardCalendar } from './dashboard-calendar';
 import { DashboardCard } from './dashboard-card';
 import { DashboardTasks } from './dashboard-tasks';
 
@@ -93,6 +94,7 @@ export default function Dashboard() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <DashboardTasks tasks={dashboardTasks} />
+          <DashboardCalendar />
         </div>
       </div>
     </div>
