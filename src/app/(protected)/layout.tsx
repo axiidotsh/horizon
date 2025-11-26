@@ -12,7 +12,7 @@ export default function ProtectedLayout({
       <AppSidebar />
       <SidebarInset>
         <AppHeader />
-        <main className="mx-auto w-full p-5">
+        <main className="mx-auto w-full p-5 pb-8">
           <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
       </SidebarInset>

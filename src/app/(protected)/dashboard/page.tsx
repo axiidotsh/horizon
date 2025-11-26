@@ -3,20 +3,23 @@ import { getDaysFromNowAt, getTodayAt } from '@/lib/date';
 import {
   ChartColumnIncreasingIcon,
   CheckCircleIcon,
+  ClockArrowUpIcon,
   Settings2Icon,
-  TrendingUpIcon,
   TrophyIcon,
 } from 'lucide-react';
 import { DashboardCalendar } from './dashboard-calendar';
 import { DashboardCard } from './dashboard-card';
 import { DashboardTasks } from './dashboard-tasks';
+import { FocusTimeAreaChart } from './focus-time-area-chart';
+import { HabitCompletionBarChart } from './habit-completion-bar-chart';
+import { TaskCompletionBarChart } from './task-completion-bar-chart';
 
 const dashboardMetrics = [
   {
-    title: 'Efficiency',
-    icon: TrendingUpIcon,
-    content: '90%',
-    footer: '+4% from yesterday',
+    title: 'Focus',
+    icon: ClockArrowUpIcon,
+    content: '2h 35m',
+    footer: '+24m from yesterday',
   },
   {
     title: 'Tasks',
@@ -97,15 +100,12 @@ export default function Dashboard() {
           <DashboardCalendar />
         </div>
         <div className="grid grid-cols-4 gap-4">
-          <div className="bg-dashboard-card col-span-2 flex h-80 items-center justify-center rounded-sm border font-mono text-sm">
-            Placeholder graph card
-          </div>
-          <div className="bg-dashboard-card flex items-center justify-center rounded-sm border font-mono text-sm">
-            Placeholder graph card
-          </div>
-          <div className="bg-dashboard-card flex items-center justify-center rounded-sm border font-mono text-sm">
-            Placeholder graph card
-          </div>
+          <FocusTimeAreaChart />
+          <TaskCompletionBarChart />
+          <HabitCompletionBarChart />
+        </div>
+        <div className="bg-dashboard-card flex h-80 items-center justify-center rounded-sm border font-mono text-sm">
+          Productivity heatmap - focus sessions + tasks done + habits done
         </div>
       </div>
     </div>

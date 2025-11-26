@@ -24,7 +24,7 @@ export const DashboardCard = ({
     <Card className="bg-dashboard-card gap-0 rounded-sm shadow-none">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="font-mono text-sm font-normal">
+          <CardTitle className="text-muted-foreground font-mono text-sm font-normal">
             {title}
           </CardTitle>
           <Icon className="text-muted-foreground size-4" />
@@ -33,9 +33,11 @@ export const DashboardCard = ({
       <CardContent className="mt-3">
         <p className="text-2xl font-semibold">{content}</p>
       </CardContent>
-      <CardFooter className="mt-1">
-        <p className="text-muted-foreground text-xs">{footer}</p>
-      </CardFooter>
+      {footer ? (
+        <CardFooter className="mt-1">
+          <p className="text-muted-foreground text-xs">{footer}</p>
+        </CardFooter>
+      ) : null}
     </Card>
   );
 };
