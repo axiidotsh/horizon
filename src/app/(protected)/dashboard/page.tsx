@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { getDaysFromNowAt, getTodayAt } from '@/utils/date';
 import {
-  ChartColumnIncreasingIcon,
-  CheckCircleIcon,
-  ClockArrowUpIcon,
+  ClockPlusIcon,
+  GoalIcon,
+  LayoutListIcon,
   Settings2Icon,
   TimerIcon,
   TrophyIcon,
@@ -19,19 +19,19 @@ import { DashboardTasks } from './components/tasks';
 const dashboardMetrics = [
   {
     title: 'Focus',
-    icon: ClockArrowUpIcon,
+    icon: ClockPlusIcon,
     content: '2h 35m',
     footer: '+24m from yesterday',
   },
   {
     title: 'Tasks',
-    icon: CheckCircleIcon,
+    icon: LayoutListIcon,
     content: '1/6',
     footer: 'Personal Best: 3/6',
   },
   {
     title: 'Habits',
-    icon: ChartColumnIncreasingIcon,
+    icon: GoalIcon,
     content: '4/6',
     footer: 'Personal Best: 12/12',
   },
