@@ -7,12 +7,12 @@ import {
   Settings2Icon,
   TrophyIcon,
 } from 'lucide-react';
-import { DashboardCalendar } from './dashboard-calendar';
-import { DashboardCard } from './dashboard-card';
-import { DashboardTasks } from './dashboard-tasks';
-import { FocusTimeAreaChart } from './focus-time-area-chart';
-import { HabitCompletionBarChart } from './habit-completion-bar-chart';
-import { TaskCompletionBarChart } from './task-completion-bar-chart';
+import { DashboardCalendar } from './components/calendar';
+import { FocusTimeAreaChart } from './components/focus-time-area-chart';
+import { HabitCompletionBarChart } from './components/habit-completion-bar-chart';
+import { DashboardMetricCard } from './components/metric-card';
+import { TaskCompletionBarChart } from './components/task-completion-bar-chart';
+import { DashboardTasks } from './components/tasks';
 
 const dashboardMetrics = [
   {
@@ -92,7 +92,7 @@ export default function Dashboard() {
       <div className="mt-4 space-y-4">
         <div className="grid grid-cols-4 gap-4">
           {dashboardMetrics.map((metric) => (
-            <DashboardCard key={metric.title} {...metric} />
+            <DashboardMetricCard key={metric.title} {...metric} />
           ))}
         </div>
         <div className="grid grid-cols-2 gap-4">

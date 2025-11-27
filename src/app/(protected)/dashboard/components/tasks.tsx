@@ -3,6 +3,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { formatDueDate, getDueDateUrgency } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import { PlusIcon } from 'lucide-react';
+import { DashboardCard } from './card';
 
 interface DashboardTaskProps {
   task: string;
@@ -16,14 +17,16 @@ interface DashboardTasksProps {
 
 export const DashboardTasks = ({ tasks }: DashboardTasksProps) => {
   return (
-    <div className="bg-dashboard-card rounded-sm border px-6 py-5">
-      <div className="flex items-center justify-between">
-        <h2 className="font-mono text-sm">Tasks</h2>
+    <DashboardCard
+      title="Tasks"
+      action={
         <Button size="icon-sm" variant="ghost" className="size-6">
           <PlusIcon />
         </Button>
-      </div>
-      <ul className="mt-5 space-y-5">
+      }
+      contentClassName="mt-5"
+    >
+      <ul className="space-y-5">
         {tasks.map((task) => (
           <li
             key={task.task}
@@ -57,6 +60,6 @@ export const DashboardTasks = ({ tasks }: DashboardTasksProps) => {
           </li>
         ))}
       </ul>
-    </div>
+    </DashboardCard>
   );
 };
