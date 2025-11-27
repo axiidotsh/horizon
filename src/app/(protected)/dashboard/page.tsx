@@ -5,6 +5,7 @@ import {
   CheckCircleIcon,
   ClockArrowUpIcon,
   Settings2Icon,
+  TimerIcon,
   TrophyIcon,
 } from 'lucide-react';
 import { DashboardCalendar } from './components/calendar';
@@ -84,10 +85,22 @@ export default function Dashboard() {
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-muted-foreground font-mono text-sm">Dashboard</h1>
-        <Button size="icon-sm" variant="ghost">
-          <Settings2Icon />
-          <span className="sr-only">Configure dashboard cards</span>
-        </Button>
+        <div className="flex items-center">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            tooltip="Start a new focus session"
+          >
+            <TimerIcon />
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            tooltip="Configure dashboard cards"
+          >
+            <Settings2Icon />
+          </Button>
+        </div>
       </div>
       <div className="mt-4 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
