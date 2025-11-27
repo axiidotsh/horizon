@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { SELECT_TRIGGER_STYLES } from '@/utils/chart';
+import { cn } from '@/utils/utils';
 import { useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { DashboardCard } from '../card';
@@ -82,11 +83,11 @@ export const GenericAreaChart = <TData extends Record<string, unknown>>({
           </SelectContent>
         </Select>
       }
-      contentClassName="mt-6"
+      contentClassName="mt-6 pl-3"
     >
       <ChartContainer
         config={chartConfig}
-        className={`${chartHeight} w-full min-w-0 pr-4`}
+        className={cn(chartHeight, 'w-full min-w-0 pr-3')}
       >
         <AreaChart data={data} margin={{ left: 0, right: 0, top: 10 }}>
           <defs>

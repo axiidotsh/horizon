@@ -24,11 +24,10 @@ import {
 } from '@/components/ui/sidebar';
 import {
   BrainIcon,
-  CalendarIcon,
-  ChartColumnIncreasingIcon,
-  CheckCircle2Icon,
   ClockPlusIcon,
+  GoalIcon,
   LayoutDashboardIcon,
+  LayoutListIcon,
   LogOutIcon,
   MonitorIcon,
   MoonIcon,
@@ -57,17 +56,12 @@ const navItems = [
   {
     title: 'Tasks',
     url: '/tasks',
-    icon: CheckCircle2Icon,
+    icon: LayoutListIcon,
   },
   {
     title: 'Habits',
     url: '/habits',
-    icon: ChartColumnIncreasingIcon,
-  },
-  {
-    title: 'Calendar',
-    url: '/calendar',
-    icon: CalendarIcon,
+    icon: GoalIcon,
   },
 ];
 

@@ -8,10 +8,10 @@ import {
   TimerIcon,
   TrophyIcon,
 } from 'lucide-react';
-import { DashboardCalendar } from './components/calendar';
 import { FocusTimeAreaChart } from './components/charts/focus-time';
 import { HabitCompletionAreaChart } from './components/charts/habit-completion';
 import { TaskCompletionAreaChart } from './components/charts/task-completion';
+import { DashboardHabits } from './components/habits';
 import { DashboardMetricCard } from './components/metric-card';
 import { DashboardTasks } from './components/tasks';
 
@@ -80,6 +80,39 @@ const dashboardTasks = [
   },
 ];
 
+const dashboardHabits = [
+  {
+    habit: 'Morning meditation',
+    completed: true,
+    streak: 12,
+  },
+  {
+    habit: 'Exercise',
+    completed: true,
+    streak: 8,
+  },
+  {
+    habit: 'Read for 30 minutes',
+    completed: false,
+    streak: 5,
+  },
+  {
+    habit: 'Journal',
+    completed: false,
+    streak: 3,
+  },
+  {
+    habit: 'Drink 8 glasses of water',
+    completed: true,
+    streak: 15,
+  },
+  {
+    habit: 'No social media before noon',
+    completed: false,
+    streak: 2,
+  },
+];
+
 export default function Dashboard() {
   return (
     <div className="flex flex-col">
@@ -110,7 +143,7 @@ export default function Dashboard() {
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
           <DashboardTasks tasks={dashboardTasks} />
-          <DashboardCalendar />
+          <DashboardHabits habits={dashboardHabits} />
         </div>
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="min-w-0">
