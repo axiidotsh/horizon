@@ -1,3 +1,4 @@
+import { PageHeading } from '@/components/page-heading';
 import { Button } from '@/components/ui/button';
 import { getDaysFromNowAt, getTodayAt } from '@/utils/date';
 import {
@@ -118,7 +119,7 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-muted-foreground font-mono text-sm">Dashboard</h1>
+        <PageHeading>Dashboard</PageHeading>
         <div className="flex items-center">
           <Button
             size="icon-sm"
