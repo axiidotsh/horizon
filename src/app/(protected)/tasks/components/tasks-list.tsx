@@ -112,8 +112,8 @@ export function TasksList({ tasks, sortedTasks }: TasksListProps) {
                     {task.tags?.map((tag) => (
                       <Badge
                         key={tag}
-                        variant="outline"
-                        className="h-5 text-xs"
+                        variant="secondary"
+                        className="bg-foreground/10 h-5 text-xs"
                       >
                         {tag}
                       </Badge>

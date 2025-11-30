@@ -71,23 +71,19 @@ export function TaskListActions({ tasks }: TaskListActionsProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="border-border flex items-center gap-2 rounded-md border bg-transparent px-2">
+      <div className="border-border flex items-center gap-1 rounded-md border bg-transparent pr-1">
         <SearchBar
           placeholder="Search tasks..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-[200px] focus:w-[250px]"
+          inputClassName="bg-transparent!"
           expandOnFocus
         />
         <div className="bg-border h-5 w-px" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              tooltip="Filter tasks"
-              className="h-8"
-            >
+            <Button size="icon-sm" variant="ghost" tooltip="Filter tasks">
               <FilterIcon />
             </Button>
           </DropdownMenuTrigger>
