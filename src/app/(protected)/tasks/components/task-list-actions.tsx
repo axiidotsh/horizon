@@ -71,78 +71,74 @@ export function TaskListActions({ tasks }: TaskListActionsProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="border-border flex items-center gap-1 rounded-md border bg-transparent pr-1">
-        <SearchBar
-          placeholder="Search tasks..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-[200px] focus:w-[250px]"
-          inputClassName="bg-transparent!"
-          expandOnFocus
-        />
-        <div className="bg-border h-5 w-px" />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="icon-sm" variant="ghost" tooltip="Filter tasks">
-              <FilterIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                Filter by tags
-                {selectedTags.length > 0 && (
-                  <span className="bg-primary text-primary-foreground ml-auto flex size-5 items-center justify-center rounded-full text-xs">
-                    {selectedTags.length}
-                  </span>
-                )}
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-56">
-                <div className="p-2">
-                  <Input
-                    type="text"
-                    placeholder="Search tags..."
-                    value={tagSearchQuery}
-                    onChange={(e) => setTagSearchQuery(e.target.value)}
-                    className="h-8"
-                  />
-                </div>
-                <DropdownMenuSeparator />
-                <div className="max-h-[200px] overflow-y-auto">
-                  {getFilteredTags().length === 0 ? (
-                    <div className="text-muted-foreground px-2 py-6 text-center text-sm">
-                      No tags found
-                    </div>
-                  ) : (
-                    getFilteredTags().map((tag) => (
-                      <DropdownMenuCheckboxItem
-                        key={tag}
-                        checked={selectedTags.includes(tag)}
-                        onCheckedChange={() => toggleTag(tag)}
-                      >
-                        <Badge variant="outline" className="h-5 text-xs">
-                          {tag}
-                        </Badge>
-                      </DropdownMenuCheckboxItem>
-                    ))
-                  )}
-                </div>
-                {selectedTags.length > 0 && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onSelect={clearTagFilters}
-                      className="justify-center"
+      <SearchBar
+        placeholder="Search tasks..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="mr-1 w-[200px] border focus:w-[250px]"
+        expandOnFocus
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="icon-sm" variant="ghost" tooltip="Filter tasks">
+            <FilterIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              Filter by tags
+              {selectedTags.length > 0 && (
+                <span className="bg-primary text-primary-foreground ml-auto flex size-5 items-center justify-center rounded-full text-xs">
+                  {selectedTags.length}
+                </span>
+              )}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-56">
+              <div className="p-2">
+                <Input
+                  type="text"
+                  placeholder="Search tags..."
+                  value={tagSearchQuery}
+                  onChange={(e) => setTagSearchQuery(e.target.value)}
+                  className="h-8"
+                />
+              </div>
+              <DropdownMenuSeparator />
+              <div className="max-h-[200px] overflow-y-auto">
+                {getFilteredTags().length === 0 ? (
+                  <div className="text-muted-foreground px-2 py-6 text-center text-sm">
+                    No tags found
+                  </div>
+                ) : (
+                  getFilteredTags().map((tag) => (
+                    <DropdownMenuCheckboxItem
+                      key={tag}
+                      checked={selectedTags.includes(tag)}
+                      onCheckedChange={() => toggleTag(tag)}
                     >
-                      Clear filters
-                    </DropdownMenuItem>
-                  </>
+                      <Badge variant="outline" className="h-5 text-xs">
+                        {tag}
+                      </Badge>
+                    </DropdownMenuCheckboxItem>
+                  ))
                 )}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+              </div>
+              {selectedTags.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onSelect={clearTagFilters}
+                    className="justify-center"
+                  >
+                    Clear filters
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button size="icon-sm" variant="ghost" tooltip="Sort tasks">

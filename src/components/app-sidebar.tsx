@@ -73,10 +73,10 @@ export function AppSidebar() {
       <SidebarHeader className="h-16 gap-0 border-b p-0">
         <PlaceholderLogo className="m-auto size-6" />
       </SidebarHeader>
-      <SidebarContent className="mx-auto mt-1">
+      <SidebarContent className="mx-auto mt-2">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5">
+            <SidebarMenu className="space-y-1">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
