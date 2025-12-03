@@ -12,6 +12,7 @@ export const {
   signIn,
   signUp,
   signOut,
+  requestPasswordReset,
   resetPassword,
   useSession,
   isLastUsedLoginMethod,

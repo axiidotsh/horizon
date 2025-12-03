@@ -15,8 +15,12 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { resetPassword } from '@/lib/auth-client';
+import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const resetPasswordSchema = z
@@ -36,10 +40,21 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 type FormErrors = Partial<Record<keyof ResetPasswordFormData, string>>;
 
 export default function ResetPasswordPage() {
-  const [errors, setErrors] = useState<FormErrors>({});
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!token) {
+      toast.error('Invalid or missing reset token');
+      return;
+    }
+
     const formData = new FormData(e.currentTarget);
     const data = {
       password: formData.get('password') as string,
@@ -59,8 +74,45 @@ export default function ResetPasswordPage() {
     }
 
     setErrors({});
-    // TODO: Handle reset password
-    console.log('Reset password:', result.data);
+    setIsLoading(true);
+
+    const { error } = await resetPassword({
+      newPassword: result.data.password,
+      token,
+    });
+
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error.message ?? 'Failed to reset password');
+      return;
+    }
+
+    toast.success('Password reset successfully');
+    router.push('/sign-in');
+  }
+
+  if (!token) {
+    return (
+      <Card className="w-full max-w-md rounded-lg">
+        <CardHeader>
+          <CardTitle className="text-xl">Invalid reset link</CardTitle>
+          <CardDescription>
+            This password reset link is invalid or has expired.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center text-sm">
+            <Link
+              href="/forgot-password"
+              className="text-foreground underline-offset-4 hover:underline"
+            >
+              Request a new reset link
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -81,6 +133,7 @@ export default function ResetPasswordPage() {
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.password}
+                disabled={isLoading}
               />
               <FieldError>{errors.password}</FieldError>
             </Field>
@@ -95,10 +148,12 @@ export default function ResetPasswordPage() {
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.confirmPassword}
+                disabled={isLoading}
               />
               <FieldError>{errors.confirmPassword}</FieldError>
             </Field>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2Icon className="size-4 animate-spin" />}
               Reset password
             </Button>
           </FieldGroup>

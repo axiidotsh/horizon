@@ -38,6 +38,13 @@ export const auth = betterAuth({
       const url = `${clientEnv.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
       await emailService.sendPasswordResetEmail(user.email, user.name, url);
     },
+    onPasswordReset: async ({ user }) => {
+      await emailService.sendPasswordResetSuccessEmail(
+        user.email,
+        user.name,
+        user.id
+      );
+    },
   },
   emailVerification: {
     sendOnSignUp: true,

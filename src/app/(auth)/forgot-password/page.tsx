@@ -15,8 +15,11 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { requestPasswordReset } from '@/lib/auth-client';
+import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const forgotPasswordSchema = z.object({
@@ -28,8 +31,10 @@ type FormErrors = Partial<Record<keyof ForgotPasswordFormData, string>>;
 
 export default function ForgotPasswordPage() {
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = {
@@ -49,8 +54,45 @@ export default function ForgotPasswordPage() {
     }
 
     setErrors({});
-    // TODO: Handle forgot password
-    console.log('Forgot password:', result.data);
+    setIsLoading(true);
+
+    const { error } = await requestPasswordReset({
+      email: result.data.email,
+      redirectTo: '/reset-password',
+    });
+
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error.message ?? 'Failed to send reset link');
+      return;
+    }
+
+    setIsSuccess(true);
+  }
+
+  if (isSuccess) {
+    return (
+      <Card className="w-full max-w-md rounded-lg">
+        <CardHeader>
+          <CardTitle className="text-xl">Check your email</CardTitle>
+          <CardDescription>
+            If an account exists with that email, we&apos;ve sent you a password
+            reset link.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center text-sm">
+            <Link
+              href="/sign-in"
+              className="text-foreground underline-offset-4 hover:underline"
+            >
+              Back to sign in
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -73,10 +115,12 @@ export default function ForgotPasswordPage() {
                 placeholder="you@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
+                disabled={isLoading}
               />
               <FieldError>{errors.email}</FieldError>
             </Field>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2Icon className="size-4 animate-spin" />}
               Send reset link
             </Button>
           </FieldGroup>

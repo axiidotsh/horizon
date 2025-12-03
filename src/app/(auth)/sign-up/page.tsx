@@ -17,12 +17,16 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { signIn, signUp } from '@/lib/auth-client';
+import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const signUpSchema = z
   .object({
+    name: z.string().min(1, 'Full name is required'),
     email: z
       .string()
       .min(1, 'Email is required')
@@ -43,11 +47,15 @@ type FormErrors = Partial<Record<keyof SignUpFormData, string>>;
 
 export default function SignUpPage() {
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = {
+      name: formData.get('name') as string,
       email: formData.get('email') as string,
       password: formData.get('password') as string,
       confirmPassword: formData.get('confirmPassword') as string,
@@ -66,8 +74,57 @@ export default function SignUpPage() {
     }
 
     setErrors({});
-    // TODO: Handle sign up
-    console.log('Sign up:', result.data);
+    setIsLoading(true);
+
+    const { error } = await signUp.email({
+      name: result.data.name,
+      email: result.data.email,
+      password: result.data.password,
+    });
+
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error.message ?? 'Failed to create account');
+      return;
+    }
+
+    setIsSuccess(true);
+  }
+
+  async function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+
+    await signIn.social({
+      provider: 'google',
+      callbackURL: '/dashboard',
+    });
+  }
+
+  const isDisabled = isLoading || isGoogleLoading;
+
+  if (isSuccess) {
+    return (
+      <Card className="w-full max-w-md rounded-lg">
+        <CardHeader>
+          <CardTitle className="text-xl">Check your email</CardTitle>
+          <CardDescription>
+            We&apos;ve sent you a verification link. Please check your email to
+            verify your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center text-sm">
+            <Link
+              href="/sign-in"
+              className="text-foreground underline-offset-4 hover:underline"
+            >
+              Back to sign in
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -77,13 +134,35 @@ export default function SignUpPage() {
         <CardDescription>Get started with Horizon today</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <Button variant="outline" className="w-full">
-          <GoogleIcon className="size-4" />
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={handleGoogleSignIn}
+          disabled={isDisabled}
+        >
+          {isGoogleLoading ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <GoogleIcon className="size-4" />
+          )}
           Continue with Google
         </Button>
         <FieldSeparator>OR</FieldSeparator>
         <form onSubmit={handleSubmit}>
           <FieldGroup className="gap-4">
+            <Field data-invalid={!!errors.name}>
+              <FieldLabel htmlFor="name">Full Name</FieldLabel>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="John Doe"
+                autoComplete="name"
+                aria-invalid={!!errors.name}
+                disabled={isDisabled}
+              />
+              <FieldError>{errors.name}</FieldError>
+            </Field>
             <Field data-invalid={!!errors.email}>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
@@ -93,6 +172,7 @@ export default function SignUpPage() {
                 placeholder="you@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
+                disabled={isDisabled}
               />
               <FieldError>{errors.email}</FieldError>
             </Field>
@@ -105,6 +185,7 @@ export default function SignUpPage() {
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.password}
+                disabled={isDisabled}
               />
               <FieldError>{errors.password}</FieldError>
             </Field>
@@ -119,10 +200,12 @@ export default function SignUpPage() {
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.confirmPassword}
+                disabled={isDisabled}
               />
               <FieldError>{errors.confirmPassword}</FieldError>
             </Field>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isDisabled}>
+              {isLoading && <Loader2Icon className="size-4 animate-spin" />}
               Create account
             </Button>
           </FieldGroup>

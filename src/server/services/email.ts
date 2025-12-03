@@ -4,12 +4,13 @@ import { Resend } from 'resend';
 import { z } from 'zod';
 import { logger } from '../logger';
 import { PasswordResetEmail } from '../templates/emails/password-reset';
+import { PasswordResetSuccessEmail } from '../templates/emails/password-reset-success';
 import { VerificationEmail } from '../templates/emails/verification';
 
 export const resend = new Resend(env.RESEND_API_KEY);
 const FROM = `${env.EMAIL_FROM_NAME} <${env.EMAIL_FROM}>`;
 
-type EmailType = 'verification' | 'password_reset';
+type EmailType = 'verification' | 'password_reset' | 'password_reset_success';
 
 const baseEmailSchema = {
   to: z.string().email('Invalid email address'),
@@ -24,6 +25,10 @@ const verificationEmailSchema = z.object({
 const passwordResetEmailSchema = z.object({
   ...baseEmailSchema,
   resetUrl: z.string().url(),
+});
+
+const passwordResetSuccessEmailSchema = z.object({
+  ...baseEmailSchema,
 });
 
 interface SendEmailParams {
@@ -116,6 +121,31 @@ export const emailService = {
       },
       {
         emailType: 'password_reset',
+        recipientEmail: input.to,
+        userId,
+      }
+    );
+  },
+  async sendPasswordResetSuccessEmail(
+    to: string,
+    userName: string,
+    userId?: string
+  ) {
+    const input = passwordResetSuccessEmailSchema.parse({
+      to,
+      userName,
+    });
+
+    return sendEmail(
+      {
+        to: input.to,
+        subject: 'Your password has been reset',
+        react: PasswordResetSuccessEmail({
+          userName: input.userName,
+        }),
+      },
+      {
+        emailType: 'password_reset_success',
         recipientEmail: input.to,
         userId,
       }

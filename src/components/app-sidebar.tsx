@@ -22,6 +22,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useUser } from '@/hooks/use-user';
+import { signOut } from '@/lib/auth-client';
+import { getInitials } from '@/utils/utils';
 import {
   BrainIcon,
   ClockPlusIcon,
@@ -36,6 +39,8 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Skeleton } from './ui/skeleton';
 
 const navItems = [
   {
@@ -66,7 +71,9 @@ const navItems = [
 ];
 
 export function AppSidebar() {
+  const router = useRouter();
   const { setTheme } = useTheme();
+  const { user, isPending } = useUser();
 
   return (
     <Sidebar collapsible="icon">
@@ -95,10 +102,19 @@ export function AppSidebar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton size="lg">
-              <Avatar className="size-8 rounded-md">
-                <AvatarImage src="/avatars/user.png" alt="User" />
-                <AvatarFallback className="rounded-md">U</AvatarFallback>
-              </Avatar>
+              {isPending ? (
+                <Skeleton className="size-8 rounded-md" />
+              ) : (
+                <Avatar className="size-8 rounded-md">
+                  <AvatarImage
+                    src={user?.image || undefined}
+                    alt={user?.name || 'User'}
+                  />
+                  <AvatarFallback className="rounded-md">
+                    {getInitials(user?.name || '')}
+                  </AvatarFallback>
+                </Avatar>
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="right" className="w-56">
@@ -128,7 +144,18 @@ export function AppSidebar() {
                 <span>Settings</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={async () =>
+                await signOut({
+                  fetchOptions: {
+                    onSuccess: () => {
+                      router.push('/sign-in');
+                    },
+                  },
+                })
+              }
+            >
               <LogOutIcon className="mr-2 size-4" />
               <span>Log out</span>
             </DropdownMenuItem>

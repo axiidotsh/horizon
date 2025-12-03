@@ -17,8 +17,12 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { signIn } from '@/lib/auth-client';
+import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const signInSchema = z.object({
@@ -30,9 +34,12 @@ type SignInFormData = z.infer<typeof signInSchema>;
 type FormErrors = Partial<Record<keyof SignInFormData, string>>;
 
 export default function SignInPage() {
+  const router = useRouter();
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = {
@@ -53,9 +60,33 @@ export default function SignInPage() {
     }
 
     setErrors({});
-    // TODO: Handle sign in
-    console.log('Sign in:', result.data);
+    setIsLoading(true);
+
+    const { error } = await signIn.email({
+      email: result.data.email,
+      password: result.data.password,
+    });
+
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error.message ?? 'Failed to sign in');
+      return;
+    }
+
+    router.push('/dashboard');
   }
+
+  async function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+
+    await signIn.social({
+      provider: 'google',
+      callbackURL: '/dashboard',
+    });
+  }
+
+  const isDisabled = isLoading || isGoogleLoading;
 
   return (
     <Card className="w-full max-w-md rounded-lg">
@@ -64,8 +95,17 @@ export default function SignInPage() {
         <CardDescription>Sign in to your account to continue</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <Button variant="outline" className="w-full">
-          <GoogleIcon className="size-4" />
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={handleGoogleSignIn}
+          disabled={isDisabled}
+        >
+          {isGoogleLoading ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <GoogleIcon className="size-4" />
+          )}
           Continue with Google
         </Button>
         <FieldSeparator>OR</FieldSeparator>
@@ -80,6 +120,7 @@ export default function SignInPage() {
                 placeholder="you@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
+                disabled={isDisabled}
               />
               <FieldError>{errors.email}</FieldError>
             </Field>
@@ -100,10 +141,12 @@ export default function SignInPage() {
                 placeholder="••••••••"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
+                disabled={isDisabled}
               />
               <FieldError>{errors.password}</FieldError>
             </Field>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isDisabled}>
+              {isLoading && <Loader2Icon className="size-4 animate-spin" />}
               Sign in
             </Button>
           </FieldGroup>
