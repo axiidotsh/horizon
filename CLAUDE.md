@@ -63,8 +63,34 @@ src/
 ├── components/ui/           # shadcn/ui
 ├── hooks/
 ├── utils/                   # cn, date, chart, heatmap
-└── styles/globals.css
+├── styles/globals.css
+└── server/
+    ├── db/                  # Prisma schema, client, generated models
+    ├── services/            # Email service (Resend)
+    ├── templates/           # Email templates (React Email)
+    ├── auth.ts              # better-auth config (Prisma adapter, Google OAuth, email/password)
+    ├── index.ts             # Hono API server (/api)
+    └── logger.ts            # Pino logger
 ```
+
+## Backend (src/server/)
+
+- **API**: Hono + Next.js Edge runtime
+- **Auth**: better-auth (email/password, Google OAuth, roles: USER/ADMIN/SUPER_ADMIN)
+- **Database**: PostgreSQL + Prisma v7
+- **Email**: Resend + React Email templates
+- **Logger**: Pino
+
+### Database Commands
+
+```bash
+pnpm db:start           # Start PostgreSQL (Docker)
+pnpm db:generate        # Generate Prisma client
+pnpm db:migrate         # Run migrations
+pnpm db:studio          # Open Prisma Studio
+```
+
+Generated models in `src/server/db/generated/` (gitignored)
 
 ## Code Style
 
