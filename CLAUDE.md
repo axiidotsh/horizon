@@ -1,152 +1,136 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+You are a Senior Frontend Developer and Expert in TypeScript, Next.js 15, React 19, Jotai, Zod, TailwindCSS v4, and shadcn/ui.
 
-## Project Overview
+## Critical Rules
 
-Horizon is a productivity application built with Next.js 15, React 19, and TypeScript. The project uses the Next.js App Router architecture and is configured with modern tooling including Tailwind CSS v4, shadcn/ui components, and React Compiler.
+- NEVER create markdown files unless explicitly requested
+- NEVER create `index.ts` barrel files
+- AVOID comments unless absolutely necessary
+- Aggressively prefer planning for medium/big tasks and wait for user confirmation
+- If unsure, ask for clarification
+- Prefer commands (`pnpm dlx`) for setup over manual file creation
+- Be unbiased - state disagreements clearly
+- Prioritize maintainable code over user validation
+- Brief, compact summaries of changes
 
-## Development Commands
+## Tech Stack
 
-### Package Management
-
-This project uses **pnpm** as the package manager.
-
-### Core Commands
-
-- `pnpm dev` - Start development server on http://localhost:3000
-- `pnpm build` - Build production bundle
-- `pnpm start` - Start production server
-- `pnpm lint` - Run ESLint on the codebase
-
-### Git Hooks
-
-The project uses Husky with a pre-commit hook that runs `lint-staged`:
-
-- Automatically runs `eslint --fix` and `prettier --write` on staged `.js`, `.jsx`, `.ts`, `.tsx` files
-- Automatically runs `prettier --write` on `.json`, `.md`, `.css` files
-
-## Code Architecture
-
-### Project Structure
-
-```
-src/
-├── app/              # Next.js App Router pages and layouts
-├── lib/              # Utility functions (e.g., cn helper)
-└── styles/           # Global CSS with Tailwind configuration
-```
-
-### Technology Stack
-
-- **Framework**: Next.js 15.5.6 with App Router
-- **React**: 19.1.0 with React Compiler enabled (`reactCompiler: true` in next.config.ts)
-- **Styling**: Tailwind CSS v4 with custom theme configuration
-- **UI Components**: shadcn/ui (New York style) with Radix UI primitives
+- **Framework**: Next.js 15.5.6 + App Router
+- **React**: 19.1.0 (React Compiler enabled)
+- **Styling**: Tailwind CSS v4 (OKLCH)
+- **UI**: shadcn/ui (New York, zinc)
+- **State**: Jotai 2.15.1
 - **Icons**: Lucide React
-- **Validation**: Zod v4
-- **Notifications**: Sonner (toast notifications)
-- **Theme**: next-themes for dark mode support
+- **Validation**: Zod v4.1.12
 
-### Path Aliases
+## Commands
 
-TypeScript and shadcn/ui are configured with the following path aliases:
+```bash
+pnpm dev              # Dev server (localhost:3000)
+pnpm build            # Production build
+pnpm lint             # ESLint
+```
+
+## Path Aliases (CRITICAL)
+
+**Always use aliases:**
+
+```typescript
+// ✅ CORRECT
+import { Button } from '@/components/ui/button';
+import { cn } from '@/utils/utils';
+
+// ❌ WRONG
+import { Button } from '../../../components/ui/button';
+```
 
 - `@/*` → `./src/*`
 - `@/components` → `./src/components`
-- `@/lib` → `./src/lib`
+- `@/utils` → `./src/utils`
 - `@/ui` → `./src/components/ui`
 - `@/hooks` → `./src/hooks`
 
-### Styling Configuration
+## Project Structure
 
-#### Tailwind CSS
+```
+src/
+├── app/
+│   ├── (auth)/              # Auth pages
+│   ├── (protected)/         # Protected routes
+│   │   ├── (main)/          # Dashboard, tasks, habits, focus
+│   │   └── chat/
+├── components/ui/           # shadcn/ui
+├── hooks/
+├── utils/                   # cn, date, chart, heatmap
+└── styles/globals.css
+```
 
-- Using Tailwind CSS v4 (PostCSS-based configuration)
-- Custom CSS variables defined in `src/styles/globals.css`
-- Design system uses OKLCH color space for better color handling
-- CSS variable-based theming for light/dark modes
-- Plugins: `tailwindcss-animate`, `tailwindcss-debug-screens`, `tw-animate-css`
-- Debug screens enabled in development (see `debug-screens` class in layout.tsx)
+## Code Style
 
-#### Color System
+- **Types**: `interface` for objects, `type` for unions/intersections
+- Never `any`
+- Descriptive names: `isLoading`, `hasError`, `canSubmit`
+- Delete unused code immediately
+- Early returns over nested if/else
+- Extract magic numbers/strings to constants
+- `const` over `let`, never `var`
+- Array methods over loops
 
-The project uses a comprehensive design token system with CSS variables:
+### Naming
 
-- Semantic colors: `background`, `foreground`, `primary`, `secondary`, `muted`, `accent`, `destructive`
-- UI element colors: `card`, `popover`, `border`, `input`, `ring`
-- Chart colors: `chart-1` through `chart-5`
-- Sidebar colors: `sidebar`, `sidebar-primary`, `sidebar-accent`, etc.
-- Border radius tokens: `--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-xl`
+- Directories: `kebab-case`
+- Components: `kebab-case.tsx`
+- Variables/Functions: `camelCase`
+- Hooks: `use` prefix
+- Constants: `SCREAMING_SNAKE_CASE`
+- Booleans: `is`, `has`, `should` prefix
 
-All colors are defined in OKLCH format for both light and dark themes.
+## Styling
 
-#### shadcn/ui Configuration
+### Tailwind Best Practices
 
-- Style variant: "new-york"
-- Base color: zinc
-- CSS variables mode enabled
-- Icon library: Lucide
-- Components are configured to use `src/styles/globals.css`
+- `size-x` not `h-x w-x`
+- `inset-x-0` not `left-0 right-0`
+- `inset-y-0` not `top-0 bottom-0`
+- `inset-0` not `inset-x-0 inset-y-0`
+- `space-y-x` on container not `mb-x` on children
+- Always `cn()` for conditional classes
 
-### Code Quality Tools
+### Color System
 
-#### ESLint
+Semantic tokens (`src/styles/globals.css`):
 
-- Uses Next.js recommended configurations: `eslint-config-next/core-web-vitals` and `eslint-config-next/typescript`
-- Custom ignore patterns: `.next/`, `out/`, `build/`, `next-env.d.ts`
+- `background`, `foreground`, `primary`, `secondary`, `muted`, `accent`, `destructive`
+- `card`, `popover`, `border`, `input`, `ring`
+- `chart-1` to `chart-5`
+- `sidebar-*`
+- Radius: `--radius-{sm,md,lg,xl}`
 
-#### Prettier
+**Use semantic tokens** (e.g., `bg-background`) not hardcoded colors.
 
-- Tab width: 2 spaces
-- Print width: 80 characters
-- Single quotes, semicolons enabled
-- Plugins: `prettier-plugin-organize-imports` (auto-organizes imports), `prettier-plugin-tailwindcss` (sorts Tailwind classes)
+## UI Components
 
-### TypeScript Configuration
+### shadcn/ui
 
-- Target: ES2017
-- Strict mode enabled
-- Module resolution: bundler (Next.js optimized)
-- JSX: `react-jsx` (React 19's new JSX transform)
-- Incremental compilation enabled
-- Path alias `@/*` maps to `./src/*`
+Add:
 
-## Key Technical Decisions
+```bash
+npx shadcn@latest add [component-name]
+```
 
-### React Compiler
+### Guidelines
 
-This project has React Compiler enabled (`next.config.ts`). This is an experimental feature that optimizes React components automatically. Be mindful of this when debugging component behavior.
+- Use shadcn/ui as base
+- Micro-interactions + hover states
+- `Skeleton` for loading (not spinners)
+- Never write SVG - use Lucide
+- Support light/dark mode
 
-### Font Configuration
+## Important
 
-The project uses Inter font loaded via `next/font/google` with a CSS variable (`--font-sans`).
-
-### Layout Configuration
-
-The root layout (`src/app/layout.tsx`) includes:
-
-- `suppressHydrationWarning` on `<html>` for theme support
-- Conditional `debug-screens` class in development
-- Antialiased text rendering
-
-## Development Notes
-
-### When Adding Components
-
-- Use shadcn/ui CLI for adding new components: `npx shadcn@latest add [component-name]`
-- Components will be added to the configured aliases paths
-- All components use the New York style variant with zinc base color
-
-### When Working with Styles
-
-- Global styles and theme configuration are in `src/styles/globals.css`
-- Use semantic color tokens (e.g., `bg-background`, `text-foreground`) rather than hardcoded colors
-- The design system supports both light and dark modes via CSS variables
-- Tailwind classes will be auto-sorted by Prettier on save
-
-### When Writing Code
-
-- Imports will be automatically organized by Prettier on commit
-- ESLint and Prettier run automatically on staged files via pre-commit hook
-- Use the `cn()` utility from `@/lib/utils` for conditional Tailwind classes
+- Ask if unsure
+- Plan + confirm for medium/big tasks
+- State disagreements
+- Suggest alternatives
+- Self-documenting code
