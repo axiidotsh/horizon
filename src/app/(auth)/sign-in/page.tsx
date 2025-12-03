@@ -1,6 +1,5 @@
 'use client';
 
-import { GoogleIcon } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -18,12 +17,16 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { signIn } from '@/lib/auth-client';
+import { signInRedirect } from '@/lib/config/redirects.config';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { GoogleSignInButton } from '../components/google-sign-in-button';
 
 const signInSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -31,62 +34,41 @@ const signInSchema = z.object({
 });
 
 type SignInFormData = z.infer<typeof signInSchema>;
-type FormErrors = Partial<Record<keyof SignInFormData, string>>;
 
 export default function SignInPage() {
   const router = useRouter();
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-    };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
+  });
 
-    const result = signInSchema.safeParse(data);
-
-    if (!result.success) {
-      const fieldErrors: FormErrors = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof SignInFormData;
-        fieldErrors[field] = issue.message;
+  const onSubmit = async (data: SignInFormData) => {
+    try {
+      setIsPending(true);
+      await signIn.email({
+        email: data.email,
+        password: data.password,
+        fetchOptions: {
+          onSuccess: () => {
+            router.push(signInRedirect);
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message || 'Failed to sign in');
+          },
+        },
       });
-      setErrors(fieldErrors);
-      return;
+    } catch (error) {
+      toast.error('An unexpected error occurred. Please try again.');
+      console.error('Sign in error:', error);
+    } finally {
+      setIsPending(false);
     }
-
-    setErrors({});
-    setIsLoading(true);
-
-    const { error } = await signIn.email({
-      email: result.data.email,
-      password: result.data.password,
-    });
-
-    setIsLoading(false);
-
-    if (error) {
-      toast.error(error.message ?? 'Failed to sign in');
-      return;
-    }
-
-    router.push('/dashboard');
-  }
-
-  async function handleGoogleSignIn() {
-    setIsGoogleLoading(true);
-
-    await signIn.social({
-      provider: 'google',
-      callbackURL: '/dashboard',
-    });
-  }
-
-  const isDisabled = isLoading || isGoogleLoading;
+  };
 
   return (
     <Card className="w-full max-w-md rounded-lg">
@@ -95,34 +77,22 @@ export default function SignInPage() {
         <CardDescription>Sign in to your account to continue</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleGoogleSignIn}
-          disabled={isDisabled}
-        >
-          {isGoogleLoading ? (
-            <Loader2Icon className="size-4 animate-spin" />
-          ) : (
-            <GoogleIcon className="size-4" />
-          )}
-          Continue with Google
-        </Button>
+        <GoogleSignInButton disabled={isPending} />
         <FieldSeparator>OR</FieldSeparator>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className="gap-4">
             <Field data-invalid={!!errors.email}>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
-                disabled={isDisabled}
+                disabled={isPending}
+                {...register('email')}
               />
-              <FieldError>{errors.email}</FieldError>
+              <FieldError>{errors.email?.message}</FieldError>
             </Field>
             <Field data-invalid={!!errors.password}>
               <div className="flex items-center justify-between">
@@ -136,17 +106,17 @@ export default function SignInPage() {
               </div>
               <Input
                 id="password"
-                name="password"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
-                disabled={isDisabled}
+                disabled={isPending}
+                {...register('password')}
               />
-              <FieldError>{errors.password}</FieldError>
+              <FieldError>{errors.password?.message}</FieldError>
             </Field>
-            <Button type="submit" className="w-full" disabled={isDisabled}>
-              {isLoading && <Loader2Icon className="size-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending && <Loader2Icon className="size-4 animate-spin" />}
               Sign in
             </Button>
           </FieldGroup>

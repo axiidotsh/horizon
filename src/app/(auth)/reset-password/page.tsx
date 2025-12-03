@@ -16,10 +16,13 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { resetPassword } from '@/lib/auth-client';
+import { passwordResetRedirect } from '@/lib/config/redirects.config';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -37,60 +40,50 @@ const resetPasswordSchema = z
   });
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
-type FormErrors = Partial<Record<keyof ResetPasswordFormData, string>>;
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+  });
 
+  const onSubmit = async (data: ResetPasswordFormData) => {
     if (!token) {
       toast.error('Invalid or missing reset token');
       return;
     }
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      password: formData.get('password') as string,
-      confirmPassword: formData.get('confirmPassword') as string,
-    };
-
-    const result = resetPasswordSchema.safeParse(data);
-
-    if (!result.success) {
-      const fieldErrors: FormErrors = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof ResetPasswordFormData;
-        fieldErrors[field] = issue.message;
+    try {
+      setIsPending(true);
+      await resetPassword({
+        newPassword: data.password,
+        token,
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success('Password reset successfully');
+            router.push(passwordResetRedirect);
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message || 'Failed to reset password');
+          },
+        },
       });
-      setErrors(fieldErrors);
-      return;
+    } catch (error) {
+      toast.error('An unexpected error occurred. Please try again.');
+      console.error('Reset password error:', error);
+    } finally {
+      setIsPending(false);
     }
-
-    setErrors({});
-    setIsLoading(true);
-
-    const { error } = await resetPassword({
-      newPassword: result.data.password,
-      token,
-    });
-
-    setIsLoading(false);
-
-    if (error) {
-      toast.error(error.message ?? 'Failed to reset password');
-      return;
-    }
-
-    toast.success('Password reset successfully');
-    router.push('/sign-in');
-  }
+  };
 
   if (!token) {
     return (
@@ -122,20 +115,20 @@ export default function ResetPasswordPage() {
         <CardDescription>Enter your new password below</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className="gap-4">
             <Field data-invalid={!!errors.password}>
               <FieldLabel htmlFor="password">New Password</FieldLabel>
               <Input
                 id="password"
-                name="password"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.password}
-                disabled={isLoading}
+                disabled={isPending}
+                {...register('password')}
               />
-              <FieldError>{errors.password}</FieldError>
+              <FieldError>{errors.password?.message}</FieldError>
             </Field>
             <Field data-invalid={!!errors.confirmPassword}>
               <FieldLabel htmlFor="confirmPassword">
@@ -143,17 +136,17 @@ export default function ResetPasswordPage() {
               </FieldLabel>
               <Input
                 id="confirmPassword"
-                name="confirmPassword"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.confirmPassword}
-                disabled={isLoading}
+                disabled={isPending}
+                {...register('confirmPassword')}
               />
-              <FieldError>{errors.confirmPassword}</FieldError>
+              <FieldError>{errors.confirmPassword?.message}</FieldError>
             </Field>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2Icon className="size-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending && <Loader2Icon className="size-4 animate-spin" />}
               Reset password
             </Button>
           </FieldGroup>

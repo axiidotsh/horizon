@@ -1,6 +1,5 @@
 'use client';
 
-import { GoogleIcon } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,12 +16,15 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { signIn, signUp } from '@/lib/auth-client';
+import { signUp } from '@/lib/auth-client';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { GoogleSignInButton } from '../components/google-sign-in-button';
 
 const signUpSchema = z
   .object({
@@ -43,65 +45,45 @@ const signUpSchema = z
   });
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
-type FormErrors = Partial<Record<keyof SignUpFormData, string>>;
 
 export default function SignUpPage() {
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-      confirmPassword: formData.get('confirmPassword') as string,
-    };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+  });
 
-    const result = signUpSchema.safeParse(data);
-
-    if (!result.success) {
-      const fieldErrors: FormErrors = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof SignUpFormData;
-        fieldErrors[field] = issue.message;
+  const onSubmit = async (data: SignUpFormData) => {
+    try {
+      setIsPending(true);
+      await signUp.email({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        fetchOptions: {
+          onSuccess: () => {
+            setIsSuccess(true);
+            toast.success(
+              'Account created! Please check your email to verify.'
+            );
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message || 'Failed to create account');
+          },
+        },
       });
-      setErrors(fieldErrors);
-      return;
+    } catch (error) {
+      toast.error('An unexpected error occurred. Please try again.');
+      console.error('Sign up error:', error);
+    } finally {
+      setIsPending(false);
     }
-
-    setErrors({});
-    setIsLoading(true);
-
-    const { error } = await signUp.email({
-      name: result.data.name,
-      email: result.data.email,
-      password: result.data.password,
-    });
-
-    setIsLoading(false);
-
-    if (error) {
-      toast.error(error.message ?? 'Failed to create account');
-      return;
-    }
-
-    setIsSuccess(true);
-  }
-
-  async function handleGoogleSignIn() {
-    setIsGoogleLoading(true);
-
-    await signIn.social({
-      provider: 'google',
-      callbackURL: '/dashboard',
-    });
-  }
-
-  const isDisabled = isLoading || isGoogleLoading;
+  };
 
   if (isSuccess) {
     return (
@@ -134,60 +116,48 @@ export default function SignUpPage() {
         <CardDescription>Get started with Horizon today</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleGoogleSignIn}
-          disabled={isDisabled}
-        >
-          {isGoogleLoading ? (
-            <Loader2Icon className="size-4 animate-spin" />
-          ) : (
-            <GoogleIcon className="size-4" />
-          )}
-          Continue with Google
-        </Button>
+        <GoogleSignInButton disabled={isPending} />
         <FieldSeparator>OR</FieldSeparator>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className="gap-4">
             <Field data-invalid={!!errors.name}>
               <FieldLabel htmlFor="name">Full Name</FieldLabel>
               <Input
                 id="name"
-                name="name"
                 type="text"
                 placeholder="John Doe"
                 autoComplete="name"
                 aria-invalid={!!errors.name}
-                disabled={isDisabled}
+                disabled={isPending}
+                {...register('name')}
               />
-              <FieldError>{errors.name}</FieldError>
+              <FieldError>{errors.name?.message}</FieldError>
             </Field>
             <Field data-invalid={!!errors.email}>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
-                disabled={isDisabled}
+                disabled={isPending}
+                {...register('email')}
               />
-              <FieldError>{errors.email}</FieldError>
+              <FieldError>{errors.email?.message}</FieldError>
             </Field>
             <Field data-invalid={!!errors.password}>
               <FieldLabel htmlFor="password">Password</FieldLabel>
               <Input
                 id="password"
-                name="password"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.password}
-                disabled={isDisabled}
+                disabled={isPending}
+                {...register('password')}
               />
-              <FieldError>{errors.password}</FieldError>
+              <FieldError>{errors.password?.message}</FieldError>
             </Field>
             <Field data-invalid={!!errors.confirmPassword}>
               <FieldLabel htmlFor="confirmPassword">
@@ -195,17 +165,17 @@ export default function SignUpPage() {
               </FieldLabel>
               <Input
                 id="confirmPassword"
-                name="confirmPassword"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.confirmPassword}
-                disabled={isDisabled}
+                disabled={isPending}
+                {...register('confirmPassword')}
               />
-              <FieldError>{errors.confirmPassword}</FieldError>
+              <FieldError>{errors.confirmPassword?.message}</FieldError>
             </Field>
-            <Button type="submit" className="w-full" disabled={isDisabled}>
-              {isLoading && <Loader2Icon className="size-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending && <Loader2Icon className="size-4 animate-spin" />}
               Create account
             </Button>
           </FieldGroup>

@@ -16,9 +16,12 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { requestPasswordReset } from '@/lib/auth-client';
+import { passwordResetPageRedirect } from '@/lib/config/redirects.config';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -27,49 +30,45 @@ const forgotPasswordSchema = z.object({
 });
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
-type FormErrors = Partial<Record<keyof ForgotPasswordFormData, string>>;
 
 export default function ForgotPasswordPage() {
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      email: formData.get('email') as string,
-    };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
 
-    const result = forgotPasswordSchema.safeParse(data);
-
-    if (!result.success) {
-      const fieldErrors: FormErrors = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof ForgotPasswordFormData;
-        fieldErrors[field] = issue.message;
+  const onSubmit = async (data: ForgotPasswordFormData) => {
+    try {
+      setIsPending(true);
+      await requestPasswordReset({
+        email: data.email,
+        redirectTo: passwordResetPageRedirect,
+        fetchOptions: {
+          onSuccess: () => {
+            setIsSuccess(true);
+            toast.success('Password reset link sent to your email.');
+          },
+          onError: (ctx) => {
+            toast.error(
+              ctx.error.message ||
+                'Failed to send reset link. Please try again.'
+            );
+          },
+        },
       });
-      setErrors(fieldErrors);
-      return;
+    } catch (error) {
+      toast.error('An unexpected error occurred. Please try again.');
+      console.error('Forgot password error:', error);
+    } finally {
+      setIsPending(false);
     }
-
-    setErrors({});
-    setIsLoading(true);
-
-    const { error } = await requestPasswordReset({
-      email: result.data.email,
-      redirectTo: '/reset-password',
-    });
-
-    setIsLoading(false);
-
-    if (error) {
-      toast.error(error.message ?? 'Failed to send reset link');
-      return;
-    }
-
-    setIsSuccess(true);
-  }
+  };
 
   if (isSuccess) {
     return (
@@ -104,23 +103,23 @@ export default function ForgotPasswordPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className="gap-4">
             <Field data-invalid={!!errors.email}>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
-                disabled={isLoading}
+                disabled={isPending}
+                {...register('email')}
               />
-              <FieldError>{errors.email}</FieldError>
+              <FieldError>{errors.email?.message}</FieldError>
             </Field>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2Icon className="size-4 animate-spin" />}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending && <Loader2Icon className="size-4 animate-spin" />}
               Send reset link
             </Button>
           </FieldGroup>

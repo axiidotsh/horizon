@@ -1,12 +1,24 @@
 import { AppHeader } from '@/components/app-header';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { authFailureRedirect } from '@/lib/config/redirects.config';
+import { auth } from '@/server/auth';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 
-export default function ProtectedLayout({
+export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect(authFailureRedirect);
+  }
+
   return (
     <SidebarProvider defaultOpen={false} open={false}>
       <AppSidebar />
