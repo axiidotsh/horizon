@@ -1,9 +1,9 @@
 import { env as clientEnv } from '@/lib/config/env/client';
 import { env as serverEnv } from '@/lib/config/env/server';
-import { Role } from '@prisma/client';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { admin } from 'better-auth/plugins';
+import { Role } from './generated/client';
 import { db } from './index';
 
 const auth = betterAuth({

@@ -1,10 +1,10 @@
 import { env as clientEnv } from '@/lib/config/env/client';
 import { env as serverEnv } from '@/lib/config/env/server';
-import { Role } from '@prisma/client';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { admin, lastLoginMethod } from 'better-auth/plugins';
 import { db } from './db';
+import { Role } from './db/generated/client';
 import { emailService } from './services/email';
 
 const RESET_PASSWORD_EXPIRY = 30 * 60; // 30 minutes
