@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log*
+
+# Next.js
+.next
+out
+build
+
+# Typescript
+*.tsbuildinfo
+
+# Environment variables
+.env*
+!.env.example
+
+# Testing
+coverage
+
+# Misc
+.DS_Store
+*.pem
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# Vercel
+.vercel
