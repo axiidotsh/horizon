@@ -13,6 +13,13 @@ enum Role {
   SUPER_ADMIN
 }
 
+enum FocusSessionStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -26,8 +33,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  sessions Session[]
-  accounts Account[]
+  sessions      Session[]
+  accounts      Account[]
+  focusSessions FocusSession[]
 
   @@map("users")
 }
@@ -81,4 +89,23 @@ model Verification {
 
   @@unique([identifier, value])
   @@map("verifications")
+}
+
+model FocusSession {
+  id                 String             @id @default(cuid())
+  userId             String
+  durationMinutes    Int
+  task               String?
+  startedAt          DateTime           @default(now())
+  pausedAt           DateTime?
+  totalPausedSeconds Int                @default(0)
+  completedAt        DateTime?
+  status             FocusSessionStatus @default(ACTIVE)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("focus_sessions")
 }

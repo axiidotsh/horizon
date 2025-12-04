@@ -6,6 +6,7 @@ import { secureHeaders } from 'hono/secure-headers';
 import { handle } from 'hono/vercel';
 import { auth } from './auth';
 import { httpLogger } from './logger';
+import { focusRouter } from './routes/focus';
 
 const app = new Hono().basePath('/api').use(
   '*',
@@ -18,9 +19,9 @@ const app = new Hono().basePath('/api').use(
   httpLogger()
 );
 
-const router = app.on(['POST', 'GET'], '/auth/*', (c) => {
-  return auth.handler(c.req.raw);
-});
+const router = app
+  .on(['POST', 'GET'], '/auth/*', (c) => auth.handler(c.req.raw))
+  .route('/focus', focusRouter);
 
 export type AppType = typeof router;
 export const httpHandler = handle(router);
