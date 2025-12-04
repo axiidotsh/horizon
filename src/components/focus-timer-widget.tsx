@@ -1,13 +1,18 @@
 'use client';
 
-import {
-  useActiveSession,
-  useCancelSession,
-  usePauseSession,
-  useResumeSession,
-} from '@/app/(protected)/(main)/focus/hooks/use-focus-sessions';
+import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/use-active-session';
+import { useCancelSession } from '@/app/(protected)/(main)/focus/hooks/use-cancel-session';
+import { useEndSessionEarly } from '@/app/(protected)/(main)/focus/hooks/use-end-session-early';
+import { usePauseSession } from '@/app/(protected)/(main)/focus/hooks/use-pause-session';
+import { useResumeSession } from '@/app/(protected)/(main)/focus/hooks/use-resume-session';
 import { cn } from '@/utils/utils';
-import { PauseIcon, PlayIcon, TimerIcon, XIcon } from 'lucide-react';
+import {
+  PauseIcon,
+  PlayIcon,
+  SquareIcon,
+  TimerIcon,
+  XIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
@@ -62,9 +67,11 @@ export function FocusTimerWidget() {
   const pauseSession = usePauseSession();
   const resumeSession = useResumeSession();
   const cancelSession = useCancelSession();
+  const endSessionEarly = useEndSessionEarly();
 
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showEndEarlyDialog, setShowEndEarlyDialog] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -99,15 +106,20 @@ export function FocusTimerWidget() {
 
   const handlePauseResume = () => {
     if (isPaused) {
-      resumeSession.mutate(session.id);
+      resumeSession.mutate({ param: { id: session.id } });
     } else {
-      pauseSession.mutate(session.id);
+      pauseSession.mutate({ param: { id: session.id } });
     }
   };
 
   const handleCancel = () => {
-    cancelSession.mutate(session.id);
+    cancelSession.mutate({ param: { id: session.id } });
     setShowCancelDialog(false);
+  };
+
+  const handleEndEarly = () => {
+    endSessionEarly.mutate({ param: { id: session.id } });
+    setShowEndEarlyDialog(false);
   };
 
   return (
@@ -158,6 +170,10 @@ export function FocusTimerWidget() {
               </>
             )}
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowEndEarlyDialog(true)}>
+            <SquareIcon />
+            End Session
+          </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onClick={() => setShowCancelDialog(true)}
@@ -187,6 +203,29 @@ export function FocusTimerWidget() {
               disabled={cancelSession.isPending}
             >
               Cancel Session
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEndEarlyDialog} onOpenChange={setShowEndEarlyDialog}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>End Session Early?</DialogTitle>
+            <DialogDescription>
+              Your progress will be saved. The session duration will be updated
+              to reflect the actual time spent.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Keep Going</Button>
+            </DialogClose>
+            <Button
+              onClick={handleEndEarly}
+              disabled={endSessionEarly.isPending}
+            >
+              End Session
             </Button>
           </DialogFooter>
         </DialogContent>

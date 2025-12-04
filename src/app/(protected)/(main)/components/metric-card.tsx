@@ -1,11 +1,12 @@
 import { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { ContentCard } from './content-card';
 
 interface MetricCardProps {
   title: string;
   icon: LucideIcon;
-  content: string;
-  footer?: string;
+  content: ReactNode;
+  footer?: ReactNode;
 }
 
 export const MetricCard = ({
@@ -21,11 +22,11 @@ export const MetricCard = ({
       contentClassName="mt-3"
       footer={
         footer ? (
-          <p className="text-muted-foreground text-xs">{footer}</p>
+          <div className="text-muted-foreground text-xs">{footer}</div>
         ) : null
       }
     >
-      <p className="text-2xl font-semibold">{content}</p>
+      <div className="text-2xl font-semibold">{content}</div>
     </ContentCard>
   );
 };

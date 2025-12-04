@@ -17,17 +17,18 @@ import {
   PauseIcon,
   PlayIcon,
   RotateCcwIcon,
+  SquareIcon,
   XIcon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import {
-  FocusSession,
-  useCancelSession,
-  useCompleteSession,
-  usePauseSession,
-  useResumeSession,
-  useStartSession,
-} from '../hooks/use-focus-sessions';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { FocusSession } from '../hooks/types';
+import { useCancelSession } from '../hooks/use-cancel-session';
+import { useCompleteSession } from '../hooks/use-complete-session';
+import { useEndSessionEarly } from '../hooks/use-end-session-early';
+import { usePauseSession } from '../hooks/use-pause-session';
+import { useResumeSession } from '../hooks/use-resume-session';
+import { useStartSession } from '../hooks/use-start-session';
+import { useUpdateSession } from '../hooks/use-update-session';
 
 function calculateRemainingSeconds(
   startedAt: string,
@@ -66,26 +67,76 @@ function formatTime(seconds: number): string {
 interface FocusTimerProps {
   activeSession: FocusSession | null | undefined;
   taskId?: string | null;
+  selectedMinutes: number;
+  onResetDuration: () => void;
 }
 
-export function FocusTimer({ activeSession, taskId }: FocusTimerProps) {
+export function FocusTimer({
+  activeSession,
+  taskId,
+  selectedMinutes,
+  onResetDuration,
+}: FocusTimerProps) {
   const startSession = useStartSession();
   const pauseSession = usePauseSession();
   const resumeSession = useResumeSession();
   const completeSession = useCompleteSession();
   const cancelSession = useCancelSession();
+  const endSessionEarly = useEndSessionEarly();
+  const updateSession = useUpdateSession();
 
-  const [selectedMinutes, setSelectedMinutes] = useState(45);
   const [sessionTask, setSessionTask] = useState('');
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [showEndEarlyDialog, setShowEndEarlyDialog] = useState(false);
+
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (taskId) {
       setSessionTask(`Task #${taskId}`);
     }
   }, [taskId]);
+
+  useEffect(() => {
+    if (activeSession?.task !== undefined) {
+      setSessionTask(activeSession.task || '');
+    }
+  }, [activeSession?.task]);
+
+  const debouncedUpdateTask = useCallback(
+    (task: string) => {
+      if (!activeSession) return;
+
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+
+      debounceTimeoutRef.current = setTimeout(() => {
+        updateSession.mutate({
+          param: { id: activeSession.id },
+          json: { task: task || undefined },
+        });
+      }, 500);
+    },
+    [activeSession, updateSession]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleTaskChange = (value: string) => {
+    setSessionTask(value);
+    if (activeSession) {
+      debouncedUpdateTask(value);
+    }
+  };
 
   useEffect(() => {
     if (!activeSession) return;
@@ -123,34 +174,42 @@ export function FocusTimer({ activeSession, taskId }: FocusTimerProps) {
 
   const handleStart = () => {
     startSession.mutate({
-      durationMinutes: selectedMinutes,
-      task: sessionTask || undefined,
+      json: {
+        durationMinutes: selectedMinutes,
+        task: sessionTask || undefined,
+      },
     });
   };
 
   const handlePauseResume = () => {
     if (!activeSession) return;
     if (activeSession.status === 'PAUSED') {
-      resumeSession.mutate(activeSession.id);
+      resumeSession.mutate({ param: { id: activeSession.id } });
     } else {
-      pauseSession.mutate(activeSession.id);
+      pauseSession.mutate({ param: { id: activeSession.id } });
     }
   };
 
   const handleComplete = () => {
     if (!activeSession) return;
-    completeSession.mutate(activeSession.id);
+    completeSession.mutate({ param: { id: activeSession.id } });
     setShowCompleteDialog(false);
   };
 
   const handleCancel = () => {
     if (!activeSession) return;
-    cancelSession.mutate(activeSession.id);
+    cancelSession.mutate({ param: { id: activeSession.id } });
     setShowCancelDialog(false);
   };
 
+  const handleEndEarly = () => {
+    if (!activeSession) return;
+    endSessionEarly.mutate({ param: { id: activeSession.id } });
+    setShowEndEarlyDialog(false);
+  };
+
   const handleReset = () => {
-    setSelectedMinutes(45);
+    onResetDuration();
     setSessionTask('');
   };
 
@@ -174,20 +233,14 @@ export function FocusTimer({ activeSession, taskId }: FocusTimerProps) {
             : formatTimePreview(selectedMinutes)}
         </span>
 
-        {!hasActiveSession && (
-          <div className="w-full max-w-md">
-            <Input
-              placeholder="What are you focusing on? (optional)"
-              value={sessionTask}
-              onChange={(e) => setSessionTask(e.target.value)}
-              className="resize-none rounded-none border-0 border-b bg-transparent! text-center shadow-none focus-visible:ring-0"
-            />
-          </div>
-        )}
-
-        {hasActiveSession && activeSession?.task && (
-          <p className="text-muted-foreground text-sm">{activeSession.task}</p>
-        )}
+        <div className="w-full max-w-md">
+          <Input
+            placeholder="What are you focusing on? (optional)"
+            value={sessionTask}
+            onChange={(e) => handleTaskChange(e.target.value)}
+            className="resize-none rounded-none border-0 border-b bg-transparent! text-center shadow-none focus-visible:ring-0"
+          />
+        </div>
 
         <div className="flex items-center gap-2">
           {!hasActiveSession ? (
@@ -221,7 +274,7 @@ export function FocusTimer({ activeSession, taskId }: FocusTimerProps) {
               >
                 {isPaused ? <PlayIcon /> : <PauseIcon />}
               </Button>
-              {isOvertime && (
+              {isOvertime ? (
                 <Button
                   size="icon-lg"
                   variant="ghost"
@@ -229,6 +282,15 @@ export function FocusTimer({ activeSession, taskId }: FocusTimerProps) {
                   onClick={() => setShowCompleteDialog(true)}
                 >
                   <CheckIcon />
+                </Button>
+              ) : (
+                <Button
+                  size="icon-lg"
+                  variant="ghost"
+                  tooltip="End session early"
+                  onClick={() => setShowEndEarlyDialog(true)}
+                >
+                  <SquareIcon />
                 </Button>
               )}
               <Button
@@ -287,6 +349,29 @@ export function FocusTimer({ activeSession, taskId }: FocusTimerProps) {
               disabled={completeSession.isPending}
             >
               Complete Session
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEndEarlyDialog} onOpenChange={setShowEndEarlyDialog}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>End Session Early?</DialogTitle>
+            <DialogDescription>
+              Your progress will be saved. The session duration will be updated
+              to reflect the actual time spent.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Keep Going</Button>
+            </DialogClose>
+            <Button
+              onClick={handleEndEarly}
+              disabled={endSessionEarly.isPending}
+            >
+              End Session
             </Button>
           </DialogFooter>
         </DialogContent>

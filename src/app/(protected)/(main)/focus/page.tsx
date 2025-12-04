@@ -2,24 +2,65 @@
 
 import { PageHeading } from '@/components/page-heading';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+  AlertCircleIcon,
+  CheckIcon,
+  ChevronDownIcon,
   ClockPlusIcon,
   FlameIcon,
+  MoreHorizontalIcon,
+  PencilIcon,
+  RefreshCwIcon,
   Settings2Icon,
   TimerIcon,
+  Trash2Icon,
   TrophyIcon,
 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
 import { ContentCard } from '../components/content-card';
 import { MetricCard } from '../components/metric-card';
 import { FocusTimer } from './components/focus-timer';
+import { SessionDeleteDialog } from './components/session-delete-dialog';
 import { SessionDurationChart } from './components/session-duration-chart';
-import {
-  FocusSession,
-  useActiveSession,
-  useRecentSessions,
-} from './hooks/use-focus-sessions';
+import { SessionEditDialog } from './components/session-edit-dialog';
+import type { FocusSession } from './hooks/types';
+import { useActiveSession } from './hooks/use-active-session';
+import { useFocusStats } from './hooks/use-focus-stats';
+import { useRecentSessions } from './hooks/use-recent-sessions';
+
+const DURATION_PRESETS = [15, 30, 45, 60, 90, 120] as const;
+
+function formatDurationLabel(minutes: number) {
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+  return `${minutes}m`;
+}
 
 function formatSessionTime(dateString: string) {
   return new Date(dateString).toLocaleTimeString('en-US', {
@@ -42,18 +83,37 @@ function getTodaysCompletedSessions(sessions: FocusSession[]) {
   });
 }
 
-function getTotalFocusTime(sessions: FocusSession[]) {
-  const todaysSessions = getTodaysCompletedSessions(sessions);
-  const totalMinutes = todaysSessions.reduce(
-    (acc, session) => acc + session.durationMinutes,
-    0
-  );
+function formatMinutesToTime(totalMinutes: number) {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   if (hours > 0) {
     return `${hours}h ${minutes}m`;
   }
   return `${minutes}m`;
+}
+
+function getTotalFocusTime(sessions: FocusSession[]) {
+  const todaysSessions = getTodaysCompletedSessions(sessions);
+  const totalMinutes = todaysSessions.reduce(
+    (acc, session) => acc + session.durationMinutes,
+    0
+  );
+  return formatMinutesToTime(totalMinutes);
+}
+
+function getYesterdaysFocusMinutes(sessions: FocusSession[]) {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(0, 0, 0, 0);
+
+  return sessions
+    .filter((session) => {
+      if (session.status !== 'COMPLETED') return false;
+      const sessionDate = new Date(session.startedAt);
+      sessionDate.setHours(0, 0, 0, 0);
+      return sessionDate.getTime() === yesterday.getTime();
+    })
+    .reduce((acc, session) => acc + session.durationMinutes, 0);
 }
 
 function generateChartData(sessions: FocusSession[]) {
@@ -91,10 +151,34 @@ export default function FocusPage() {
   const searchParams = useSearchParams();
   const taskId = searchParams.get('taskId');
 
-  const { data: activeSession, isLoading: isLoadingActive } =
-    useActiveSession();
-  const { data: recentSessions = [], isLoading: isLoadingSessions } =
-    useRecentSessions(20);
+  const {
+    data: activeSession,
+    isLoading: isLoadingActive,
+    isError: isActiveError,
+    refetch: refetchActive,
+  } = useActiveSession();
+  const {
+    data: recentSessions = [],
+    isLoading: isLoadingSessions,
+    isError: isSessionsError,
+    refetch: refetchSessions,
+  } = useRecentSessions(20);
+  const {
+    data: focusStats,
+    isLoading: isLoadingStats,
+    isError: isStatsError,
+    refetch: refetchStats,
+  } = useFocusStats();
+
+  const [selectedMinutes, setSelectedMinutes] = useState(45);
+  const [customMinutes, setCustomMinutes] = useState('');
+  const [isCustomDuration, setIsCustomDuration] = useState(false);
+  const [editingSession, setEditingSession] = useState<FocusSession | null>(
+    null
+  );
+  const [deletingSession, setDeletingSession] = useState<FocusSession | null>(
+    null
+  );
 
   const hasActiveSession =
     activeSession?.status === 'ACTIVE' || activeSession?.status === 'PAUSED';
@@ -102,6 +186,162 @@ export default function FocusPage() {
   const todaysCompleted = getTodaysCompletedSessions(recentSessions);
   const totalFocusTime = getTotalFocusTime(recentSessions);
   const chartData = generateChartData(recentSessions);
+
+  const metrics = useMemo(() => {
+    const todayMinutes = todaysCompleted.reduce(
+      (acc, session) => acc + session.durationMinutes,
+      0
+    );
+    const yesterdayMinutes = getYesterdaysFocusMinutes(recentSessions);
+    const timeDiff = todayMinutes - yesterdayMinutes;
+
+    const currentStreak = focusStats?.currentStreak ?? 0;
+    const bestStreak = focusStats?.bestStreak ?? 0;
+    const highestDailyMinutes = focusStats?.highestDailyMinutes ?? 0;
+    const highestDailyDaysAgo = focusStats?.highestDailyDaysAgo ?? null;
+    const bestSessionsInDay = focusStats?.bestSessionsInDay ?? 0;
+
+    return {
+      timeDiff,
+      timeDiffLabel:
+        timeDiff >= 0
+          ? `+${formatMinutesToTime(timeDiff)} from yesterday`
+          : `${formatMinutesToTime(Math.abs(timeDiff))} less than yesterday`,
+      highestEver: formatMinutesToTime(highestDailyMinutes),
+      highestEverLabel:
+        highestDailyDaysAgo === null
+          ? 'No sessions yet'
+          : highestDailyDaysAgo === 0
+            ? 'Achieved today'
+            : highestDailyDaysAgo === 1
+              ? 'Achieved yesterday'
+              : `Achieved ${highestDailyDaysAgo} days ago`,
+      currentStreak: `${currentStreak} day${currentStreak !== 1 ? 's' : ''}`,
+      bestStreak: `Personal Best: ${bestStreak} day${bestStreak !== 1 ? 's' : ''}`,
+      personalBestSessions: `Personal Best: ${bestSessionsInDay} session${bestSessionsInDay !== 1 ? 's' : ''}`,
+    };
+  }, [recentSessions, todaysCompleted, focusStats]);
+
+  const hasError = isActiveError || isSessionsError || isStatsError;
+  const isLoadingMetrics = isLoadingSessions || isLoadingStats;
+
+  const handleRetry = () => {
+    if (isActiveError) refetchActive();
+    if (isSessionsError) refetchSessions();
+    if (isStatsError) refetchStats();
+  };
+
+  const handleSelectPreset = (minutes: number) => {
+    setSelectedMinutes(minutes);
+    setIsCustomDuration(false);
+    setCustomMinutes('');
+  };
+
+  const handleCustomMinutesChange = (value: string) => {
+    const numValue = value.replace(/\D/g, '');
+    setCustomMinutes(numValue);
+    if (numValue) {
+      const mins = Math.min(Math.max(parseInt(numValue, 10), 1), 480);
+      setSelectedMinutes(mins);
+    }
+  };
+
+  const handleCustomMinutesSubmit = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && customMinutes) {
+      const mins = Math.min(Math.max(parseInt(customMinutes, 10), 1), 480);
+      setSelectedMinutes(mins);
+      setCustomMinutes(mins.toString());
+    }
+  };
+
+  const handleResetDuration = () => {
+    setSelectedMinutes(45);
+    setCustomMinutes('');
+    setIsCustomDuration(false);
+  };
+
+  const durationDropdown = (
+    <DropdownMenu>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1"
+                disabled={hasActiveSession}
+              >
+                {formatDurationLabel(selectedMinutes)}
+                <ChevronDownIcon className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+          </span>
+        </TooltipTrigger>
+        {hasActiveSession && (
+          <TooltipContent>A session is active</TooltipContent>
+        )}
+      </Tooltip>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Duration</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {DURATION_PRESETS.map((minutes) => (
+          <DropdownMenuItem
+            key={minutes}
+            onClick={() => handleSelectPreset(minutes)}
+          >
+            <span className="flex-1">{formatDurationLabel(minutes)}</span>
+            {selectedMinutes === minutes && !isCustomDuration && (
+              <CheckIcon className="size-4" />
+            )}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <div>
+          <Input
+            placeholder="Custom (min)..."
+            value={customMinutes}
+            onChange={(e) => {
+              setIsCustomDuration(true);
+              handleCustomMinutesChange(e.target.value);
+            }}
+            onKeyDown={handleCustomMinutesSubmit}
+            className="h-8 border-0 bg-transparent! ring-0!"
+            type="text"
+            inputMode="numeric"
+          />
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  if (hasError) {
+    return (
+      <div className="flex flex-col">
+        <div className="flex items-center justify-between gap-2">
+          <PageHeading>Focus</PageHeading>
+        </div>
+        <div className="mt-4">
+          <Empty className="border py-16">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <AlertCircleIcon className="text-destructive" />
+              </EmptyMedia>
+              <EmptyTitle>Failed to load focus data</EmptyTitle>
+              <EmptyDescription>
+                Something went wrong while fetching your focus sessions. Please
+                try again.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button onClick={handleRetry} variant="outline">
+              <RefreshCwIcon />
+              Retry
+            </Button>
+          </Empty>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">
@@ -127,7 +367,13 @@ export default function FocusPage() {
                 todaysCompleted.length.toString()
               )
             }
-            footer="Personal Best: 8 sessions"
+            footer={
+              isLoadingMetrics ? (
+                <Skeleton className="h-3 w-28" />
+              ) : (
+                metrics.personalBestSessions
+              )
+            }
           />
           <MetricCard
             title="Total Time Today"
@@ -139,19 +385,49 @@ export default function FocusPage() {
                 totalFocusTime
               )
             }
-            footer="+45m from yesterday"
+            footer={
+              isLoadingSessions ? (
+                <Skeleton className="h-3 w-32" />
+              ) : (
+                metrics.timeDiffLabel
+              )
+            }
           />
           <MetricCard
             title="Highest Ever"
             icon={TrophyIcon}
-            content="6h 30m"
-            footer="Achieved 3 days ago"
+            content={
+              isLoadingMetrics ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                metrics.highestEver
+              )
+            }
+            footer={
+              isLoadingMetrics ? (
+                <Skeleton className="h-3 w-28" />
+              ) : (
+                metrics.highestEverLabel
+              )
+            }
           />
           <MetricCard
             title="Current Streak"
             icon={FlameIcon}
-            content="3 days"
-            footer="Personal Best: 12 days"
+            content={
+              isLoadingMetrics ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                metrics.currentStreak
+              )
+            }
+            footer={
+              isLoadingMetrics ? (
+                <Skeleton className="h-3 w-28" />
+              ) : (
+                metrics.bestStreak
+              )
+            }
           />
         </div>
 
@@ -159,6 +435,7 @@ export default function FocusPage() {
           title={
             hasActiveSession ? 'Focus Session' : 'Start a new focus session'
           }
+          action={durationDropdown}
         >
           {isLoadingActive ? (
             <div className="flex flex-col items-center justify-center gap-8 py-20">
@@ -170,7 +447,12 @@ export default function FocusPage() {
               </div>
             </div>
           ) : (
-            <FocusTimer activeSession={activeSession} taskId={taskId} />
+            <FocusTimer
+              activeSession={activeSession}
+              taskId={taskId}
+              selectedMinutes={selectedMinutes}
+              onResetDuration={handleResetDuration}
+            />
           )}
         </ContentCard>
 
@@ -227,6 +509,28 @@ export default function FocusPage() {
                     ) : session.status === 'CANCELLED' ? (
                       <div className="size-2 rounded-full bg-red-500" />
                     ) : null}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon-sm">
+                          <MoreHorizontalIcon className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => setEditingSession(session)}
+                        >
+                          <PencilIcon />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => setDeletingSession(session)}
+                        >
+                          <Trash2Icon />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </li>
               ))}
@@ -234,6 +538,17 @@ export default function FocusPage() {
           )}
         </ContentCard>
       </div>
+
+      <SessionEditDialog
+        session={editingSession}
+        open={!!editingSession}
+        onOpenChange={(open) => !open && setEditingSession(null)}
+      />
+      <SessionDeleteDialog
+        session={deletingSession}
+        open={!!deletingSession}
+        onOpenChange={(open) => !open && setDeletingSession(null)}
+      />
     </div>
   );
 }
