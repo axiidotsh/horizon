@@ -35,80 +35,111 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useRef, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-const pages = [
+interface CommandItemBase {
+  name: string;
+  searchWords?: string[];
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface PageItem extends CommandItemBase {
+  href: string;
+}
+
+interface CommandItem extends CommandItemBase {
+  action: string;
+}
+
+interface ThemeItem extends CommandItemBase {
+  value: string;
+}
+
+const pages: PageItem[] = [
   {
     name: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboardIcon,
+    searchWords: ['home', 'overview', 'main'],
   },
   {
     name: 'Chat',
     href: '/chat',
     icon: BrainIcon,
+    searchWords: ['ai', 'assistant', 'conversation', 'message'],
   },
   {
     name: 'Focus',
     href: '/focus',
     icon: ClockPlusIcon,
+    searchWords: ['timer', 'pomodoro', 'session', 'concentrate'],
   },
   {
     name: 'Tasks',
     href: '/tasks',
     icon: LayoutListIcon,
+    searchWords: ['todo', 'todos', 'list', 'items'],
   },
   {
     name: 'Habits',
     href: '/habits',
     icon: GoalIcon,
+    searchWords: ['routine', 'daily', 'goals', 'tracking'],
   },
 ];
 
-const commands = [
+const commands: CommandItem[] = [
   {
     name: 'Add new task',
     action: 'add-task',
     icon: PlusIcon,
+    searchWords: ['create', 'new', 'todo'],
   },
   {
     name: 'Add new habit',
     action: 'add-habit',
     icon: CheckSquareIcon,
+    searchWords: ['create', 'new', 'routine', 'goal'],
   },
   {
     name: 'Start focus session',
     action: 'start-focus',
     icon: TimerIcon,
+    searchWords: ['begin', 'timer', 'pomodoro', 'work'],
   },
   {
     name: 'Create new chat',
     action: 'new-chat',
     icon: MessageCirclePlusIcon,
+    searchWords: ['start', 'conversation', 'ai', 'assistant'],
   },
 ];
 
-const themes = [
+const themes: ThemeItem[] = [
   {
     name: 'Light',
     value: 'light',
     icon: SunIcon,
+    searchWords: ['bright', 'day', 'white'],
   },
   {
     name: 'Dark',
     value: 'dark',
     icon: MoonIcon,
+    searchWords: ['night', 'black', 'dimmed'],
   },
   {
     name: 'System',
     value: 'system',
     icon: MonitorIcon,
+    searchWords: ['auto', 'default', 'os', 'preference'],
   },
 ];
 
-const accountActions = [
+const accountActions: CommandItem[] = [
   {
     name: 'Sign out',
     action: 'sign-out',
     icon: LogOutIcon,
+    searchWords: ['log out', 'logout', 'sign out', 'signout'],
   },
 ];
 
@@ -190,7 +221,7 @@ export function CommandMenu() {
               {pages.map((page) => (
                 <CommandItem
                   key={page.href}
-                  value={page.name}
+                  value={[page.name, ...(page.searchWords ?? [])].join(' ')}
                   onSelect={() => {
                     handleSelect(() => {
                       router.push(page.href);
@@ -206,7 +237,9 @@ export function CommandMenu() {
               {commands.map((command) => (
                 <CommandItem
                   key={command.action}
-                  value={command.name}
+                  value={[command.name, ...(command.searchWords ?? [])].join(
+                    ' '
+                  )}
                   onSelect={() => {
                     handleSelect(() => {
                       // TODO: Execute command
@@ -223,7 +256,11 @@ export function CommandMenu() {
               {themes.map((theme) => (
                 <CommandItem
                   key={theme.value}
-                  value={`theme ${theme.name}`}
+                  value={[
+                    'theme',
+                    theme.name,
+                    ...(theme.searchWords ?? []),
+                  ].join(' ')}
                   onSelect={() => {
                     handleSelect(() => {
                       setTheme(theme.value);
@@ -239,7 +276,7 @@ export function CommandMenu() {
               {accountActions.map((action) => (
                 <CommandItem
                   key={action.action}
-                  value={action.name}
+                  value={[action.name, ...(action.searchWords ?? [])].join(' ')}
                   onSelect={() => {
                     handleSelect(() => {
                       if (action.action === 'sign-out') {
