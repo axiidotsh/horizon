@@ -2,6 +2,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
+import { Spinner } from '@/components/ui/spinner';
 import {
   Tooltip,
   TooltipContent,
@@ -47,20 +48,37 @@ function Button({
   size,
   asChild = false,
   tooltip,
+  isLoading,
+  loadingContent,
+  children,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+    isLoading?: boolean;
+    loadingContent?: React.ReactNode;
   }) {
   const Comp = asChild ? Slot : 'button';
+
+  const content = isLoading ? (
+    <>
+      <Spinner />
+      {loadingContent || children}
+    </>
+  ) : (
+    children
+  );
 
   const button = (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      disabled={isLoading || props.disabled}
       {...props}
-    />
+    >
+      {content}
+    </Comp>
   );
 
   if (!tooltip) {

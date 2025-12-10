@@ -1,5 +1,6 @@
 'use client';
 
+import { logoutDialogOpenAtom } from '@/atoms/ui-atoms';
 import {
   Command,
   CommandEmpty,
@@ -14,7 +15,8 @@ import {
   PopoverAnchor,
   PopoverContent,
 } from '@/components/ui/popover';
-import { signOut } from '@/lib/auth-client';
+import { cn } from '@/utils/utils';
+import { useSetAtom } from 'jotai';
 import {
   BrainIcon,
   CheckSquareIcon,
@@ -39,6 +41,7 @@ interface CommandItemBase {
   name: string;
   searchWords?: string[];
   icon: React.ComponentType<{ className?: string }>;
+  destructive?: boolean;
 }
 
 interface PageItem extends CommandItemBase {
@@ -140,12 +143,14 @@ const accountActions: CommandItem[] = [
     action: 'sign-out',
     icon: LogOutIcon,
     searchWords: ['log out', 'logout', 'sign out', 'signout'],
+    destructive: true,
   },
 ];
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('');
+  const setLogoutDialogOpen = useSetAtom(logoutDialogOpenAtom);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { setTheme } = useTheme();
@@ -280,12 +285,18 @@ export function CommandMenu() {
                   onSelect={() => {
                     handleSelect(() => {
                       if (action.action === 'sign-out') {
-                        signOut();
+                        setLogoutDialogOpen(true);
                       }
                     });
                   }}
+                  className={action.destructive ? 'text-destructive!' : ''}
                 >
-                  <action.icon className="size-3.5" />
+                  <action.icon
+                    className={cn(
+                      'size-3.5',
+                      action.destructive && 'text-destructive!'
+                    )}
+                  />
                   <span>{action.name}</span>
                 </CommandItem>
               ))}

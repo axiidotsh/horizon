@@ -1,5 +1,6 @@
 'use client';
 
+import { logoutDialogOpenAtom } from '@/atoms/ui-atoms';
 import { PlaceholderLogo } from '@/components/icons';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -23,8 +24,8 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useUser } from '@/hooks/use-user';
-import { signOut } from '@/lib/auth-client';
 import { getInitials } from '@/utils/utils';
+import { useSetAtom } from 'jotai';
 import {
   BrainIcon,
   ClockPlusIcon,
@@ -39,7 +40,6 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Skeleton } from './ui/skeleton';
 
 const navItems = [
@@ -71,9 +71,9 @@ const navItems = [
 ];
 
 export function AppSidebar() {
-  const router = useRouter();
   const { setTheme } = useTheme();
   const { user, isPending } = useUser();
+  const setLogoutDialogOpen = useSetAtom(logoutDialogOpenAtom);
 
   return (
     <Sidebar collapsible="icon">
@@ -146,15 +146,7 @@ export function AppSidebar() {
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
-              onSelect={async () =>
-                await signOut({
-                  fetchOptions: {
-                    onSuccess: () => {
-                      router.push('/sign-in');
-                    },
-                  },
-                })
-              }
+              onSelect={() => setLogoutDialogOpen(true)}
             >
               <LogOutIcon className="mr-2 size-4" />
               <span>Log out</span>
