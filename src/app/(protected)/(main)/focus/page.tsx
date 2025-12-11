@@ -274,7 +274,6 @@ export default function FocusPage() {
             />
           )}
         </ContentCard>
-        <SessionDurationChart data={chartData} isLoading={isLoadingSessions} />
         <ContentCard title="Recent Sessions">
           {isLoadingSessions ? (
             <RecentSessionsSkeleton />
@@ -341,6 +340,7 @@ export default function FocusPage() {
             </ul>
           )}
         </ContentCard>
+        <SessionDurationChart data={chartData} isLoading={isLoadingSessions} />
       </div>
       <SessionEditDialog
         session={editingSession}

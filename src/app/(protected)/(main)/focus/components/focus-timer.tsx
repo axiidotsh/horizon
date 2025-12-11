@@ -80,7 +80,7 @@ interface CircularProgressProps {
 
 function CircularProgress({
   progress,
-  size = 320,
+  size = 400,
   strokeWidth = 8,
   children,
 }: CircularProgressProps) {
