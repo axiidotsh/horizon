@@ -45,12 +45,6 @@ import { cn } from '@/utils/utils';
 import { Button } from '../../../components/ui/button';
 ```
 
-- `@/*` → `./src/*`
-- `@/components` → `./src/components`
-- `@/utils` → `./src/utils`
-- `@/ui` → `./src/components/ui`
-- `@/hooks` → `./src/hooks`
-
 ## Project Structure
 
 ```
@@ -103,6 +97,17 @@ Generated models in `src/server/db/generated/` (gitignored)
 - `const` over `let`, never `var`
 - Array methods over loops
 
+### Function Declarations
+
+- **Components**: Use arrow functions with `export const`
+  ```typescript
+  export const ComponentName = ({ prop1, prop2 }: ComponentProps) => {};
+  ```
+- **Helper functions**: Use `function` keyword
+  ```typescript
+  function helperFunction(param1: string, param2: number) {}
+  ```
+
 ### Naming
 
 - Directories: `kebab-case`
@@ -142,7 +147,7 @@ Semantic tokens (`src/styles/globals.css`):
 Add:
 
 ```bash
-npx shadcn@latest add [component-name]
+pnpm dlx shadcn@latest add [component-name]
 ```
 
 ### Guidelines
