@@ -32,14 +32,8 @@ export const FocusTimer = ({
   taskId,
   selectedMinutes,
 }: FocusTimerProps) => {
-  const {
-    startSession,
-    pauseSession,
-    resumeSession,
-    completeSession,
-    cancelSession,
-    endSessionEarly,
-  } = useFocusSession();
+  const { start, pause, resume, complete, cancel, endEarly } =
+    useFocusSession();
 
   const setSelectedMinutes = useSetAtom(selectedMinutesAtom);
   const setCustomMinutes = useSetAtom(customMinutesAtom);
@@ -57,7 +51,7 @@ export const FocusTimer = ({
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
 
   const handleStart = () => {
-    startSession.mutate({
+    start.mutate({
       json: {
         durationMinutes: selectedMinutes,
         task: sessionTask || undefined,
@@ -68,34 +62,34 @@ export const FocusTimer = ({
   const handlePauseResume = () => {
     if (!activeSession) return;
     if (activeSession.status === 'PAUSED') {
-      resumeSession.mutate({ param: { id: activeSession.id } });
+      resume.mutate({ param: { id: activeSession.id } });
     } else {
-      pauseSession.mutate({ param: { id: activeSession.id } });
+      pause.mutate({ param: { id: activeSession.id } });
     }
   };
 
   const handleComplete = () => {
     if (!activeSession) return;
-    completeSession.mutate({ param: { id: activeSession.id } });
+    complete.mutate({ param: { id: activeSession.id } });
     setIsCompleted(false);
   };
 
   const handleCancel = () => {
     if (!activeSession) return;
-    cancelSession.mutate({ param: { id: activeSession.id } });
+    cancel.mutate({ param: { id: activeSession.id } });
     setShowCancelDialog(false);
   };
 
   const handleDiscard = () => {
     if (!activeSession) return;
-    cancelSession.mutate({ param: { id: activeSession.id } });
+    cancel.mutate({ param: { id: activeSession.id } });
     setShowDiscardDialog(false);
     setIsCompleted(false);
   };
 
   const handleEndEarly = () => {
     if (!activeSession) return;
-    endSessionEarly.mutate({ param: { id: activeSession.id } });
+    endEarly.mutate({ param: { id: activeSession.id } });
     setShowEndEarlyDialog(false);
   };
 
@@ -172,10 +166,10 @@ export const FocusTimer = ({
             onReset: handleReset,
           }}
           isPending={{
-            start: startSession.isPending,
-            pause: pauseSession.isPending,
-            resume: resumeSession.isPending,
-            complete: completeSession.isPending,
+            start: start.isPending,
+            pause: pause.isPending,
+            resume: resume.isPending,
+            complete: complete.isPending,
           }}
         />
       </div>
@@ -196,8 +190,8 @@ export const FocusTimer = ({
           onDiscard: handleDiscard,
         }}
         isPending={{
-          cancel: cancelSession.isPending,
-          endEarly: endSessionEarly.isPending,
+          cancel: cancel.isPending,
+          endEarly: endEarly.isPending,
         }}
       />
     </>

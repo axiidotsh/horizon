@@ -26,13 +26,7 @@ import {
 
 export function FocusTimerWidget() {
   const { data: session, isLoading } = useActiveSession();
-  const {
-    pauseSession,
-    resumeSession,
-    cancelSession,
-    completeSession,
-    endSessionEarly,
-  } = useFocusSession();
+  const { pause, resume, cancel, complete, endEarly } = useFocusSession();
   const { remainingSeconds } = useTimerLogic(session);
 
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -51,28 +45,28 @@ export function FocusTimerWidget() {
 
   const handlePauseResume = () => {
     if (isPaused) {
-      resumeSession.mutate({ param: { id: session.id } });
+      resume.mutate({ param: { id: session.id } });
     } else {
-      pauseSession.mutate({ param: { id: session.id } });
+      pause.mutate({ param: { id: session.id } });
     }
   };
 
   const handleCancel = () => {
-    cancelSession.mutate({ param: { id: session.id } });
+    cancel.mutate({ param: { id: session.id } });
     setShowCancelDialog(false);
   };
 
   const handleEndEarly = () => {
-    endSessionEarly.mutate({ param: { id: session.id } });
+    endEarly.mutate({ param: { id: session.id } });
     setShowEndEarlyDialog(false);
   };
 
   const handleComplete = () => {
-    completeSession.mutate({ param: { id: session.id } });
+    complete.mutate({ param: { id: session.id } });
   };
 
   const handleDiscard = () => {
-    cancelSession.mutate({ param: { id: session.id } });
+    cancel.mutate({ param: { id: session.id } });
     setShowDiscardDialog(false);
   };
 
@@ -111,7 +105,7 @@ export function FocusTimerWidget() {
             <>
               <DropdownMenuItem
                 onClick={handleComplete}
-                disabled={completeSession.isPending}
+                disabled={complete.isPending}
               >
                 <CheckIcon />
                 Save Session
@@ -128,7 +122,7 @@ export function FocusTimerWidget() {
             <>
               <DropdownMenuItem
                 onClick={handlePauseResume}
-                disabled={pauseSession.isPending || resumeSession.isPending}
+                disabled={pause.isPending || resume.isPending}
               >
                 {isPaused ? (
                   <>
@@ -175,8 +169,8 @@ export function FocusTimerWidget() {
           onDiscard: handleDiscard,
         }}
         isPending={{
-          cancel: cancelSession.isPending,
-          endEarly: endSessionEarly.isPending,
+          cancel: cancel.isPending,
+          endEarly: endEarly.isPending,
         }}
       />
     </>

@@ -1,24 +1,49 @@
-import { useCancelSession } from '../mutations/use-cancel-session';
-import { useCompleteSession } from '../mutations/use-complete-session';
-import { useEndSessionEarly } from '../mutations/use-end-session-early';
-import { usePauseSession } from '../mutations/use-pause-session';
-import { useResumeSession } from '../mutations/use-resume-session';
-import { useStartSession } from '../mutations/use-start-session';
+import { useApiMutation } from '@/hooks/use-api-mutation';
+import { api } from '@/lib/rpc';
+import { FOCUS_QUERY_KEYS } from '../focus-query-keys';
 
 export function useFocusSession() {
-  const startSession = useStartSession();
-  const pauseSession = usePauseSession();
-  const resumeSession = useResumeSession();
-  const completeSession = useCompleteSession();
-  const cancelSession = useCancelSession();
-  const endSessionEarly = useEndSessionEarly();
+  const start = useApiMutation(api.focus.sessions.$post, {
+    invalidateKeys: [FOCUS_QUERY_KEYS.activeSession],
+  });
+
+  const pause = useApiMutation(api.focus.sessions[':id'].pause.$patch, {
+    invalidateKeys: [FOCUS_QUERY_KEYS.activeSession],
+  });
+
+  const resume = useApiMutation(api.focus.sessions[':id'].resume.$patch, {
+    invalidateKeys: [FOCUS_QUERY_KEYS.activeSession],
+  });
+
+  const complete = useApiMutation(api.focus.sessions[':id'].complete.$patch, {
+    invalidateKeys: [
+      FOCUS_QUERY_KEYS.activeSession,
+      FOCUS_QUERY_KEYS.sessions,
+      FOCUS_QUERY_KEYS.stats,
+    ],
+  });
+
+  const cancel = useApiMutation(api.focus.sessions[':id'].cancel.$patch, {
+    invalidateKeys: [FOCUS_QUERY_KEYS.activeSession, FOCUS_QUERY_KEYS.sessions],
+  });
+
+  const endEarly = useApiMutation(
+    api.focus.sessions[':id']['end-early'].$patch,
+    {
+      invalidateKeys: [
+        FOCUS_QUERY_KEYS.activeSession,
+        FOCUS_QUERY_KEYS.sessions,
+        FOCUS_QUERY_KEYS.stats,
+      ],
+    }
+  );
 
   return {
-    startSession,
-    pauseSession,
-    resumeSession,
-    completeSession,
-    cancelSession,
-    endSessionEarly,
+    start,
+    pause,
+    resume,
+    complete,
+    cancel,
+    endEarly,
   };
 }
