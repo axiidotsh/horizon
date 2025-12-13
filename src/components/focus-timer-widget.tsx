@@ -1,11 +1,16 @@
 'use client';
 
+import {
+  showCancelDialogAtom,
+  showDiscardDialogAtom,
+  showEndEarlyDialogAtom,
+} from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
 import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-focus-session';
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
 import { useTimerLogic } from '@/app/(protected)/(main)/focus/hooks/timer/use-timer-logic';
 import { formatTime } from '@/app/(protected)/(main)/focus/utils/timer-calculations';
-import { SessionDialogs } from '@/components/session-dialogs';
 import { cn } from '@/utils/utils';
+import { useSetAtom } from 'jotai';
 import {
   CheckIcon,
   PauseIcon,
@@ -15,7 +20,6 @@ import {
   XIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,12 +30,12 @@ import {
 
 export function FocusTimerWidget() {
   const { data: session, isLoading } = useActiveSession();
-  const { pause, resume, cancel, complete, endEarly } = useFocusSession();
+  const { pause, resume, complete } = useFocusSession();
   const { remainingSeconds } = useTimerLogic(session);
 
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showDiscardDialog, setShowDiscardDialog] = useState(false);
-  const [showEndEarlyDialog, setShowEndEarlyDialog] = useState(false);
+  const setShowCancelDialog = useSetAtom(showCancelDialogAtom);
+  const setShowDiscardDialog = useSetAtom(showDiscardDialogAtom);
+  const setShowEndEarlyDialog = useSetAtom(showEndEarlyDialogAtom);
 
   if (isLoading || !session) {
     return null;
@@ -51,23 +55,8 @@ export function FocusTimerWidget() {
     }
   };
 
-  const handleCancel = () => {
-    cancel.mutate({ param: { id: session.id } });
-    setShowCancelDialog(false);
-  };
-
-  const handleEndEarly = () => {
-    endEarly.mutate({ param: { id: session.id } });
-    setShowEndEarlyDialog(false);
-  };
-
   const handleComplete = () => {
     complete.mutate({ param: { id: session.id } });
-  };
-
-  const handleDiscard = () => {
-    cancel.mutate({ param: { id: session.id } });
-    setShowDiscardDialog(false);
   };
 
   return (
@@ -151,28 +140,6 @@ export function FocusTimerWidget() {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <SessionDialogs
-        dialogs={{
-          showCancel: showCancelDialog,
-          showEndEarly: showEndEarlyDialog,
-          showDiscard: showDiscardDialog,
-        }}
-        onOpenChange={(dialog, open) => {
-          if (dialog === 'cancel') setShowCancelDialog(open);
-          if (dialog === 'endEarly') setShowEndEarlyDialog(open);
-          if (dialog === 'discard') setShowDiscardDialog(open);
-        }}
-        handlers={{
-          onCancel: handleCancel,
-          onEndEarly: handleEndEarly,
-          onDiscard: handleDiscard,
-        }}
-        isPending={{
-          cancel: cancel.isPending,
-          endEarly: endEarly.isPending,
-        }}
-      />
     </>
   );
 }

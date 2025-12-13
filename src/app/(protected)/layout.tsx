@@ -1,6 +1,7 @@
 import { AppHeader } from '@/components/app-header';
 import { AppSidebar } from '@/components/app-sidebar';
 import { LogoutDialog } from '@/components/logout-dialog';
+import { SessionDialogs } from '@/components/session-dialogs';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { authFailureRedirect } from '@/lib/config/redirects.config';
 import { auth } from '@/server/auth';
@@ -28,6 +29,7 @@ export default async function ProtectedLayout({
         <main className="flex-1">{children}</main>
       </SidebarInset>
       <LogoutDialog />
+      <SessionDialogs />
     </SidebarProvider>
   );
 }

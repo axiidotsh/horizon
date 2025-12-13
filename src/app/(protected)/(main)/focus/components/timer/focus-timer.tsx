@@ -1,14 +1,17 @@
 'use client';
 
-import { SessionDialogs } from '@/components/session-dialogs';
 import { Input } from '@/components/ui/input';
 import { useSetAtom } from 'jotai';
-import { useState } from 'react';
 import {
   customMinutesAtom,
   isCustomDurationAtom,
   selectedMinutesAtom,
 } from '../../atoms/duration';
+import {
+  showCancelDialogAtom,
+  showDiscardDialogAtom,
+  showEndEarlyDialogAtom,
+} from '../../atoms/session-dialogs';
 import { useFocusSession } from '../../hooks/mutations/use-focus-session';
 import { useSessionTask } from '../../hooks/mutations/use-session-task';
 import { useTimerLogic } from '../../hooks/timer/use-timer-logic';
@@ -32,12 +35,15 @@ export const FocusTimer = ({
   taskId,
   selectedMinutes,
 }: FocusTimerProps) => {
-  const { start, pause, resume, complete, cancel, endEarly } =
-    useFocusSession();
+  const { start, pause, resume, complete } = useFocusSession();
 
   const setSelectedMinutes = useSetAtom(selectedMinutesAtom);
   const setCustomMinutes = useSetAtom(customMinutesAtom);
   const setIsCustomDuration = useSetAtom(isCustomDurationAtom);
+
+  const setShowCancelDialog = useSetAtom(showCancelDialogAtom);
+  const setShowEndEarlyDialog = useSetAtom(showEndEarlyDialogAtom);
+  const setShowDiscardDialog = useSetAtom(showDiscardDialogAtom);
 
   const { sessionTask, handleTaskChange } = useSessionTask(
     activeSession,
@@ -45,10 +51,6 @@ export const FocusTimer = ({
   );
   const { remainingSeconds, isCompleted, setIsCompleted } =
     useTimerLogic(activeSession);
-
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showEndEarlyDialog, setShowEndEarlyDialog] = useState(false);
-  const [showDiscardDialog, setShowDiscardDialog] = useState(false);
 
   const handleStart = () => {
     start.mutate({
@@ -72,25 +74,6 @@ export const FocusTimer = ({
     if (!activeSession) return;
     complete.mutate({ param: { id: activeSession.id } });
     setIsCompleted(false);
-  };
-
-  const handleCancel = () => {
-    if (!activeSession) return;
-    cancel.mutate({ param: { id: activeSession.id } });
-    setShowCancelDialog(false);
-  };
-
-  const handleDiscard = () => {
-    if (!activeSession) return;
-    cancel.mutate({ param: { id: activeSession.id } });
-    setShowDiscardDialog(false);
-    setIsCompleted(false);
-  };
-
-  const handleEndEarly = () => {
-    if (!activeSession) return;
-    endEarly.mutate({ param: { id: activeSession.id } });
-    setShowEndEarlyDialog(false);
   };
 
   const handleReset = () => {
@@ -173,27 +156,6 @@ export const FocusTimer = ({
           }}
         />
       </div>
-      <SessionDialogs
-        dialogs={{
-          showCancel: showCancelDialog,
-          showEndEarly: showEndEarlyDialog,
-          showDiscard: showDiscardDialog,
-        }}
-        onOpenChange={(dialog, open) => {
-          if (dialog === 'cancel') setShowCancelDialog(open);
-          if (dialog === 'endEarly') setShowEndEarlyDialog(open);
-          if (dialog === 'discard') setShowDiscardDialog(open);
-        }}
-        handlers={{
-          onCancel: handleCancel,
-          onEndEarly: handleEndEarly,
-          onDiscard: handleDiscard,
-        }}
-        isPending={{
-          cancel: cancel.isPending,
-          endEarly: endEarly.isPending,
-        }}
-      />
     </>
   );
 };

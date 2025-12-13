@@ -1,3 +1,12 @@
+'use client';
+
+import {
+  showCancelDialogAtom,
+  showDiscardDialogAtom,
+  showEndEarlyDialogAtom,
+} from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
+import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-focus-session';
+import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -8,40 +17,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useAtom } from 'jotai';
 
-interface SessionDialogsProps {
-  dialogs: {
-    showCancel: boolean;
-    showEndEarly: boolean;
-    showDiscard: boolean;
-  };
-  onOpenChange: (
-    dialog: 'cancel' | 'endEarly' | 'discard',
-    open: boolean
-  ) => void;
-  handlers: {
-    onCancel: () => void;
-    onEndEarly: () => void;
-    onDiscard: () => void;
-  };
-  isPending: {
-    cancel: boolean;
-    endEarly: boolean;
-  };
-}
+export function SessionDialogs() {
+  const { data: activeSession } = useActiveSession();
+  const { cancel, endEarly } = useFocusSession();
 
-export function SessionDialogs({
-  dialogs,
-  onOpenChange,
-  handlers,
-  isPending,
-}: SessionDialogsProps) {
+  const [showCancel, setShowCancel] = useAtom(showCancelDialogAtom);
+  const [showEndEarly, setShowEndEarly] = useAtom(showEndEarlyDialogAtom);
+  const [showDiscard, setShowDiscard] = useAtom(showDiscardDialogAtom);
+
+  const handleCancel = () => {
+    if (!activeSession) return;
+    cancel.mutate({ param: { id: activeSession.id } });
+    setShowCancel(false);
+  };
+
+  const handleEndEarly = () => {
+    if (!activeSession) return;
+    endEarly.mutate({ param: { id: activeSession.id } });
+    setShowEndEarly(false);
+  };
+
+  const handleDiscard = () => {
+    if (!activeSession) return;
+    cancel.mutate({ param: { id: activeSession.id } });
+    setShowDiscard(false);
+  };
+
   return (
     <>
-      <Dialog
-        open={dialogs.showCancel}
-        onOpenChange={(open) => onOpenChange('cancel', open)}
-      >
+      {/* Cancel Dialog */}
+      <Dialog open={showCancel} onOpenChange={setShowCancel}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Cancel Focus Session?</DialogTitle>
@@ -56,8 +63,8 @@ export function SessionDialogs({
             </DialogClose>
             <Button
               variant="destructive"
-              onClick={handlers.onCancel}
-              disabled={isPending.cancel}
+              onClick={handleCancel}
+              disabled={cancel.isPending}
             >
               Cancel Session
             </Button>
@@ -65,10 +72,8 @@ export function SessionDialogs({
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={dialogs.showEndEarly}
-        onOpenChange={(open) => onOpenChange('endEarly', open)}
-      >
+      {/* End Early Dialog */}
+      <Dialog open={showEndEarly} onOpenChange={setShowEndEarly}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>End Session Early?</DialogTitle>
@@ -83,8 +88,8 @@ export function SessionDialogs({
             </DialogClose>
             <Button
               variant="destructive"
-              onClick={handlers.onEndEarly}
-              disabled={isPending.endEarly}
+              onClick={handleEndEarly}
+              disabled={endEarly.isPending}
             >
               End Session
             </Button>
@@ -92,10 +97,8 @@ export function SessionDialogs({
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={dialogs.showDiscard}
-        onOpenChange={(open) => onOpenChange('discard', open)}
-      >
+      {/* Discard Dialog */}
+      <Dialog open={showDiscard} onOpenChange={setShowDiscard}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Discard Completed Session?</DialogTitle>
@@ -110,8 +113,8 @@ export function SessionDialogs({
             </DialogClose>
             <Button
               variant="destructive"
-              onClick={handlers.onDiscard}
-              disabled={isPending.cancel}
+              onClick={handleDiscard}
+              disabled={cancel.isPending}
             >
               Discard Session
             </Button>
