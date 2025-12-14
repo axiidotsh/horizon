@@ -10,8 +10,10 @@ export function useSessionTask(activeSession: FocusSession | null | undefined) {
   useEffect(() => {
     if (activeSession?.task !== undefined) {
       setSessionTask(activeSession.task || '');
+    } else if (!activeSession) {
+      setSessionTask('');
     }
-  }, [activeSession?.task]);
+  }, [activeSession?.task, activeSession]);
 
   useEffect(() => {
     return () => {

@@ -8,7 +8,10 @@ import {
 import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-focus-session';
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
 import { useTimerLogic } from '@/app/(protected)/(main)/focus/hooks/timer/use-timer-logic';
-import { formatTime } from '@/app/(protected)/(main)/focus/utils/timer-calculations';
+import {
+  formatTime,
+  formatTimePreview,
+} from '@/app/(protected)/(main)/focus/utils/timer-calculations';
 import { cn } from '@/utils/utils';
 import { useSetAtom } from 'jotai';
 import {
@@ -46,6 +49,10 @@ export function FocusTimerWidget() {
   const elapsedSeconds = totalSeconds - remainingSeconds;
   const progress = Math.min(100, (elapsedSeconds / totalSeconds) * 100);
 
+  const displayTime = isCompleted
+    ? formatTimePreview(session.durationMinutes)
+    : formatTime(remainingSeconds);
+
   const handlePauseResume = () => {
     if (isPaused) {
       resume.mutate({ param: { id: session.id } });
@@ -79,7 +86,7 @@ export function FocusTimerWidget() {
             style={{ transform: `scaleX(${progress / 100})` }}
           />
           <TimerIcon className="relative size-4" />
-          <span className="relative">{formatTime(remainingSeconds)}</span>
+          <span className="relative">{displayTime}</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
