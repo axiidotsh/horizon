@@ -31,7 +31,7 @@ import {
 export function FocusTimerWidget() {
   const { data: session, isLoading } = useActiveSession();
   const { pause, resume, complete } = useFocusSession();
-  const { remainingSeconds } = useTimerLogic(session);
+  const { remainingSeconds, isCompleted } = useTimerLogic(session);
 
   const setShowCancelDialog = useSetAtom(showCancelDialogAtom);
   const setShowDiscardDialog = useSetAtom(showDiscardDialogAtom);
@@ -42,7 +42,6 @@ export function FocusTimerWidget() {
   }
 
   const isPaused = session.status === 'PAUSED';
-  const isOvertime = remainingSeconds <= 0;
   const totalSeconds = session.durationMinutes * 60;
   const elapsedSeconds = totalSeconds - remainingSeconds;
   const progress = Math.min(100, (elapsedSeconds / totalSeconds) * 100);
@@ -67,15 +66,15 @@ export function FocusTimerWidget() {
             'relative flex h-8 items-center gap-2 overflow-hidden rounded-md border px-2 font-mono text-sm font-medium transition-colors',
             'hover:bg-accent focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
             isPaused && 'animate-pulse border-amber-500/50',
-            isOvertime &&
+            isCompleted &&
               'border-green-500/50 text-green-600 dark:text-green-500'
           )}
         >
           <div
             className={cn(
-              'absolute inset-0 origin-left transition-transform duration-1000',
+              'absolute inset-0 origin-left transition-transform duration-500',
               isPaused ? 'bg-amber-500/40' : 'bg-green-500/40',
-              isOvertime && 'bg-green-500/20'
+              isCompleted && 'bg-green-500/20'
             )}
             style={{ transform: `scaleX(${progress / 100})` }}
           />
@@ -90,7 +89,7 @@ export function FocusTimerWidget() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          {isOvertime ? (
+          {isCompleted ? (
             <>
               <DropdownMenuItem
                 onClick={handleComplete}

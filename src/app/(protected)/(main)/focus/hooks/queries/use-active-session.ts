@@ -13,12 +13,5 @@ export function useActiveSession() {
       const data = await res.json();
       return data.session;
     },
-    refetchInterval: (query) => {
-      const session = query.state.data;
-      if (session?.status === 'ACTIVE') {
-        return 30000;
-      }
-      return false;
-    },
   });
 }
