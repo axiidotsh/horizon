@@ -2,19 +2,12 @@
 
 import { ContentCard } from '@/app/(protected)/(main)/components/content-card';
 import { ErrorState } from '@/components/error-state';
-import { useAtomValue } from 'jotai';
-import { useSearchParams } from 'next/navigation';
-import { selectedMinutesAtom } from '../../atoms/duration';
 import { useActiveSession } from '../../hooks/queries/use-active-session';
 import { TimerSkeleton } from '../skeletons/timer-skeleton';
 import { DurationDropdown } from '../timer/duration-dropdown';
 import { FocusTimer } from '../timer/focus-timer';
 
 export const FocusTimerSection = () => {
-  const searchParams = useSearchParams();
-  const taskId = searchParams.get('taskId');
-  const selectedMinutes = useAtomValue(selectedMinutesAtom);
-
   const {
     data: activeSession,
     isLoading,
@@ -43,11 +36,7 @@ export const FocusTimerSection = () => {
       {isLoading ? (
         <TimerSkeleton />
       ) : (
-        <FocusTimer
-          activeSession={activeSession}
-          taskId={taskId}
-          selectedMinutes={selectedMinutes}
-        />
+        <FocusTimer activeSession={activeSession} />
       )}
     </ContentCard>
   );

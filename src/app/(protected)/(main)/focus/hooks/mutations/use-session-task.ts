@@ -2,19 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FocusSession } from '../types';
 import { useUpdateSession } from './use-update-session';
 
-export function useSessionTask(
-  activeSession: FocusSession | null | undefined,
-  taskId: string | null | undefined
-) {
+export function useSessionTask(activeSession: FocusSession | null | undefined) {
   const [sessionTask, setSessionTask] = useState('');
   const updateSession = useUpdateSession();
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (taskId) {
-      setSessionTask(`Task #${taskId}`);
-    }
-  }, [taskId]);
 
   useEffect(() => {
     if (activeSession?.task !== undefined) {

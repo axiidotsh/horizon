@@ -1,7 +1,7 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
-import { useSetAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import {
   customMinutesAtom,
   isCustomDurationAtom,
@@ -26,18 +26,12 @@ import { TimerDisplay } from './timer-display';
 
 interface FocusTimerProps {
   activeSession: FocusSession | null | undefined;
-  taskId?: string | null;
-  selectedMinutes: number;
 }
 
-export const FocusTimer = ({
-  activeSession,
-  taskId,
-  selectedMinutes,
-}: FocusTimerProps) => {
+export const FocusTimer = ({ activeSession }: FocusTimerProps) => {
   const { start, pause, resume, complete } = useFocusSession();
 
-  const setSelectedMinutes = useSetAtom(selectedMinutesAtom);
+  const [selectedMinutes, setSelectedMinutes] = useAtom(selectedMinutesAtom);
   const setCustomMinutes = useSetAtom(customMinutesAtom);
   const setIsCustomDuration = useSetAtom(isCustomDurationAtom);
 
@@ -45,10 +39,7 @@ export const FocusTimer = ({
   const setShowEndEarlyDialog = useSetAtom(showEndEarlyDialogAtom);
   const setShowDiscardDialog = useSetAtom(showDiscardDialogAtom);
 
-  const { sessionTask, handleTaskChange } = useSessionTask(
-    activeSession,
-    taskId
-  );
+  const { sessionTask, handleTaskChange } = useSessionTask(activeSession);
   const { remainingSeconds, isCompleted, setIsCompleted } =
     useTimerLogic(activeSession);
 
