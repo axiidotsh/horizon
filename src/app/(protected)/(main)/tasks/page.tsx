@@ -3,12 +3,6 @@
 import { PageHeading } from '@/components/page-heading';
 import { Button } from '@/components/ui/button';
 import { Settings2Icon } from 'lucide-react';
-import { BulkAddTasksSheet } from './components/dialogs/bulk-add-tasks-sheet';
-import { CreateProjectDialog } from './components/dialogs/create-project-dialog';
-import { CreateTaskDialog } from './components/dialogs/create-task-dialog';
-import { DeleteTaskDialog } from './components/dialogs/delete-task-dialog';
-import { EditProjectDialog } from './components/dialogs/edit-project-dialog';
-import { EditTaskDialog } from './components/dialogs/edit-task-dialog';
 import { TaskChartSection } from './components/sections/task-chart-section';
 import { TaskListSection } from './components/sections/task-list-section';
 import { TaskMetricsSection } from './components/sections/task-metrics-section';
@@ -31,13 +25,6 @@ export default function TasksPage() {
         <TaskListSection />
         <TaskChartSection />
       </div>
-
-      <CreateTaskDialog />
-      <EditTaskDialog />
-      <DeleteTaskDialog />
-      <CreateProjectDialog />
-      <EditProjectDialog />
-      <BulkAddTasksSheet />
     </div>
   );
 }

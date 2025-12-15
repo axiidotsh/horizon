@@ -1,7 +1,9 @@
 import { AppHeader } from '@/components/app-header';
 import { AppSidebar } from '@/components/app-sidebar';
 import { LogoutDialog } from '@/components/logout-dialog';
+import { ProjectDialogs } from '@/components/project-dialogs';
 import { SessionDialogs } from '@/components/session-dialogs';
+import { TaskDialogs } from '@/components/task-dialogs';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { authFailureRedirect } from '@/lib/config/redirects.config';
 import { auth } from '@/server/auth';
@@ -22,14 +24,18 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <SidebarProvider defaultOpen={false} open={false}>
-      <AppSidebar />
-      <SidebarInset className="flex flex-col">
-        <AppHeader />
-        <main className="flex-1">{children}</main>
-      </SidebarInset>
+    <>
+      <SidebarProvider defaultOpen={false} open={false}>
+        <AppSidebar />
+        <SidebarInset className="flex flex-col">
+          <AppHeader />
+          <main className="flex-1">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
       <LogoutDialog />
       <SessionDialogs />
-    </SidebarProvider>
+      <TaskDialogs />
+      <ProjectDialogs />
+    </>
   );
 }
