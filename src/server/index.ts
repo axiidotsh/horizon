@@ -7,6 +7,7 @@ import { handle } from 'hono/vercel';
 import { auth } from './auth';
 import { httpLogger } from './logger';
 import { focusRouter } from './routes/focus';
+import { habitsRouter } from './routes/habits';
 import { projectsRouter } from './routes/projects';
 import { tasksRouter } from './routes/tasks';
 
@@ -25,7 +26,8 @@ const router = app
   .on(['POST', 'GET'], '/auth/*', (c) => auth.handler(c.req.raw))
   .route('/focus', focusRouter)
   .route('/tasks', tasksRouter)
-  .route('/projects', projectsRouter);
+  .route('/projects', projectsRouter)
+  .route('/habits', habitsRouter);
 
 export type AppType = typeof router;
 export const httpHandler = handle(router);
