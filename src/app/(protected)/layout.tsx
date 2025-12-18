@@ -1,5 +1,6 @@
 import { AppHeader } from '@/components/app-header';
 import { AppSidebar } from '@/components/app-sidebar';
+import { HabitDialogs } from '@/components/habit-dialogs';
 import { LogoutDialog } from '@/components/logout-dialog';
 import { ProjectDialogs } from '@/components/project-dialogs';
 import { SessionDialogs } from '@/components/session-dialogs';
@@ -36,6 +37,7 @@ export default async function ProtectedLayout({
       <SessionDialogs />
       <TaskDialogs />
       <ProjectDialogs />
+      <HabitDialogs />
     </>
   );
 }

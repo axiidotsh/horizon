@@ -5,7 +5,7 @@ import { PageHeading } from '@/components/page-heading';
 import { Button } from '@/components/ui/button';
 import { ChartConfig } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import {
   CheckCircle2Icon,
   FlameIcon,
@@ -18,18 +18,10 @@ import { ContentCard } from '../components/content-card';
 import { GenericAreaChart } from '../components/generic-area-chart';
 import { MetricCard } from '../components/metric-card';
 import {
-  createDialogOpenAtom,
-  deletingHabitIdAtom,
-  editingHabitIdAtom,
-} from './atoms/dialog-atoms';
-import {
   searchQueryAtom,
   sortByAtom,
   statusFilterAtom,
 } from './atoms/habit-atoms';
-import { CreateHabitDialog } from './components/dialogs/create-habit-dialog';
-import { DeleteHabitDialog } from './components/dialogs/delete-habit-dialog';
-import { EditHabitDialog } from './components/dialogs/edit-habit-dialog';
 import { HabitListActions } from './components/habit-list-actions';
 import { HabitsList } from './components/habits-list';
 import { useToggleHabit } from './hooks/mutations/use-toggle-habit';
@@ -87,10 +79,6 @@ export default function HabitsPage() {
   const { data: statsData, isLoading: isStatsLoading } = useHabitStats();
   const { toggleDate } = useToggleHabit();
 
-  const [createDialogOpen, setCreateDialogOpen] = useAtom(createDialogOpenAtom);
-  const [editingHabitId, setEditingHabitId] = useAtom(editingHabitIdAtom);
-  const [deletingHabitId, setDeletingHabitId] = useAtom(deletingHabitIdAtom);
-
   const sortBy = useAtomValue(sortByAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
   const statusFilter = useAtomValue(statusFilterAtom);
@@ -106,9 +94,6 @@ export default function HabitsPage() {
     () => sortHabits(filteredHabits, sortBy),
     [filteredHabits, sortBy]
   );
-
-  const editingHabit = habits.find((h) => h.id === editingHabitId) || null;
-  const deletingHabit = habits.find((h) => h.id === deletingHabitId) || null;
 
   const handleToggleDay = (habitId: string, date: Date) => {
     const utcDate = new Date(
@@ -258,21 +243,6 @@ export default function HabitsPage() {
           onPeriodChange={handlePeriodChange}
         />
       </div>
-
-      <CreateHabitDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-      />
-      <EditHabitDialog
-        habit={editingHabit}
-        open={!!editingHabitId}
-        onOpenChange={(open) => !open && setEditingHabitId(null)}
-      />
-      <DeleteHabitDialog
-        habit={deletingHabit}
-        open={!!deletingHabitId}
-        onOpenChange={(open) => !open && setDeletingHabitId(null)}
-      />
     </div>
   );
 }
