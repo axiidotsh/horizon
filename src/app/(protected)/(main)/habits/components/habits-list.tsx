@@ -201,7 +201,8 @@ export function HabitsList({
             {/* Fixed header row with day labels */}
             <div className="border-border mb-2 flex items-center gap-3 border-b pb-2">
               <span className="text-muted-foreground font-mono text-xs font-medium">
-                {habits.length} {habits.length === 1 ? 'Habit' : 'Habits'}
+                {sortedHabits.length}{' '}
+                {sortedHabits.length === 1 ? 'Habit' : 'Habits'}
               </span>
               <div className="flex-1" />
               <WeekDayHeader />
