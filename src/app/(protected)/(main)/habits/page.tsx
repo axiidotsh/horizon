@@ -41,7 +41,7 @@ import {
   sortHabits,
 } from './utils/habit-calculations';
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function HabitTrackerSkeleton() {
   return (
@@ -146,8 +146,9 @@ export default function HabitsPage() {
       const completionRate =
         totalHabits > 0 ? Math.round((completedOnDay / totalHabits) * 100) : 0;
 
+      const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
       chartData.push({
-        date: DAYS[date.getDay()],
+        date: DAYS[dayIndex],
         completionRate,
       });
     }
@@ -165,10 +166,23 @@ export default function HabitsPage() {
   } satisfies ChartConfig;
 
   const stats = statsData || {
-    totalHabits: 0,
-    completedToday: 0,
+    weekConsistency: 0,
+    activeStreakCount: 0,
     longestStreak: 0,
+    bestStreak: 0,
     completionRate: 0,
+    weekStart: new Date().toISOString(),
+    weekEnd: new Date().toISOString(),
+  };
+
+  const formatWeekRange = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const formatOptions: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric',
+    };
+    return `${startDate.toLocaleDateString('en-US', formatOptions)} - ${endDate.toLocaleDateString('en-US', formatOptions)}`;
   };
 
   if (isError) {
@@ -190,31 +204,31 @@ export default function HabitsPage() {
       <div className="mt-4 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard
-            title="Total Habits"
-            icon={GoalIcon}
-            content={stats.totalHabits.toString()}
-            footer="Active habits"
+            title="Active Days"
+            icon={CheckCircle2Icon}
+            content={`${stats.weekConsistency}/7`}
+            footer={`Days this week (${formatWeekRange(stats.weekStart, stats.weekEnd)})`}
             isLoading={isStatsLoading}
           />
           <MetricCard
-            title="Completed Today"
-            icon={CheckCircle2Icon}
-            content={`${stats.completedToday}/${stats.totalHabits}`}
-            footer={`${stats.completionRate}%`}
+            title="Active Streaks"
+            icon={GoalIcon}
+            content={`${stats.activeStreakCount} ${stats.activeStreakCount === 1 ? 'habit' : 'habits'}`}
+            footer="On a streak"
             isLoading={isStatsLoading}
           />
           <MetricCard
             title="Current Streak"
             icon={FlameIcon}
-            content={`${stats.longestStreak} days`}
-            footer="Personal best"
+            content={`${stats.longestStreak} ${stats.longestStreak === 1 ? 'day' : 'days'}`}
+            footer={`Personal best: ${stats.bestStreak}`}
             isLoading={isStatsLoading}
           />
           <MetricCard
             title="Completion Rate"
             icon={TrendingUpIcon}
             content={`${stats.completionRate}%`}
-            footer="Today"
+            footer={`This week (${formatWeekRange(stats.weekStart, stats.weekEnd)})`}
             isLoading={isStatsLoading}
           />
         </div>

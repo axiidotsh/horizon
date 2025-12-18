@@ -234,25 +234,10 @@ export const habitsRouter = new Hono()
   .get('/stats', async (c) => {
     const user = c.get('user');
 
-    const totalHabits = await db.habit.count({
-      where: {
-        userId: user.id,
-        archived: false,
-      },
-    });
-
     const today = new Date();
     const todayKey = new Date(
       Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
     );
-
-    const completedToday = await db.habitCompletion.count({
-      where: {
-        userId: user.id,
-        date: todayKey,
-        habit: { archived: false },
-      },
-    });
 
     const habits = await db.habit.findMany({
       where: {
@@ -267,23 +252,75 @@ export const habitsRouter = new Hono()
       },
     });
 
+    const startOfWeek = new Date(todayKey);
+    const dayOfWeek = todayKey.getUTCDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    startOfWeek.setUTCDate(todayKey.getUTCDate() - daysToMonday);
+
+    const weekDaysWithActivity = new Set<string>();
+    const weekCompletions: { date: Date; count: number }[] = [];
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setUTCDate(startOfWeek.getUTCDate() + i);
+
+      const completedCount = habits.filter((habit) =>
+        habit.completions.some((comp) => {
+          const compDate = new Date(comp.date);
+          return compDate.getTime() === date.getTime();
+        })
+      ).length;
+
+      if (completedCount > 0) {
+        weekDaysWithActivity.add(date.toISOString());
+      }
+
+      weekCompletions.push({ date, count: completedCount });
+    }
+
     let longestStreak = 0;
+    let bestStreak = 0;
+    let activeStreakCount = 0;
+
     for (const habit of habits) {
-      const streak = calculateCurrentStreak(habit.completions);
-      if (streak > longestStreak) {
-        longestStreak = streak;
+      const currentStreak = calculateCurrentStreak(habit.completions);
+      const allTimeStreak = calculateBestStreak(habit.completions);
+
+      if (currentStreak > 0) {
+        activeStreakCount++;
+      }
+
+      if (currentStreak > longestStreak) {
+        longestStreak = currentStreak;
+      }
+
+      if (allTimeStreak > bestStreak) {
+        bestStreak = allTimeStreak;
       }
     }
 
-    const completionRate =
-      totalHabits > 0 ? Math.round((completedToday / totalHabits) * 100) : 0;
+    const totalHabits = habits.length;
+    const weekCompletionRate =
+      totalHabits > 0
+        ? Math.round(
+            (weekCompletions.reduce((sum, day) => sum + day.count, 0) /
+              (totalHabits * 7)) *
+              100
+          )
+        : 0;
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
 
     return c.json({
       stats: {
-        totalHabits,
-        completedToday,
+        weekConsistency: weekDaysWithActivity.size,
+        activeStreakCount,
         longestStreak,
-        completionRate,
+        bestStreak,
+        completionRate: weekCompletionRate,
+        weekStart: startOfWeek.toISOString(),
+        weekEnd: endOfWeek.toISOString(),
       },
     });
   });
@@ -318,4 +355,42 @@ function calculateCurrentStreak(completions: { date: Date }[]): number {
   }
 
   return streak;
+}
+
+function calculateBestStreak(completions: { date: Date }[]): number {
+  if (completions.length === 0) return 0;
+
+  const sortedDates = completions
+    .map((c) => {
+      const d = new Date(c.date);
+      return new Date(
+        Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+      );
+    })
+    .sort((a, b) => b.getTime() - a.getTime());
+
+  let maxStreak = 0;
+  let currentStreak = 0;
+  let lastDate: Date | null = null;
+
+  for (const date of sortedDates) {
+    if (!lastDate) {
+      currentStreak = 1;
+    } else {
+      const daysDiff = Math.round(
+        (lastDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysDiff === 1) {
+        currentStreak++;
+      } else {
+        maxStreak = Math.max(maxStreak, currentStreak);
+        currentStreak = 1;
+      }
+    }
+
+    lastDate = date;
+  }
+
+  return Math.max(maxStreak, currentStreak);
 }

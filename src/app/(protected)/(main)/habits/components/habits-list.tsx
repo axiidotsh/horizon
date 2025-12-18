@@ -41,8 +41,9 @@ function getLast7Days(): Date[] {
 
 // Helper to format date for display
 function formatDayLabel(date: Date): string {
-  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  return days[date.getDay()];
+  const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
+  return days[dayIndex];
 }
 
 // Helper to format full date for tooltip
@@ -199,6 +200,9 @@ export function HabitsList({
           <div className="pr-4">
             {/* Fixed header row with day labels */}
             <div className="border-border mb-2 flex items-center gap-3 border-b pb-2">
+              <span className="text-muted-foreground font-mono text-xs font-medium">
+                {habits.length} {habits.length === 1 ? 'Habit' : 'Habits'}
+              </span>
               <div className="flex-1" />
               <WeekDayHeader />
               {/* Spacer for dropdown button alignment */}
