@@ -29,7 +29,7 @@ import {
   actionsViewOpenAtom,
   selectedItemAtom,
 } from '@/atoms/command-menu-atoms';
-import { settingsAtom } from '@/atoms/settings-atoms';
+import { type CommandMenuPosition, settingsAtom } from '@/atoms/settings-atoms';
 import { logoutDialogOpenAtom } from '@/atoms/ui-atoms';
 import {
   Command,
@@ -48,7 +48,7 @@ import {
   PopoverContent,
 } from '@/components/ui/popover';
 import { cn } from '@/utils/utils';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import {
   BrainIcon,
   CheckCircle2Icon,
@@ -62,11 +62,13 @@ import {
   MessageCirclePlusIcon,
   MonitorIcon,
   MoonIcon,
+  PanelTopIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
   SaveIcon,
   SettingsIcon,
+  SquareDashedIcon,
   SquareIcon,
   SunIcon,
   TimerIcon,
@@ -159,6 +161,25 @@ const themes: ThemeItem[] = [
   },
 ];
 
+interface PositionItem extends CommandItemBase {
+  value: CommandMenuPosition;
+}
+
+const positions: PositionItem[] = [
+  {
+    name: 'Top',
+    value: 'top',
+    icon: PanelTopIcon,
+    searchWords: ['dropdown', 'search bar', 'above'],
+  },
+  {
+    name: 'Center',
+    value: 'center',
+    icon: SquareDashedIcon,
+    searchWords: ['modal', 'dialog', 'middle'],
+  },
+];
+
 const accountActions: ActionCommand[] = [
   {
     name: 'Sign out',
@@ -187,7 +208,7 @@ export function CommandMenu() {
   const [selectedValue, setSelectedValue] = useState('');
   const [actionsOpen, setActionsOpen] = useAtom(actionsViewOpenAtom);
   const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
-  const settings = useAtomValue(settingsAtom);
+  const [settings, setSettings] = useAtom(settingsAtom);
   const setLogoutDialogOpen = useSetAtom(logoutDialogOpenAtom);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogInputRef = useRef<HTMLInputElement>(null);
@@ -597,6 +618,31 @@ export function CommandMenu() {
           >
             <theme.icon className="size-3.5" />
             <span>{theme.name}</span>
+          </CommandItem>
+        ))}
+      </CommandGroup>
+
+      <CommandGroup heading="Command Menu Position">
+        {positions.map((position) => (
+          <CommandItem
+            key={position.value}
+            value={[
+              'position',
+              'command menu',
+              position.name,
+              ...(position.searchWords ?? []),
+            ].join(' ')}
+            onSelect={() =>
+              handleSelect(() =>
+                setSettings((prev) => ({
+                  ...prev,
+                  commandMenuPosition: position.value,
+                }))
+              )
+            }
+          >
+            <position.icon className="size-3.5" />
+            <span>{position.name}</span>
           </CommandItem>
         ))}
       </CommandGroup>

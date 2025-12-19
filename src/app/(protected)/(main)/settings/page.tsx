@@ -12,46 +12,34 @@ import {
 import { Label } from '@/components/ui/label';
 import { cn } from '@/utils/utils';
 import { useAtom } from 'jotai';
-import {
-  AlignVerticalJustifyStartIcon,
-  LayoutTemplateIcon,
-} from 'lucide-react';
 
-interface PositionOptionProps {
-  value: CommandMenuPosition;
+interface OptionCardProps {
+  title: string;
+  description: string;
   selected: boolean;
   onSelect: () => void;
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  description: string;
 }
 
-const PositionOption = ({
+const OptionCard = ({
+  title,
+  description,
   selected,
   onSelect,
-  icon: Icon,
-  label,
-  description,
-}: PositionOptionProps) => {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={cn(
-        'flex flex-col items-start gap-2 rounded-lg border p-4 text-left transition-colors',
-        selected
-          ? 'border-primary bg-primary/5'
-          : 'border-border hover:border-muted-foreground/50'
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <Icon className="size-4" />
-        <span className="font-medium">{label}</span>
-      </div>
-      <span className="text-muted-foreground text-sm">{description}</span>
-    </button>
-  );
-};
+}: OptionCardProps) => (
+  <button
+    type="button"
+    onClick={onSelect}
+    className={cn(
+      'flex cursor-pointer flex-col gap-1 rounded-lg border p-4 text-left transition-colors duration-300',
+      selected
+        ? 'bg-primary/5 border-primary/15'
+        : 'border-input hover:bg-muted/50'
+    )}
+  >
+    <span className="text-sm font-medium">{title}</span>
+    <span className="text-muted-foreground text-xs">{description}</span>
+  </button>
+);
 
 export default function SettingsPage() {
   const [settings, setSettings] = useAtom(settingsAtom);
@@ -74,22 +62,18 @@ export default function SettingsPage() {
           <CardContent className="space-y-6">
             <div className="space-y-3">
               <Label>Command Menu Position</Label>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <PositionOption
-                  value="top"
+              <div className="grid grid-cols-2 gap-3">
+                <OptionCard
+                  title="Top"
+                  description="Opens as a dropdown below the search bar"
                   selected={settings.commandMenuPosition === 'top'}
                   onSelect={() => handlePositionChange('top')}
-                  icon={AlignVerticalJustifyStartIcon}
-                  label="Top"
-                  description="Aligned with the search bar at the top of the screen"
                 />
-                <PositionOption
-                  value="center"
+                <OptionCard
+                  title="Center"
+                  description="Opens as a centered modal dialog"
                   selected={settings.commandMenuPosition === 'center'}
                   onSelect={() => handlePositionChange('center')}
-                  icon={LayoutTemplateIcon}
-                  label="Center"
-                  description="Centered in the middle of the screen"
                 />
               </div>
             </div>
