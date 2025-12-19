@@ -344,16 +344,13 @@ export function CommandMenu() {
   useHotkeys(
     'escape',
     (e) => {
-      if (actionsOpen) {
-        e.preventDefault();
-        e.stopPropagation();
-        setActionsOpen(false);
-        inputRef.current?.focus();
-      } else {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!actionsOpen) {
         reset();
       }
     },
-    { enableOnFormTags: true, preventDefault: actionsOpen }
+    { enableOnFormTags: true }
   );
 
   const handleSelect = (callback: () => void) => {
@@ -363,7 +360,6 @@ export function CommandMenu() {
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen && actionsOpen) {
-      setActionsOpen(false);
       return;
     }
     if (!newOpen) {

@@ -16,6 +16,7 @@ import {
   TrashIcon,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 type CommandMenuItem =
   | { type: 'todo'; data: Task }
@@ -73,6 +74,22 @@ export const CommandMenuActions = ({
   const toggleHabit = useToggleHabit();
 
   const last7Days = useMemo(() => getLast7Days(), []);
+
+  useHotkeys(
+    'escape',
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (showDatePicker) {
+        setShowDatePicker(false);
+        setSelectedIndex(0);
+      } else {
+        onClose();
+      }
+    },
+    { enableOnFormTags: true, preventDefault: true },
+    [showDatePicker, onClose]
+  );
 
   const getItemTitle = (): string => {
     if (item.type === 'todo') return item.data.title;
@@ -147,14 +164,11 @@ export const CommandMenuActions = ({
       e.preventDefault();
       const action = filteredActions[selectedIndex];
       if (action) handleActionSelect(action.id);
-    } else if (e.key === 'Escape' || e.key === 'Backspace') {
-      if (showDatePicker && e.key === 'Backspace' && !searchValue) {
+    } else if (e.key === 'Backspace') {
+      if (showDatePicker && !searchValue) {
         e.preventDefault();
         setShowDatePicker(false);
         setSelectedIndex(0);
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
       }
     }
   };
