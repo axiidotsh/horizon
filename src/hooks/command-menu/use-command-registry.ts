@@ -1,4 +1,5 @@
 import {
+  showCancelDialogAtom,
   showDiscardDialogAtom,
   showEndEarlyDialogAtom,
 } from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
@@ -31,6 +32,7 @@ export function useCommandRegistry() {
   const setCreateTaskDialogOpen = useSetAtom(createTaskDialogAtom);
   const setCreateHabitDialogOpen = useSetAtom(createDialogOpenAtom);
   const setLogoutDialogOpen = useSetAtom(logoutDialogOpenAtom);
+  const setShowCancel = useSetAtom(showCancelDialogAtom);
   const setShowEndEarly = useSetAtom(showEndEarlyDialogAtom);
   const setShowDiscard = useSetAtom(showDiscardDialogAtom);
   const setSettings = useSetAtom(settingsAtom);
@@ -67,6 +69,15 @@ export function useCommandRegistry() {
           keywords: ['stop', 'finish', 'save'],
           category: 'focus',
           handler: () => setShowEndEarly(true),
+        },
+        {
+          id: 'focus-cancel',
+          name: 'Cancel focus session',
+          icon: XIcon,
+          keywords: ['discard', 'delete', 'remove', 'abort'],
+          destructive: true,
+          category: 'focus',
+          handler: () => setShowCancel(true),
         }
       );
     } else if (activeSession.status === 'PAUSED') {
@@ -86,6 +97,15 @@ export function useCommandRegistry() {
           keywords: ['stop', 'finish', 'save'],
           category: 'focus',
           handler: () => setShowEndEarly(true),
+        },
+        {
+          id: 'focus-cancel',
+          name: 'Cancel focus session',
+          icon: XIcon,
+          keywords: ['discard', 'delete', 'remove', 'abort'],
+          destructive: true,
+          category: 'focus',
+          handler: () => setShowCancel(true),
         }
       );
     } else if (activeSession.status === 'COMPLETED') {
@@ -117,6 +137,7 @@ export function useCommandRegistry() {
     pause,
     resume,
     complete,
+    setShowCancel,
     setShowEndEarly,
     setShowDiscard,
     router,
