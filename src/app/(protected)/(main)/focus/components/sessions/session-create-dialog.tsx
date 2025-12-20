@@ -87,11 +87,15 @@ export const SessionCreateDialog = ({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" disabled={start.isPending}>
+              Cancel
+            </Button>
           </DialogClose>
           <Button
             onClick={handleCreate}
             disabled={start.isPending || durationMinutes.length === 0}
+            isLoading={start.isPending}
+            loadingContent="Starting..."
           >
             Start Session
           </Button>

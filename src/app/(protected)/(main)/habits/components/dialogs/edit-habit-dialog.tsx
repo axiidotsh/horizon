@@ -108,6 +108,8 @@ export const EditHabitDialog = ({
           <Button
             onClick={handleSave}
             disabled={!title.trim() || updateHabit.isPending}
+            isLoading={updateHabit.isPending}
+            loadingContent="Saving..."
           >
             Save Changes
           </Button>

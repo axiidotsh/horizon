@@ -93,9 +93,16 @@ export const SessionEditDialog = ({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" disabled={editSession.isPending}>
+              Cancel
+            </Button>
           </DialogClose>
-          <Button onClick={handleSave} disabled={editSession.isPending}>
+          <Button
+            onClick={handleSave}
+            disabled={editSession.isPending || durationMinutes.length === 0}
+            isLoading={editSession.isPending}
+            loadingContent="Saving..."
+          >
             Save Changes
           </Button>
         </DialogFooter>

@@ -208,17 +208,23 @@ export const BulkAddTasksSheet = () => {
         </div>
 
         <div className="flex gap-2 border-t px-6 pt-4">
-          <Button variant="outline" onClick={handleClose} className="flex-1">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={bulkCreateTasks.isPending}
+            className="flex-1"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSaveAll}
             disabled={pendingTasks.length === 0 || bulkCreateTasks.isPending}
+            isLoading={bulkCreateTasks.isPending}
+            loadingContent="Creating..."
             className="flex-1"
           >
-            {bulkCreateTasks.isPending
-              ? 'Creating...'
-              : `Create ${pendingTasks.length} ${pendingTasks.length === 1 ? 'Task' : 'Tasks'}`}
+            Create {pendingTasks.length}{' '}
+            {pendingTasks.length === 1 ? 'Task' : 'Tasks'}
           </Button>
         </div>
       </SheetContent>

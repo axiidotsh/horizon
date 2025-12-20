@@ -102,6 +102,8 @@ export const CreateHabitDialog = ({
           <Button
             onClick={handleCreate}
             disabled={!title.trim() || createHabit.isPending}
+            isLoading={createHabit.isPending}
+            loadingContent="Creating..."
           >
             Create Habit
           </Button>

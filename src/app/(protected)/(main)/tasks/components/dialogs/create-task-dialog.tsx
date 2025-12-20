@@ -136,14 +136,21 @@ export const CreateTaskDialog = () => {
             />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={createTask.isPending}
+            >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={!title.trim() || createTask.isPending}
+              isLoading={createTask.isPending}
+              loadingContent="Creating..."
             >
-              {createTask.isPending ? 'Creating...' : 'Create'}
+              Create
             </Button>
           </DialogFooter>
         </form>

@@ -60,6 +60,8 @@ export const DeleteHabitDialog = ({
             variant="destructive"
             onClick={handleDelete}
             disabled={deleteHabit.isPending}
+            isLoading={deleteHabit.isPending}
+            loadingContent="Deleting..."
           >
             Delete
           </Button>

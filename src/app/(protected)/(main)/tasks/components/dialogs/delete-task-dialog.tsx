@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { useAtom } from 'jotai';
 import { deletingTaskAtom } from '../../atoms/task-dialogs';
 import { useDeleteTask } from '../../hooks/mutations/use-delete-task';
@@ -39,12 +40,22 @@ export const DeleteTaskDialog = () => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleClose}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDelete}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          <AlertDialogCancel
+            onClick={handleClose}
+            disabled={deleteTask.isPending}
           >
-            {deleteTask.isPending ? 'Deleting...' : 'Delete'}
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction asChild>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteTask.isPending}
+              isLoading={deleteTask.isPending}
+              loadingContent="Deleting..."
+            >
+              Delete
+            </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

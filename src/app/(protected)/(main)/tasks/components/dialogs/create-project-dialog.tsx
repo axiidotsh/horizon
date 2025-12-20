@@ -95,14 +95,21 @@ export const CreateProjectDialog = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={createProject.isPending}
+            >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={!name.trim() || createProject.isPending}
+              isLoading={createProject.isPending}
+              loadingContent="Creating..."
             >
-              {createProject.isPending ? 'Creating...' : 'Create'}
+              Create
             </Button>
           </DialogFooter>
         </form>

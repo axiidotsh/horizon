@@ -138,14 +138,21 @@ export const EditTaskDialog = () => {
             />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={updateTask.isPending}
+            >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={!title.trim() || updateTask.isPending}
+              isLoading={updateTask.isPending}
+              loadingContent="Saving..."
             >
-              {updateTask.isPending ? 'Saving...' : 'Save'}
+              Save
             </Button>
           </DialogFooter>
         </form>

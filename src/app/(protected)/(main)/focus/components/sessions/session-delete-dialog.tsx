@@ -50,12 +50,16 @@ export const SessionDeleteDialog = ({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" disabled={deleteSession.isPending}>
+              Cancel
+            </Button>
           </DialogClose>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={deleteSession.isPending}
+            isLoading={deleteSession.isPending}
+            loadingContent="Deleting..."
           >
             Delete Session
           </Button>
