@@ -1,4 +1,4 @@
-import { CommandMenu } from './command-menu';
+import { CommandMenu } from './command-menu/command-menu';
 import { FocusTimerWidget } from './focus-timer-widget';
 
 export const AppHeader = () => {
