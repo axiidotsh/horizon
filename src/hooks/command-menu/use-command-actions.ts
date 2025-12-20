@@ -1,7 +1,9 @@
 import {
+  createCustomSessionAtom,
   deletingSessionAtom,
   editingSessionAtom,
 } from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
+import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-focus-session';
 import {
   deletingHabitIdAtom,
   editingHabitIdAtom,
@@ -14,21 +16,36 @@ import {
 import { useToggleTask } from '@/app/(protected)/(main)/tasks/hooks/mutations/use-toggle-task';
 import type { CommandMenuItem } from '@/hooks/command-menu/types';
 import { useSetAtom } from 'jotai';
+import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
 export function useCommandActions() {
+  const router = useRouter();
   const setEditingTask = useSetAtom(editingTaskAtom);
   const setDeletingTask = useSetAtom(deletingTaskAtom);
   const setEditingHabitId = useSetAtom(editingHabitIdAtom);
   const setDeletingHabitId = useSetAtom(deletingHabitIdAtom);
   const setEditingSession = useSetAtom(editingSessionAtom);
   const setDeletingSession = useSetAtom(deletingSessionAtom);
+  const setCreateCustomSession = useSetAtom(createCustomSessionAtom);
 
   const toggleTask = useToggleTask();
   const toggleHabit = useToggleHabit();
+  const { start } = useFocusSession();
 
   const handleAction = useCallback(
     (action: string, item: CommandMenuItem) => {
+      if (item.type === 'focus-start') {
+        if (action === 'custom') {
+          setCreateCustomSession(true);
+        } else if (action.startsWith('start-')) {
+          const duration = parseInt(action.replace('start-', ''), 10);
+          start.mutate({ json: { durationMinutes: duration } });
+          router.push('/focus');
+        }
+        return;
+      }
+
       switch (action) {
         case 'toggle':
           if (item.type === 'todo') {
@@ -55,6 +72,9 @@ export function useCommandActions() {
       setDeletingHabitId,
       setEditingSession,
       setDeletingSession,
+      setCreateCustomSession,
+      start,
+      router,
     ]
   );
 

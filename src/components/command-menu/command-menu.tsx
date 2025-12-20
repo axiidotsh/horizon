@@ -13,7 +13,7 @@ import { useCommandActions } from '@/hooks/command-menu/use-command-actions';
 import { useCommandItems } from '@/hooks/command-menu/use-command-items';
 import { useCommandRegistry } from '@/hooks/command-menu/use-command-registry';
 import { useCommandState } from '@/hooks/command-menu/use-command-state';
-import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { useCallback, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
@@ -22,12 +22,13 @@ export const CommandMenu = () => {
   const commands = useCommandRegistry();
   const items = useCommandItems();
   const { handleAction, handleDateToggle } = useCommandActions();
-  const [settings] = useAtom(settingsAtom);
+  const settings = useAtomValue(settingsAtom);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogInputRef = useRef<HTMLInputElement>(null);
 
   const isCentered = settings.commandMenuPosition === 'center';
+  const showStartFocusItem = !commands.some((cmd) => cmd.category === 'focus');
 
   useHotkeys(
     'mod+k',
@@ -62,7 +63,7 @@ export const CommandMenu = () => {
       actions.setSelectedItem(item);
       actions.setSearchValue('');
     },
-    [actions]
+    [actions, state.selectedItem]
   );
 
   const handleActionSelect = useCallback(
@@ -143,6 +144,7 @@ export const CommandMenu = () => {
                   todos={items.todos}
                   habits={items.habits}
                   sessions={items.sessions}
+                  showStartFocusItem={showStartFocusItem}
                   onCommandSelect={handleCommandSelect}
                   onItemSelect={handleItemSelect}
                 />
@@ -189,6 +191,7 @@ export const CommandMenu = () => {
                 todos={items.todos}
                 habits={items.habits}
                 sessions={items.sessions}
+                showStartFocusItem={showStartFocusItem}
                 onCommandSelect={handleCommandSelect}
                 onItemSelect={handleItemSelect}
               />

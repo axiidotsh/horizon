@@ -27,7 +27,7 @@ export function useCommandRegistry() {
   const router = useRouter();
   const { setTheme } = useTheme();
   const { data: activeSession } = useActiveSession();
-  const { start, pause, resume, complete } = useFocusSession();
+  const { pause, resume, complete } = useFocusSession();
 
   const setCreateTaskDialogOpen = useSetAtom(createTaskDialogAtom);
   const setCreateHabitDialogOpen = useSetAtom(createDialogOpenAtom);
@@ -40,19 +40,7 @@ export function useCommandRegistry() {
   const focusCommands = useMemo(() => {
     const commands: CommandDefinition[] = [];
 
-    if (!activeSession) {
-      commands.push({
-        id: 'focus-start',
-        name: 'Start focus session',
-        icon: PlayIcon,
-        keywords: ['begin', 'timer', 'pomodoro', 'work'],
-        category: 'focus',
-        handler: () => {
-          start.mutate({ json: { durationMinutes: 45 } });
-          router.push('/focus');
-        },
-      });
-    } else if (activeSession.status === 'ACTIVE') {
+    if (activeSession?.status === 'ACTIVE') {
       commands.push(
         {
           id: 'focus-pause',
@@ -80,7 +68,7 @@ export function useCommandRegistry() {
           handler: () => setShowCancel(true),
         }
       );
-    } else if (activeSession.status === 'PAUSED') {
+    } else if (activeSession?.status === 'PAUSED') {
       commands.push(
         {
           id: 'focus-resume',
@@ -108,7 +96,7 @@ export function useCommandRegistry() {
           handler: () => setShowCancel(true),
         }
       );
-    } else if (activeSession.status === 'COMPLETED') {
+    } else if (activeSession?.status === 'COMPLETED') {
       commands.push(
         {
           id: 'focus-save',
@@ -133,14 +121,12 @@ export function useCommandRegistry() {
     return commands;
   }, [
     activeSession,
-    start,
     pause,
     resume,
     complete,
     setShowCancel,
     setShowEndEarly,
     setShowDiscard,
-    router,
   ]);
 
   return useMemo<CommandDefinition[]>(

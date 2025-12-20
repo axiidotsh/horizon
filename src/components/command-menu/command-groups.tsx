@@ -11,6 +11,7 @@ import {
   CheckCircle2Icon,
   CircleIcon,
   ClockPlusIcon,
+  PlayIcon,
   TimerIcon,
 } from 'lucide-react';
 
@@ -19,6 +20,7 @@ interface CommandGroupsProps {
   todos: CommandMenuItem[];
   habits: CommandMenuItem[];
   sessions: CommandMenuItem[];
+  showStartFocusItem: boolean;
   onCommandSelect: (command: CommandDefinition) => void;
   onItemSelect: (item: CommandMenuItem) => void;
 }
@@ -28,6 +30,7 @@ export const CommandGroups = ({
   todos,
   habits,
   sessions,
+  showStartFocusItem,
   onCommandSelect,
   onItemSelect,
 }: CommandGroupsProps) => {
@@ -90,6 +93,22 @@ export const CommandGroups = ({
       </CommandGroup>
 
       <CommandSeparator />
+
+      {showStartFocusItem && (
+        <CommandGroup heading="Focus">
+          <CommandItem
+            value="start focus session begin timer pomodoro work"
+            onSelect={() => onItemSelect({ type: 'focus-start' })}
+          >
+            <PlayIcon className="size-3.5" />
+            <span>Start focus session</span>
+            <span className="text-muted-foreground ml-auto flex items-center gap-1 text-xs">
+              Actions
+              <Kbd>↵</Kbd>
+            </span>
+          </CommandItem>
+        </CommandGroup>
+      )}
 
       {todos.length > 0 && (
         <CommandGroup heading="Todos">

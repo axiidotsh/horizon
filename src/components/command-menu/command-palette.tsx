@@ -8,6 +8,7 @@ interface CommandPaletteProps {
   todos: CommandMenuItem[];
   habits: CommandMenuItem[];
   sessions: CommandMenuItem[];
+  showStartFocusItem: boolean;
   onCommandSelect: (command: CommandDefinition) => void;
   onItemSelect: (item: CommandMenuItem) => void;
 }
@@ -17,6 +18,7 @@ export const CommandPalette = ({
   todos,
   habits,
   sessions,
+  showStartFocusItem,
   onCommandSelect,
   onItemSelect,
 }: CommandPaletteProps) => {
@@ -28,6 +30,7 @@ export const CommandPalette = ({
         todos={todos}
         habits={habits}
         sessions={sessions}
+        showStartFocusItem={showStartFocusItem}
         onCommandSelect={onCommandSelect}
         onItemSelect={onItemSelect}
       />

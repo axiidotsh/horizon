@@ -6,6 +6,7 @@ import {
   CalendarIcon,
   CheckCircle2Icon,
   CircleIcon,
+  ClockIcon,
   PencilIcon,
   TrashIcon,
 } from 'lucide-react';
@@ -17,6 +18,15 @@ interface CommandActionsViewProps {
   onAction: (action: string) => void;
   onDateSelect?: (date: Date) => void;
 }
+
+const PRESET_TIMERS = [
+  { label: '15 minutes', value: '15' },
+  { label: '25 minutes (Pomodoro)', value: '25' },
+  { label: '45 minutes', value: '45' },
+  { label: '60 minutes', value: '60' },
+  { label: '90 minutes', value: '90' },
+  { label: '120 minutes', value: '120' },
+];
 
 function formatDate(date: Date): string {
   const today = new Date();
@@ -50,6 +60,29 @@ export const CommandActionsView = ({
   onDateSelect,
 }: CommandActionsViewProps) => {
   const last7Days = useMemo(() => getLast7Days(), []);
+
+  if (item.type === 'focus-start') {
+    return (
+      <>
+        <CommandMenuEmpty />
+        <CommandGroup heading={getItemTitle(item)}>
+          {PRESET_TIMERS.map((timer) => (
+            <CommandItem
+              key={timer.value}
+              onSelect={() => onAction(`start-${timer.value}`)}
+            >
+              <ClockIcon className="size-4" />
+              <span>{timer.label}</span>
+            </CommandItem>
+          ))}
+          <CommandItem onSelect={() => onAction('custom')}>
+            <PencilIcon className="size-4" />
+            <span>Custom...</span>
+          </CommandItem>
+        </CommandGroup>
+      </>
+    );
+  }
 
   return (
     <>

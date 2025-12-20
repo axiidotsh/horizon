@@ -6,7 +6,8 @@ import type { ComponentType } from 'react';
 export type CommandMenuItem =
   | { type: 'todo'; data: Task }
   | { type: 'habit'; data: Habit }
-  | { type: 'session'; data: FocusSession };
+  | { type: 'session'; data: FocusSession }
+  | { type: 'focus-start' };
 
 export interface CommandDefinition {
   id: string;
