@@ -49,7 +49,9 @@ export const CommandGroups = ({
         {pageCommands.map((command) => (
           <CommandItem
             key={command.id}
-            value={[command.name, ...(command.keywords ?? [])].join(' ')}
+            value={[command.id, command.name, ...(command.keywords ?? [])].join(
+              ' '
+            )}
             onSelect={() => onCommandSelect(command)}
           >
             <command.icon className="size-3.5" />
@@ -63,7 +65,11 @@ export const CommandGroups = ({
           {focusCommands.map((command) => (
             <CommandItem
               key={command.id}
-              value={[command.name, ...(command.keywords ?? [])].join(' ')}
+              value={[
+                command.id,
+                command.name,
+                ...(command.keywords ?? []),
+              ].join(' ')}
               onSelect={() => onCommandSelect(command)}
               className={command.destructive ? 'text-destructive!' : ''}
             >
@@ -83,7 +89,9 @@ export const CommandGroups = ({
         {createCommands.map((command) => (
           <CommandItem
             key={command.id}
-            value={[command.name, ...(command.keywords ?? [])].join(' ')}
+            value={[command.id, command.name, ...(command.keywords ?? [])].join(
+              ' '
+            )}
             onSelect={() => onCommandSelect(command)}
           >
             <command.icon className="size-3.5" />
@@ -117,7 +125,7 @@ export const CommandGroups = ({
             .map((item) => (
               <CommandItem
                 key={`todo:${item.data.id}`}
-                value={`todo ${item.data.title}`}
+                value={`todo:${item.data.id}:${item.data.title}`}
                 onSelect={() => onItemSelect(item)}
               >
                 {item.data.completed ? (
@@ -150,7 +158,7 @@ export const CommandGroups = ({
             .map((item) => (
               <CommandItem
                 key={`habit:${item.data.id}`}
-                value={`habit ${item.data.title}`}
+                value={`habit:${item.data.id}:${item.data.title}`}
                 onSelect={() => onItemSelect(item)}
               >
                 <TimerIcon className="size-3.5" />
@@ -171,7 +179,7 @@ export const CommandGroups = ({
             .map((item) => (
               <CommandItem
                 key={`session:${item.data.id}`}
-                value={`session ${item.data.task || 'Focus session'}`}
+                value={`session:${item.data.id}:${item.data.task || 'Focus session'}`}
                 onSelect={() => onItemSelect(item)}
               >
                 <ClockPlusIcon className="size-3.5" />
@@ -194,7 +202,9 @@ export const CommandGroups = ({
         {themeCommands.map((command) => (
           <CommandItem
             key={command.id}
-            value={[command.name, ...(command.keywords ?? [])].join(' ')}
+            value={[command.id, command.name, ...(command.keywords ?? [])].join(
+              ' '
+            )}
             onSelect={() => onCommandSelect(command)}
           >
             <command.icon className="size-3.5" />
@@ -207,7 +217,9 @@ export const CommandGroups = ({
         {positionCommands.map((command) => (
           <CommandItem
             key={command.id}
-            value={[command.name, ...(command.keywords ?? [])].join(' ')}
+            value={[command.id, command.name, ...(command.keywords ?? [])].join(
+              ' '
+            )}
             onSelect={() => onCommandSelect(command)}
           >
             <command.icon className="size-3.5" />
@@ -220,7 +232,9 @@ export const CommandGroups = ({
         {accountCommands.map((command) => (
           <CommandItem
             key={command.id}
-            value={[command.name, ...(command.keywords ?? [])].join(' ')}
+            value={[command.id, command.name, ...(command.keywords ?? [])].join(
+              ' '
+            )}
             onSelect={() => onCommandSelect(command)}
             className={command.destructive ? 'text-destructive!' : ''}
           >
