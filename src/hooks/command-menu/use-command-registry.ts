@@ -5,6 +5,7 @@ import {
 } from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
 import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-focus-session';
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
+import { calculateRemainingSeconds } from '@/app/(protected)/(main)/focus/utils/timer-calculations';
 import { createDialogOpenAtom } from '@/app/(protected)/(main)/habits/atoms/dialog-atoms';
 import { createTaskDialogAtom } from '@/app/(protected)/(main)/tasks/atoms/task-dialogs';
 import { settingsAtom } from '@/atoms/settings-atoms';
@@ -40,7 +41,37 @@ export function useCommandRegistry() {
   const focusCommands = useMemo(() => {
     const commands: CommandDefinition[] = [];
 
-    if (activeSession?.status === 'ACTIVE') {
+    if (!activeSession) return commands;
+
+    const remainingSeconds = calculateRemainingSeconds(
+      activeSession.startedAt,
+      activeSession.durationMinutes,
+      activeSession.totalPausedSeconds,
+      activeSession.pausedAt
+    );
+    const isDurationCompleted = remainingSeconds <= 0;
+
+    if (isDurationCompleted) {
+      commands.push(
+        {
+          id: 'focus-save',
+          name: 'Save focus session',
+          icon: SaveIcon,
+          keywords: ['complete', 'finish', 'done'],
+          category: 'focus',
+          handler: () => complete.mutate({ param: { id: activeSession.id } }),
+        },
+        {
+          id: 'focus-discard',
+          name: 'Discard focus session',
+          icon: XIcon,
+          keywords: ['cancel', 'delete', 'remove'],
+          destructive: true,
+          category: 'focus',
+          handler: () => setShowDiscard(true),
+        }
+      );
+    } else if (activeSession.status === 'ACTIVE') {
       commands.push(
         {
           id: 'focus-pause',
@@ -68,7 +99,7 @@ export function useCommandRegistry() {
           handler: () => setShowCancel(true),
         }
       );
-    } else if (activeSession?.status === 'PAUSED') {
+    } else if (activeSession.status === 'PAUSED') {
       commands.push(
         {
           id: 'focus-resume',
@@ -94,26 +125,6 @@ export function useCommandRegistry() {
           destructive: true,
           category: 'focus',
           handler: () => setShowCancel(true),
-        }
-      );
-    } else if (activeSession?.status === 'COMPLETED') {
-      commands.push(
-        {
-          id: 'focus-save',
-          name: 'Save focus session',
-          icon: SaveIcon,
-          keywords: ['complete', 'finish', 'done'],
-          category: 'focus',
-          handler: () => complete.mutate({ param: { id: activeSession.id } }),
-        },
-        {
-          id: 'focus-discard',
-          name: 'Discard focus session',
-          icon: XIcon,
-          keywords: ['cancel', 'delete', 'remove'],
-          destructive: true,
-          category: 'focus',
-          handler: () => setShowDiscard(true),
         }
       );
     }
