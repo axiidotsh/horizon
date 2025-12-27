@@ -28,14 +28,12 @@ export function HabitListActions() {
   const hasActiveFilters = statusFilter !== 'all';
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center gap-2">
       <SearchBar
         placeholder="Search habits..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 mr-1 w-full! border shadow-xs sm:w-[200px] sm:focus:w-[250px]"
-        inputClassName="w-full!"
-        expandOnFocus
+        className="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 w-full border shadow-xs sm:w-60"
       />
       <ButtonGroup>
         <DropdownMenu>

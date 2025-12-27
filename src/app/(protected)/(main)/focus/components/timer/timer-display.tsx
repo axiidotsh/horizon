@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/utils/utils';
 import { CircularProgress } from './circular-progress';
 
@@ -14,15 +15,18 @@ export const TimerDisplay = ({
   isPaused,
   isCompleted,
 }: TimerDisplayProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <CircularProgress
+      size={isMobile ? 320 : 400}
       progress={progress}
       isPaused={isPaused}
       isCompleted={isCompleted}
     >
       <span
         className={cn(
-          'font-mono text-7xl font-bold tabular-nums',
+          'font-mono text-5xl font-bold tabular-nums sm:text-7xl',
           isPaused && !isCompleted && 'animate-pulse'
         )}
       >

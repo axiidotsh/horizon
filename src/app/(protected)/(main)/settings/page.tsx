@@ -62,7 +62,7 @@ export default function SettingsPage() {
           <CardContent className="space-y-6">
             <div className="space-y-3">
               <Label>Command Menu Position</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <OptionCard
                   title="Top"
                   description="Opens as a dropdown below the search bar"

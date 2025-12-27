@@ -52,7 +52,7 @@ export const ContentCard = ({
           <div
             className={cn(
               'flex items-center gap-2',
-              action && 'w-full justify-end'
+              action && 'justify-end max-sm:w-full'
             )}
           >
             {action}

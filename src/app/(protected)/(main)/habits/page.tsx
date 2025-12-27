@@ -220,7 +220,7 @@ export default function HabitsPage() {
         <ContentCard
           title="Habit Tracker"
           action={<HabitListActions />}
-          headerClassName="sm:flex-row sm:items-center sm:justify-between flex-col items-start"
+          headerClassName="max-sm:!flex-col max-sm:!items-start max-sm:!justify-start"
         >
           {isLoading ? (
             <HabitTrackerSkeleton />

@@ -125,7 +125,11 @@ export const TaskListSection = () => {
   };
 
   return (
-    <ContentCard title="Task List" action={<TaskListActions />}>
+    <ContentCard
+      title="Task List"
+      action={<TaskListActions />}
+      headerClassName="max-sm:!flex-col max-sm:!items-start max-sm:!justify-start"
+    >
       {renderContent()}
     </ContentCard>
   );

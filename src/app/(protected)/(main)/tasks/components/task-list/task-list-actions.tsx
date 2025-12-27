@@ -61,14 +61,13 @@ export const TaskListActions = () => {
     selectedTags.length > 0 || selectedProjects.length > 0;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <div className="flex items-center gap-2">
         <SearchBar
-          placeholder="Search tasks..."
+          placeholder="Search habits..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 mr-1 w-[200px] border shadow-xs focus:w-[250px]"
-          expandOnFocus
+          className="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 w-full border shadow-xs sm:w-60"
         />
         <ButtonGroup>
           <DropdownMenu>
