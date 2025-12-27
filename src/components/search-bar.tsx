@@ -6,7 +6,6 @@ import { forwardRef, InputHTMLAttributes } from 'react';
 
 export interface SearchBarProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
-  containerClassName?: string;
   iconClassName?: string;
   inputClassName?: string;
   expandOnFocus?: boolean;
@@ -17,7 +16,6 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
   (
     {
       className,
-      containerClassName,
       iconClassName,
       inputClassName,
       expandOnFocus = false,
@@ -28,7 +26,12 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
     ref
   ) => {
     return (
-      <div className={cn('relative w-full', containerClassName)}>
+      <div
+        className={cn(
+          'relative w-full! max-w-none! overflow-hidden rounded-md',
+          className
+        )}
+      >
         <SearchIcon
           className={cn(
             'text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2',
@@ -40,10 +43,9 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(
           type="text"
           placeholder={placeholder}
           className={cn(
-            'placeholder:text-muted-foreground h-8 w-full rounded-md border-0 bg-transparent pr-3 pl-8 text-sm shadow-none ring-0 transition-all outline-none',
+            'placeholder:text-muted-foreground h-8 w-full max-w-none! rounded-md border-0 bg-transparent pr-3 pl-8 text-sm shadow-none ring-0 transition-all outline-none',
             expandOnFocus && 'focus:bg-accent/50',
             expandOnFocus && maxWidth && `focus:${maxWidth}`,
-            className,
             inputClassName
           )}
           {...props}

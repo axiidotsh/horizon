@@ -26,7 +26,7 @@ export function ActiveFocusSession({ session }: ActiveFocusSessionProps) {
     <ContentCard
       title="Active Focus Session"
       contentClassName="mt-4"
-      className="border-primary/50 bg-primary/5"
+      containerClassName="border-primary/50 bg-primary/5"
     >
       <div className="space-y-4">
         <div className="flex items-center justify-between">

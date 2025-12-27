@@ -33,7 +33,8 @@ export function HabitListActions() {
         placeholder="Search habits..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 mr-1 w-[200px] border shadow-xs focus:w-[250px]"
+        className="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 mr-1 w-full! border shadow-xs sm:w-[200px] sm:focus:w-[250px]"
+        inputClassName="w-full!"
         expandOnFocus
       />
       <ButtonGroup>

@@ -217,7 +217,11 @@ export default function HabitsPage() {
             isLoading={isStatsLoading}
           />
         </div>
-        <ContentCard title="Habit Tracker" action={<HabitListActions />}>
+        <ContentCard
+          title="Habit Tracker"
+          action={<HabitListActions />}
+          headerClassName="sm:flex-row sm:items-center sm:justify-between flex-col items-start"
+        >
           {isLoading ? (
             <HabitTrackerSkeleton />
           ) : (

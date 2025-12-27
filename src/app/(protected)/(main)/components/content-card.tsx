@@ -14,7 +14,9 @@ interface ContentCardProps {
   icon?: LucideIcon;
   action?: ReactNode;
   footer?: ReactNode;
-  className?: string;
+  containerClassName?: string;
+  headerClassName?: string;
+  footerClassName?: string;
   contentClassName?: string;
   children: ReactNode;
 }
@@ -24,7 +26,9 @@ export const ContentCard = ({
   icon: Icon,
   action,
   footer,
-  className,
+  containerClassName,
+  headerClassName,
+  footerClassName,
   contentClassName,
   children,
 }: ContentCardProps) => {
@@ -32,15 +36,25 @@ export const ContentCard = ({
     <Card
       className={cn(
         'bg-dashboard-card gap-0 rounded-sm shadow-none',
-        className
+        containerClassName
       )}
     >
-      <CardHeader className="flex flex-row items-center justify-between gap-2">
-        <CardTitle className="text-muted-foreground font-mono text-sm font-normal">
+      <CardHeader
+        className={cn(
+          'flex items-center justify-between gap-2',
+          headerClassName
+        )}
+      >
+        <CardTitle className="text-muted-foreground shrink-0 font-mono text-sm font-normal">
           {title}
         </CardTitle>
         {(action || Icon) && (
-          <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              'flex items-center gap-2',
+              action && 'w-full justify-end'
+            )}
+          >
             {action}
             {Icon ? (
               <Icon
@@ -52,7 +66,9 @@ export const ContentCard = ({
         )}
       </CardHeader>
       <CardContent className={cn(contentClassName)}>{children}</CardContent>
-      {footer ? <CardFooter>{footer}</CardFooter> : null}
+      {footer ? (
+        <CardFooter className={cn(footerClassName)}>{footer}</CardFooter>
+      ) : null}
     </Card>
   );
 };
