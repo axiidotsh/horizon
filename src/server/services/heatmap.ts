@@ -1,3 +1,4 @@
+import { addUTCDays, getUTCDateKey } from '@/utils/date-utc';
 import type { PrismaClient } from '../db/generated/client';
 
 type TransactionClient = Omit<
@@ -12,21 +13,13 @@ interface DayData {
   habitsCompleted: number;
 }
 
-function getDateKey(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
 export async function getHeatmapData(
   userId: string,
   weeks: number,
   client: PrismaClient | TransactionClient
 ): Promise<DayData[]> {
   const endDate = new Date();
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - weeks * 7);
+  const startDate = addUTCDays(endDate, -weeks * 7);
 
   const [focusSessions, completedTasks, habitCompletions] = await Promise.all([
     client.focusSession.findMany({
@@ -56,18 +49,20 @@ export async function getHeatmapData(
 
   const dataMap = new Map<string, DayData>();
 
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    const key = getDateKey(new Date(d));
+  let currentDate = new Date(startDate);
+  while (currentDate <= endDate) {
+    const key = getUTCDateKey(currentDate);
     dataMap.set(key, {
       date: key,
       focusMinutes: 0,
       tasksCompleted: 0,
       habitsCompleted: 0,
     });
+    currentDate = addUTCDays(currentDate, 1);
   }
 
   focusSessions.forEach((session) => {
-    const key = getDateKey(session.startedAt);
+    const key = getUTCDateKey(session.startedAt);
     const data = dataMap.get(key);
     if (data) {
       data.focusMinutes += session.durationMinutes;
@@ -75,7 +70,7 @@ export async function getHeatmapData(
   });
 
   completedTasks.forEach((task) => {
-    const key = getDateKey(task.updatedAt);
+    const key = getUTCDateKey(task.updatedAt);
     const data = dataMap.get(key);
     if (data) {
       data.tasksCompleted++;
@@ -83,7 +78,7 @@ export async function getHeatmapData(
   });
 
   habitCompletions.forEach((completion) => {
-    const key = getDateKey(completion.date);
+    const key = getUTCDateKey(completion.date);
     const data = dataMap.get(key);
     if (data) {
       data.habitsCompleted++;

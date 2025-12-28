@@ -1,3 +1,4 @@
+import { getUTCMidnight } from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -9,13 +10,6 @@ import { calculateOverallStreak } from '../services/overall-streak';
 const heatmapQuerySchema = z.object({
   weeks: z.coerce.number().min(1).max(52).default(52),
 });
-
-function getDateKey(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 function formatTimeDiff(minutes: number): string {
   if (minutes === 0) return 'Same as yesterday';
@@ -50,13 +44,11 @@ function getTaskComparisonLabel(
   const completionPercentage = (completedToday / totalToday) * 100;
 
   const now = new Date();
-  const startOfDay = new Date(now);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(now);
-  endOfDay.setHours(23, 59, 59, 999);
+  const startOfDayUTC = getUTCMidnight(now);
+  const endOfDayUTC = new Date(startOfDayUTC.getTime() + 24 * 60 * 60 * 1000);
 
-  const totalDayMs = endOfDay.getTime() - startOfDay.getTime();
-  const elapsedMs = now.getTime() - startOfDay.getTime();
+  const totalDayMs = endOfDayUTC.getTime() - startOfDayUTC.getTime();
+  const elapsedMs = now.getTime() - startOfDayUTC.getTime();
   const dayProgressPercentage = (elapsedMs / totalDayMs) * 100;
 
   if (completionPercentage >= dayProgressPercentage + 20) {

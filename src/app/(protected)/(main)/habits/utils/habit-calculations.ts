@@ -2,9 +2,9 @@ import type { CompletionRecord, Habit, HabitWithMetrics } from '../hooks/types';
 
 function getDateKey(date: Date): string {
   const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
@@ -24,19 +24,27 @@ export function calculateCurrentStreak(
   );
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const todayUTC = new Date(
+    Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+  );
 
   let streak = 0;
-  const checkDate = new Date(today);
+  let checkDate = new Date(todayUTC);
 
   for (const completion of sorted) {
     const compDate = new Date(completion.date);
-    compDate.setHours(0, 0, 0, 0);
+    const compDateUTC = new Date(
+      Date.UTC(
+        compDate.getUTCFullYear(),
+        compDate.getUTCMonth(),
+        compDate.getUTCDate()
+      )
+    );
 
-    if (compDate.getTime() === checkDate.getTime()) {
+    if (compDateUTC.getTime() === checkDate.getTime()) {
       streak++;
-      checkDate.setDate(checkDate.getDate() - 1);
-    } else if (compDate.getTime() < checkDate.getTime()) {
+      checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000);
+    } else if (compDateUTC.getTime() < checkDate.getTime()) {
       break;
     }
   }
@@ -58,14 +66,21 @@ export function calculateBestStreak(
   let previousDate: Date | null = null;
 
   for (const completion of sorted) {
-    const currentDate = new Date(completion.date);
-    currentDate.setHours(0, 0, 0, 0);
+    const compDate = new Date(completion.date);
+    const currentDate = new Date(
+      Date.UTC(
+        compDate.getUTCFullYear(),
+        compDate.getUTCMonth(),
+        compDate.getUTCDate()
+      )
+    );
 
     if (previousDate === null) {
       currentStreak = 1;
     } else {
-      const expectedDate = new Date(previousDate);
-      expectedDate.setDate(expectedDate.getDate() + 1);
+      const expectedDate = new Date(
+        previousDate.getTime() + 24 * 60 * 60 * 1000
+      );
 
       if (currentDate.getTime() === expectedDate.getTime()) {
         currentStreak++;
@@ -82,8 +97,10 @@ export function calculateBestStreak(
 }
 
 export function enrichHabitsWithMetrics(habits: Habit[]): HabitWithMetrics[] {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
+  const today = new Date(
+    Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+  );
 
   return habits.map((habit) => {
     const completions = habit.completions || [];

@@ -10,9 +10,10 @@ export const getDaysFromNowAt = (
   minutes: number = 0
 ) => {
   const date = new Date();
-  date.setDate(date.getDate() + days);
-  date.setHours(hours, minutes, 0, 0);
-  return date;
+  const newDate = new Date(date);
+  newDate.setDate(date.getDate() + days);
+  newDate.setHours(hours, minutes, 0, 0);
+  return newDate;
 };
 
 export const formatDueDate = (date: Date): string => {
@@ -98,12 +99,15 @@ export interface GroupedTasks {
 export const groupTasksByDate = (tasks: Task[]): GroupedTasks => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
   const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setDate(today.getDate() + 1);
+
   const dayAfterTomorrow = new Date(today);
-  dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+  dayAfterTomorrow.setDate(today.getDate() + 2);
+
   const weekFromNow = new Date(today);
-  weekFromNow.setDate(weekFromNow.getDate() + 7);
+  weekFromNow.setDate(today.getDate() + 7);
 
   const grouped: GroupedTasks = {
     overdue: [],

@@ -1,3 +1,4 @@
+import { addUTCDays } from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -57,9 +58,7 @@ export const tasksRouter = new Hono()
     const user = c.get('user');
 
     const now = new Date();
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
-    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfWeek = addUTCDays(now, -now.getUTCDay());
 
     const [total, completed] = await Promise.all([
       db.task.count({
@@ -98,12 +97,8 @@ export const tasksRouter = new Hono()
     const chartData = [];
 
     for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      date.setHours(0, 0, 0, 0);
-
-      const nextDate = new Date(date);
-      nextDate.setDate(nextDate.getDate() + 1);
+      const date = addUTCDays(now, -i);
+      const nextDate = addUTCDays(date, 1);
 
       const [totalTasks, completedTasks] = await Promise.all([
         db.task.count({
