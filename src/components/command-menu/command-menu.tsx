@@ -132,7 +132,7 @@ export const CommandMenu = () => {
             className={
               isMobile
                 ? 'bg-background flex h-full flex-col'
-                : 'bg-popover data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 w-full translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg border shadow-lg'
+                : 'bg-popover data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-70 w-full translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg border shadow-lg'
             }
             shouldFilter={true}
             value={state.selectedValue}
