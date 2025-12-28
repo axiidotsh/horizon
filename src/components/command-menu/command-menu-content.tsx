@@ -30,6 +30,7 @@ export const CommandMenuContent = ({
     return (
       <Dialog modal={false} open={open} onOpenChange={onOpenChange}>
         <DialogContent
+          onOpenAutoFocus={(e) => e.preventDefault()}
           className="inset-0 h-full max-h-none w-full max-w-none! translate-x-0 translate-y-0 rounded-none border-0 p-0"
           onEscapeKeyDown={onEscapeKeyDown}
           showCloseButton={false}
