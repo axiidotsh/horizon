@@ -381,3 +381,5 @@ export const focusRouter = new Hono()
 
     return c.json({ session: updated });
   });
+
+export type AppType = typeof focusRouter;

@@ -448,3 +448,5 @@ function calculateBestStreak(completions: { date: Date }[]): number {
 
   return Math.max(maxStreak, currentStreak);
 }
+
+export type AppType = typeof habitsRouter;

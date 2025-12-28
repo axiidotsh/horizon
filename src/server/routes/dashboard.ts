@@ -261,3 +261,5 @@ export const dashboardRouter = new Hono()
 
     return c.json({ heatmap });
   });
+
+export type AppType = typeof dashboardRouter;

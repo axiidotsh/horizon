@@ -307,3 +307,5 @@ export const tasksRouter = new Hono()
 
     return c.json({ success: true });
   });
+
+export type AppType = typeof tasksRouter;
