@@ -39,7 +39,7 @@ export const ResponsiveDialog = ({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false}>
         {children}
       </Drawer>
     );

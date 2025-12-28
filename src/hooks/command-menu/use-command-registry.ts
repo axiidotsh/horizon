@@ -7,7 +7,10 @@ import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
 import { calculateRemainingSeconds } from '@/app/(protected)/(main)/focus/utils/timer-calculations';
 import { createDialogOpenAtom } from '@/app/(protected)/(main)/habits/atoms/dialog-atoms';
-import { createTaskDialogAtom } from '@/app/(protected)/(main)/tasks/atoms/task-dialogs';
+import {
+  bulkAddTasksSheetAtom,
+  createTaskDialogAtom,
+} from '@/app/(protected)/(main)/tasks/atoms/task-dialogs';
 import { settingsAtom } from '@/atoms/settings-atoms';
 import { logoutDialogOpenAtom } from '@/atoms/ui-atoms';
 import {
@@ -31,6 +34,7 @@ export function useCommandRegistry() {
   const { pause, resume, complete } = useFocusSession();
 
   const setCreateTaskDialogOpen = useSetAtom(createTaskDialogAtom);
+  const setBulkAddTasksSheetOpen = useSetAtom(bulkAddTasksSheetAtom);
   const setCreateHabitDialogOpen = useSetAtom(createDialogOpenAtom);
   const setLogoutDialogOpen = useSetAtom(logoutDialogOpenAtom);
   const setShowCancel = useSetAtom(showCancelDialogAtom);
@@ -162,6 +166,9 @@ export function useCommandRegistry() {
             case 'add-task':
               setCreateTaskDialogOpen(true);
               break;
+            case 'bulk-add-tasks':
+              setBulkAddTasksSheetOpen(true);
+              break;
             case 'add-habit':
               setCreateHabitDialogOpen(true);
               break;
@@ -211,6 +218,7 @@ export function useCommandRegistry() {
       setTheme,
       setSettings,
       setCreateTaskDialogOpen,
+      setBulkAddTasksSheetOpen,
       setCreateHabitDialogOpen,
       setLogoutDialogOpen,
     ]

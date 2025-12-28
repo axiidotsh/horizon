@@ -6,6 +6,7 @@ import {
   GoalIcon,
   LayoutDashboardIcon,
   LayoutListIcon,
+  ListPlusIcon,
   LogOutIcon,
   MessageCirclePlusIcon,
   MonitorIcon,
@@ -132,6 +133,12 @@ export const CREATE_COMMANDS: ActionCommand[] = [
     action: 'add-task',
     icon: PlusIcon,
     searchWords: ['add', 'new', 'task'],
+  },
+  {
+    name: 'Bulk add todos',
+    action: 'bulk-add-tasks',
+    icon: ListPlusIcon,
+    searchWords: ['add', 'multiple', 'tasks', 'batch', 'bulk'],
   },
   {
     name: 'Create new habit',

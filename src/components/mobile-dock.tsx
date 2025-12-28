@@ -58,7 +58,7 @@ export const MobileDock = () => {
       >
         <motion.div
           layout
-          className="bg-sidebar/20 flex h-14 items-center gap-1 rounded-full border px-2 shadow-lg backdrop-blur-md"
+          className="bg-sidebar/60 flex h-14 items-center gap-1 rounded-full border px-2 shadow-lg backdrop-blur-md"
         >
           {navItems.map((item) => {
             const isActive = !commandMenuOpen && pathname === item.url;
@@ -87,7 +87,7 @@ export const MobileDock = () => {
         </AnimatePresence>
         <motion.div
           layout
-          className="bg-sidebar/20 flex h-14 items-center rounded-full border px-2 shadow-lg backdrop-blur-md"
+          className="bg-sidebar/60 flex h-14 items-center rounded-full border px-2 shadow-lg backdrop-blur-md"
         >
           <button
             onClick={() => setCommandMenuOpen((prev) => !prev)}

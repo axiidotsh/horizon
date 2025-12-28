@@ -24,7 +24,6 @@ import { createTaskDialogAtom } from '../../atoms/task-dialogs';
 import { PRIORITY_OPTIONS } from '../../constants';
 import { useCreateTask } from '../../hooks/mutations/use-create-task';
 import { useProjects } from '../../hooks/queries/use-projects';
-import type { Project } from '../../hooks/types';
 import { useExistingTags } from '../../hooks/use-existing-tags';
 import { ProjectSelect } from '../project-select';
 import { TagInput } from './tag-input';
@@ -32,9 +31,7 @@ import { TagInput } from './tag-input';
 export const CreateTaskDialog = () => {
   const [open, setOpen] = useAtom(createTaskDialogAtom);
   const createTask = useCreateTask();
-  const { data: projects = [] } = useProjects() as {
-    data: Project[] | undefined;
-  };
+  const { data: projects = [] } = useProjects();
   const existingTags = useExistingTags();
 
   const [title, setTitle] = useState('');

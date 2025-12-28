@@ -109,7 +109,10 @@ export const BulkAddTasksSheet = () => {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="flex w-full max-w-2xl! flex-col pb-4">
+      <SheetContent
+        className="flex w-full max-w-2xl! flex-col pb-4"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <SheetHeader className="px-6">
           <SheetTitle>Bulk Add Tasks</SheetTitle>
           <SheetDescription>
