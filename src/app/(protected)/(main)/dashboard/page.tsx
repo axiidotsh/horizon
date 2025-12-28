@@ -4,7 +4,6 @@ import { useChartSessions } from '@/app/(protected)/(main)/focus/hooks/queries/u
 import { useTaskChart } from '@/app/(protected)/(main)/tasks/hooks/queries/use-task-chart';
 import { PageHeading } from '@/components/page-heading';
 import { useState } from 'react';
-import { ActiveFocusSession } from './components/active-focus-session';
 import { FocusTimeChart } from './components/charts/focus-time-chart';
 import { HabitCompletionChart } from './components/charts/habit-completion-chart';
 import { TaskCompletionChart } from './components/charts/task-completion-chart';
@@ -70,10 +69,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-4 space-y-4">
-        {metrics?.focus.activeSession && (
-          <ActiveFocusSession session={metrics.focus.activeSession} />
-        )}
-
         {metricsLoading ? (
           <MetricsSkeleton />
         ) : (
