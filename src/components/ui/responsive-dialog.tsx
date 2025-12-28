@@ -73,7 +73,7 @@ export const ResponsiveDialogContent = ({
 
   if (isMobile) {
     return (
-      <DrawerContent className="px-6" {...props}>
+      <DrawerContent className="z-70 px-6" {...props}>
         {children}
       </DrawerContent>
     );
