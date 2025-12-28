@@ -41,3 +41,6 @@ next-env.d.ts
 
 # prisma
 /src/server/db/generated
+
+# generated api docs
+/public/openapi.json
