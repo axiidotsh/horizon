@@ -146,7 +146,10 @@ export const dashboardRouter = new Hono()
         where: {
           userId: user.id,
           completed: true,
-          updatedAt: { gte: todayKey, lt: tomorrowKey },
+          dueDate: {
+            gte: todayKey,
+            lt: tomorrowKey,
+          },
         },
       }),
       db.task.count({

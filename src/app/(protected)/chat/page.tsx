@@ -107,7 +107,7 @@ export default function ChatPage() {
     <div className="flex size-full items-center justify-center">
       <div className="-mt-24 flex w-full max-w-2xl flex-col">
         <h1 className="flex items-start gap-3 font-mono text-xl sm:items-center">
-          <PlaceholderLogo className="size-8 animate-[wiggle_3s_ease-in-out_infinite]" />
+          <PlaceholderLogo className="size-8 shrink-0 animate-[wiggle_3s_ease-in-out_infinite]" />
           Good morning, Aditya. How can I help you?
         </h1>
         <div className="mt-12 flex items-baseline gap-2">

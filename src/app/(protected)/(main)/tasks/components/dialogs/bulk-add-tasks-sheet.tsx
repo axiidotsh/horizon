@@ -91,11 +91,17 @@ export const BulkAddTasksSheet = () => {
   const handleSaveAll = () => {
     if (pendingTasks.length === 0) return;
 
+    const normalizedDueDate = dueDate
+      ? new Date(
+          Date.UTC(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
+        ).toISOString()
+      : undefined;
+
     bulkCreateTasks.mutate(
       {
         json: {
           tasks: pendingTasks.map((task) => ({ title: task.title })),
-          dueDate: dueDate?.toISOString() || undefined,
+          dueDate: normalizedDueDate,
           priority: 'MEDIUM' as TaskPriority,
           projectId: projectId || undefined,
           tags,

@@ -61,12 +61,18 @@ export const EditTaskDialog = () => {
     e.preventDefault();
     if (!task || !title.trim()) return;
 
+    const normalizedDueDate = dueDate
+      ? new Date(
+          Date.UTC(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
+        ).toISOString()
+      : null;
+
     updateTask.mutate(
       {
         param: { id: task.id },
         json: {
           title: title.trim(),
-          dueDate: dueDate?.toISOString() || null,
+          dueDate: normalizedDueDate,
           priority: priority as 'LOW' | 'MEDIUM' | 'HIGH',
           projectId: projectId || null,
           tags,
