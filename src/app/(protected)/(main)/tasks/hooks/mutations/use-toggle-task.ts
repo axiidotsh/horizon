@@ -2,9 +2,24 @@ import { DASHBOARD_QUERY_KEYS } from '@/app/(protected)/(main)/dashboard/hooks/d
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { api } from '@/lib/rpc';
 import { TASK_QUERY_KEYS } from '../task-query-keys';
+import type { Task } from '../types';
 
 export function useToggleTask() {
   return useApiMutation(api.tasks[':id'].toggle.$patch, {
+    optimisticUpdate: {
+      queryKey: TASK_QUERY_KEYS.tasks,
+      updater: (oldData: unknown, variables) => {
+        const data = oldData as { tasks: Task[] };
+        return {
+          ...data,
+          tasks: data.tasks.map((task) =>
+            task.id === variables.param.id
+              ? { ...task, completed: !task.completed }
+              : task
+          ),
+        };
+      },
+    },
     invalidateKeys: [
       TASK_QUERY_KEYS.tasks,
       TASK_QUERY_KEYS.stats,

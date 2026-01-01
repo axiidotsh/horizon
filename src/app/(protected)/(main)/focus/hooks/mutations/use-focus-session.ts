@@ -2,6 +2,7 @@ import { DASHBOARD_QUERY_KEYS } from '@/app/(protected)/(main)/dashboard/hooks/d
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { api } from '@/lib/rpc';
 import { FOCUS_QUERY_KEYS } from '../focus-query-keys';
+import type { FocusSession } from '../types';
 
 export function useFocusSession() {
   const start = useApiMutation(api.focus.sessions.$post, {
@@ -12,6 +13,17 @@ export function useFocusSession() {
   });
 
   const pause = useApiMutation(api.focus.sessions[':id'].pause.$patch, {
+    optimisticUpdate: {
+      queryKey: FOCUS_QUERY_KEYS.activeSession,
+      updater: (oldData: unknown) => {
+        const data = oldData as { session: FocusSession | null };
+        if (!data.session) return data;
+        return {
+          ...data,
+          session: { ...data.session, status: 'PAUSED' as const },
+        };
+      },
+    },
     invalidateKeys: [
       FOCUS_QUERY_KEYS.activeSession,
       DASHBOARD_QUERY_KEYS.metrics,
@@ -19,6 +31,17 @@ export function useFocusSession() {
   });
 
   const resume = useApiMutation(api.focus.sessions[':id'].resume.$patch, {
+    optimisticUpdate: {
+      queryKey: FOCUS_QUERY_KEYS.activeSession,
+      updater: (oldData: unknown) => {
+        const data = oldData as { session: FocusSession | null };
+        if (!data.session) return data;
+        return {
+          ...data,
+          session: { ...data.session, status: 'ACTIVE' as const },
+        };
+      },
+    },
     invalidateKeys: [
       FOCUS_QUERY_KEYS.activeSession,
       DASHBOARD_QUERY_KEYS.metrics,

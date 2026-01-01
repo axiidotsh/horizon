@@ -18,6 +18,13 @@ export function useApiMutation<TEndpoint extends AnyEndpoint>(
     onSuccess?: (data: InferResponseType<TEndpoint>) => void;
     onError?: (error: Error) => void;
     errorMessage?: string;
+    optimisticUpdate?: {
+      queryKey: QueryKey;
+      updater: (
+        oldData: unknown,
+        variables: InferRequestType<TEndpoint>
+      ) => unknown;
+    };
   }
 ) {
   const queryClient = useQueryClient();
@@ -33,13 +40,39 @@ export function useApiMutation<TEndpoint extends AnyEndpoint>(
       }
       return res.json() as Promise<InferResponseType<TEndpoint>>;
     },
+    onMutate: async (variables) => {
+      if (options?.optimisticUpdate) {
+        await queryClient.cancelQueries({
+          queryKey: options.optimisticUpdate.queryKey,
+        });
+
+        const previousData = queryClient.getQueryData(
+          options.optimisticUpdate.queryKey
+        );
+
+        queryClient.setQueryData(
+          options.optimisticUpdate.queryKey,
+          (old: unknown) => options.optimisticUpdate!.updater(old, variables)
+        );
+
+        return { previousData };
+      }
+      return {};
+    },
     onSuccess: (data) => {
       options?.invalidateKeys?.forEach((key) => {
         queryClient.invalidateQueries({ queryKey: key });
       });
       options?.onSuccess?.(data);
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
+      if (options?.optimisticUpdate && context?.previousData !== undefined) {
+        queryClient.setQueryData(
+          options.optimisticUpdate.queryKey,
+          context.previousData
+        );
+      }
+
       toast.error(
         options?.errorMessage || error.message || 'An error occurred'
       );
