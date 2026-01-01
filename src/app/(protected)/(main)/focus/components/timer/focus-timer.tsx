@@ -29,7 +29,7 @@ interface FocusTimerProps {
 }
 
 export const FocusTimer = ({ activeSession }: FocusTimerProps) => {
-  const { start, pause, resume, complete } = useFocusSession();
+  const { start, pause, resume, complete } = useFocusSession(activeSession?.id);
 
   const [selectedMinutes, setSelectedMinutes] = useAtom(selectedMinutesAtom);
   const setCustomMinutes = useSetAtom(customMinutesAtom);

@@ -54,7 +54,7 @@ const ProgressBar = ({ progress, isPaused, isCompleted }: ProgressBarProps) => {
 
 export function FocusTimerWidget() {
   const { data: session } = useActiveSession();
-  const { pause, resume, complete } = useFocusSession();
+  const { pause, resume, complete } = useFocusSession(session?.id);
   const { remainingSeconds, isCompleted } = useTimerLogic(session);
   const isMobile = useIsMobile();
 

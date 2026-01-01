@@ -24,7 +24,6 @@ import {
 } from './atoms/habit-atoms';
 import { HabitListActions } from './components/habit-list-actions';
 import { HabitsList } from './components/habits-list';
-import { useToggleHabit } from './hooks/mutations/use-toggle-habit';
 import { useHabitStats } from './hooks/queries/use-habit-stats';
 import { useHabits } from './hooks/queries/use-habits';
 import {
@@ -77,7 +76,6 @@ export default function HabitsPage() {
     refetch,
   } = useHabits(period);
   const { data: statsData, isLoading: isStatsLoading } = useHabitStats();
-  const { toggleDate } = useToggleHabit();
 
   const sortBy = useAtomValue(sortByAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
@@ -94,16 +92,6 @@ export default function HabitsPage() {
     () => sortHabits(filteredHabits, sortBy),
     [filteredHabits, sortBy]
   );
-
-  const handleToggleDay = (habitId: string, date: Date) => {
-    const utcDate = new Date(
-      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-    );
-    toggleDate.mutate({
-      param: { id: habitId },
-      json: { date: utcDate.toISOString() },
-    });
-  };
 
   const handlePeriodChange = (days: number) => {
     setPeriod(days);
@@ -225,11 +213,7 @@ export default function HabitsPage() {
           {isLoading ? (
             <HabitTrackerSkeleton />
           ) : (
-            <HabitsList
-              habits={habits}
-              sortedHabits={sortedHabits}
-              onToggleDay={handleToggleDay}
-            />
+            <HabitsList habits={habits} sortedHabits={sortedHabits} />
           )}
         </ContentCard>
         <GenericAreaChart

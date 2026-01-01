@@ -4,8 +4,9 @@ import { api } from '@/lib/rpc';
 import { TASK_QUERY_KEYS } from '../task-query-keys';
 import type { Task } from '../types';
 
-export function useToggleTask() {
+export function useToggleTask(taskId?: string) {
   return useApiMutation(api.tasks[':id'].toggle.$patch, {
+    mutationKey: taskId ? ['toggleTask', taskId] : undefined,
     optimisticUpdate: {
       queryKey: TASK_QUERY_KEYS.tasks,
       updater: (oldData: unknown, variables) => {

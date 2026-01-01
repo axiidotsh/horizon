@@ -4,7 +4,7 @@ import { api } from '@/lib/rpc';
 import { FOCUS_QUERY_KEYS } from '../focus-query-keys';
 import type { FocusSession } from '../types';
 
-export function useFocusSession() {
+export function useFocusSession(sessionId?: string) {
   const start = useApiMutation(api.focus.sessions.$post, {
     invalidateKeys: [
       FOCUS_QUERY_KEYS.activeSession,
@@ -13,6 +13,7 @@ export function useFocusSession() {
   });
 
   const pause = useApiMutation(api.focus.sessions[':id'].pause.$patch, {
+    mutationKey: sessionId ? ['focusSession', 'pause', sessionId] : undefined,
     optimisticUpdate: {
       queryKey: FOCUS_QUERY_KEYS.activeSession,
       updater: (oldData: unknown) => {
@@ -31,6 +32,7 @@ export function useFocusSession() {
   });
 
   const resume = useApiMutation(api.focus.sessions[':id'].resume.$patch, {
+    mutationKey: sessionId ? ['focusSession', 'resume', sessionId] : undefined,
     optimisticUpdate: {
       queryKey: FOCUS_QUERY_KEYS.activeSession,
       updater: (oldData: unknown) => {

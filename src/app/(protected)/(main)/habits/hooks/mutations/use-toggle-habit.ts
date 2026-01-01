@@ -4,8 +4,9 @@ import { api } from '@/lib/rpc';
 import { HABITS_QUERY_KEYS } from '../habit-query-keys';
 import type { Habit } from '../types';
 
-export function useToggleHabit() {
+export function useToggleHabit(habitId?: string) {
   const toggleToday = useApiMutation(api.habits[':id'].toggle.$post, {
+    mutationKey: habitId ? ['toggleHabit', habitId, 'today'] : undefined,
     optimisticUpdate: {
       queryKey: HABITS_QUERY_KEYS.list,
       updater: (oldData: unknown, variables) => {
@@ -46,6 +47,7 @@ export function useToggleHabit() {
   });
 
   const toggleDate = useApiMutation(api.habits[':id']['toggle-date'].$post, {
+    mutationKey: habitId ? ['toggleHabit', habitId, 'date'] : undefined,
     optimisticUpdate: {
       queryKey: HABITS_QUERY_KEYS.list,
       updater: (oldData: unknown, variables) => {

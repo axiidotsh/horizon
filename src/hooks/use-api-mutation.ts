@@ -14,6 +14,7 @@ type AnyEndpoint = (args: any) => Promise<ClientResponse>;
 export function useApiMutation<TEndpoint extends AnyEndpoint>(
   endpoint: TEndpoint,
   options?: {
+    mutationKey?: QueryKey;
     invalidateKeys?: QueryKey[];
     onSuccess?: (data: InferResponseType<TEndpoint>) => void;
     onError?: (error: Error) => void;
@@ -30,6 +31,7 @@ export function useApiMutation<TEndpoint extends AnyEndpoint>(
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: options?.mutationKey,
     mutationFn: async (input: InferRequestType<TEndpoint>) => {
       const res = await endpoint(input);
       if (!res.ok) {

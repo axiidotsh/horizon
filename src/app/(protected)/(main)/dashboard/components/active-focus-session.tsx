@@ -15,7 +15,7 @@ interface ActiveFocusSessionProps {
 
 export function ActiveFocusSession({ session }: ActiveFocusSessionProps) {
   const router = useRouter();
-  const { pause, resume, complete } = useFocusSession();
+  const { pause, resume, complete } = useFocusSession(session.id);
   const { remainingSeconds } = useTimerLogic(session);
 
   const totalSeconds = session.durationMinutes * 60;

@@ -23,7 +23,7 @@ export const SessionCancelDialog = ({
   onOpenChange,
 }: SessionCancelDialogProps) => {
   const { data: activeSession } = useActiveSession();
-  const { cancel } = useFocusSession();
+  const { cancel } = useFocusSession(activeSession?.id);
 
   const handleCancel = () => {
     if (!activeSession) return;

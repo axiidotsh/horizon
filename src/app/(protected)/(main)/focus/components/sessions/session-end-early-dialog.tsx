@@ -23,7 +23,7 @@ export const SessionEndEarlyDialog = ({
   onOpenChange,
 }: SessionEndEarlyDialogProps) => {
   const { data: activeSession } = useActiveSession();
-  const { endEarly } = useFocusSession();
+  const { endEarly } = useFocusSession(activeSession?.id);
 
   const handleEndEarly = () => {
     if (!activeSession) return;

@@ -1,10 +1,3 @@
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Tooltip,
@@ -12,17 +5,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/utils/utils';
-import { useSetAtom } from 'jotai';
-import {
-  EllipsisIcon,
-  FlameIcon,
-  ListChecksIcon,
-  PencilIcon,
-  TargetIcon,
-  Trash2Icon,
-} from 'lucide-react';
-import { deletingHabitIdAtom, editingHabitIdAtom } from '../atoms/dialog-atoms';
+import { ListChecksIcon, TargetIcon } from 'lucide-react';
 import type { HabitWithMetrics } from '../hooks/types';
+import { HabitRow } from './habit-row';
 
 // Helper to get the last 7 days (today + 6 previous days)
 function getLast7Days(): Date[] {
@@ -73,6 +58,7 @@ function isToday(date: Date): boolean {
 interface WeekDayToggleProps {
   completionHistory: CompletionRecord[];
   onToggleDay: (date: Date) => void;
+  disabled?: boolean;
 }
 
 // Fixed header showing day labels once
@@ -96,7 +82,11 @@ function WeekDayHeader() {
   );
 }
 
-function WeekDayToggle({ completionHistory, onToggleDay }: WeekDayToggleProps) {
+function WeekDayToggle({
+  completionHistory,
+  onToggleDay,
+  disabled = false,
+}: WeekDayToggleProps) {
   const days = getLast7Days();
 
   const isCompleted = (date: Date): boolean => {
@@ -116,6 +106,7 @@ function WeekDayToggle({ completionHistory, onToggleDay }: WeekDayToggleProps) {
             <TooltipTrigger asChild>
               <button
                 onClick={() => onToggleDay(day)}
+                disabled={disabled}
                 className={cn(
                   'size-3.5 cursor-pointer rounded-full border transition-all duration-150',
                   'hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
@@ -123,7 +114,8 @@ function WeekDayToggle({ completionHistory, onToggleDay }: WeekDayToggleProps) {
                     ? 'border-emerald-500 bg-emerald-500'
                     : 'border-muted-foreground/30 hover:border-muted-foreground/50 bg-transparent',
                   today && !completed && 'ring-primary/30 ring-1 ring-offset-1',
-                  today && completed && 'ring-1 ring-emerald-300 ring-offset-1'
+                  today && completed && 'ring-1 ring-emerald-300 ring-offset-1',
+                  disabled && 'cursor-not-allowed opacity-50'
                 )}
                 aria-label={`${completed ? 'Completed' : 'Not completed'} on ${formatFullDate(day)}`}
               >
@@ -163,24 +155,9 @@ export type Habit = HabitWithMetrics;
 interface HabitsListProps {
   habits: Habit[];
   sortedHabits: Habit[];
-  onToggleDay: (habitId: string, date: Date) => void;
 }
 
-export function HabitsList({
-  habits,
-  sortedHabits,
-  onToggleDay,
-}: HabitsListProps) {
-  const setEditingHabitId = useSetAtom(editingHabitIdAtom);
-  const setDeletingHabitId = useSetAtom(deletingHabitIdAtom);
-
-  const getStreakColor = (streak: number): string => {
-    if (streak >= 30) return 'text-purple-500';
-    if (streak >= 14) return 'text-yellow-500';
-    if (streak >= 7) return 'text-orange-500';
-    return 'text-muted-foreground';
-  };
-
+export function HabitsList({ habits, sortedHabits }: HabitsListProps) {
   return (
     <ScrollArea className="my-4">
       <div className="max-h-[600px]">
@@ -211,60 +188,11 @@ export function HabitsList({
             </div>
             <ul className="space-y-3">
               {sortedHabits.map((habit) => (
-                <li
+                <HabitRow
                   key={habit.id}
-                  className="border-border flex items-center gap-3 border-b pb-3 last:border-0 last:pb-0"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className={`truncate text-sm ${habit.completed ? 'text-muted-foreground line-through' : ''}`}
-                    >
-                      {habit.title}
-                    </p>
-                    {habit.currentStreak > 0 && (
-                      <div className="mt-0.5">
-                        <span
-                          className={`flex items-center gap-1 font-mono text-xs ${getStreakColor(habit.currentStreak)}`}
-                        >
-                          <FlameIcon className="size-3" />
-                          {habit.currentStreak} day
-                          {habit.currentStreak !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <WeekDayToggle
-                    completionHistory={habit.completionHistory}
-                    onToggleDay={(date) => onToggleDay(habit.id, date)}
-                  />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        size="icon-sm"
-                        variant="ghost"
-                        className="shrink-0"
-                        aria-label="Habit options"
-                      >
-                        <EllipsisIcon className="text-muted-foreground" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => setEditingHabitId(habit.id)}
-                      >
-                        <PencilIcon />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => setDeletingHabitId(habit.id)}
-                      >
-                        <Trash2Icon />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </li>
+                  habit={habit}
+                  WeekDayToggle={WeekDayToggle}
+                />
               ))}
             </ul>
           </div>

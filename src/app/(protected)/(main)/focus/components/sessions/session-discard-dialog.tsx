@@ -23,7 +23,7 @@ export const SessionDiscardDialog = ({
   onOpenChange,
 }: SessionDiscardDialogProps) => {
   const { data: activeSession } = useActiveSession();
-  const { cancel } = useFocusSession();
+  const { cancel } = useFocusSession(activeSession?.id);
 
   const handleDiscard = () => {
     if (!activeSession) return;

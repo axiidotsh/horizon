@@ -30,7 +30,7 @@ interface TaskListItemProps {
 export const TaskListItem = ({ task }: TaskListItemProps) => {
   const setEditingTask = useSetAtom(editingTaskAtom);
   const setDeletingTask = useSetAtom(deletingTaskAtom);
-  const toggleTask = useToggleTask();
+  const toggleTask = useToggleTask(task.id);
 
   const handleToggle = () => {
     toggleTask.mutate({ param: { id: task.id } });
@@ -49,6 +49,7 @@ export const TaskListItem = ({ task }: TaskListItemProps) => {
       <Checkbox
         checked={task.completed}
         onCheckedChange={handleToggle}
+        disabled={toggleTask.isPending}
         className="mt-0.5"
         aria-label={`Mark task "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
       />
