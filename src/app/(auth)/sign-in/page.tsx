@@ -24,7 +24,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { z } from 'zod';
 import { GoogleSignInButton } from '../components/google-sign-in-button';
 
@@ -48,26 +47,17 @@ export default function SignInPage() {
   });
 
   const onSubmit = async (data: SignInFormData) => {
-    try {
-      setIsPending(true);
-      await signIn.email({
-        email: data.email,
-        password: data.password,
-        fetchOptions: {
-          onSuccess: () => {
-            router.push(signInRedirect);
-          },
-          onError: (ctx) => {
-            toast.error(ctx.error.message || 'Failed to sign in');
-          },
+    setIsPending(true);
+    await signIn.email({
+      email: data.email,
+      password: data.password,
+      fetchOptions: {
+        onSuccess: () => {
+          router.push(signInRedirect);
         },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred. Please try again.');
-      console.error('Sign in error:', error);
-    } finally {
-      setIsPending(false);
-    }
+      },
+    });
+    setIsPending(false);
   };
 
   return (

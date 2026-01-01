@@ -4,8 +4,13 @@ import {
   type UseQueryOptions,
 } from '@tanstack/react-query';
 import type { InferRequestType, InferResponseType } from 'hono/client';
+import { toast } from 'sonner';
 
-type ClientResponse = { ok: boolean; json: () => Promise<unknown> };
+type ClientResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyEndpoint = (args?: any) => Promise<ClientResponse>;
@@ -35,11 +40,16 @@ export function useApiQuery<
       const res = await endpoint(input);
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(
+        const errorMsg =
           (error as { error?: string }).error ||
-            errorMessage ||
-            'Request failed'
-        );
+          errorMessage ||
+          'Request failed';
+
+        if (res.status === 429) {
+          toast.error(errorMsg);
+        }
+
+        throw new Error(errorMsg);
       }
       return res.json() as Promise<InferResponseType<TEndpoint>>;
     },

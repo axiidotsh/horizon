@@ -6,7 +6,11 @@ import {
 import type { InferRequestType, InferResponseType } from 'hono/client';
 import { toast } from 'sonner';
 
-type ClientResponse = { ok: boolean; json: () => Promise<unknown> };
+type ClientResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyEndpoint = (args: any) => Promise<ClientResponse>;
@@ -36,9 +40,11 @@ export function useApiMutation<TEndpoint extends AnyEndpoint>(
       const res = await endpoint(input);
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(
-          (error as { error?: string }).error || 'Request failed'
-        );
+        const errorMsg =
+          (error as { error?: string }).error || 'Request failed';
+        const rateLimitError = new Error(errorMsg);
+        (rateLimitError as Error & { status: number }).status = res.status;
+        throw rateLimitError;
       }
       return res.json() as Promise<InferResponseType<TEndpoint>>;
     },
@@ -67,7 +73,7 @@ export function useApiMutation<TEndpoint extends AnyEndpoint>(
       });
       options?.onSuccess?.(data);
     },
-    onError: (error: Error, _variables, context) => {
+    onError: (error: Error & { status?: number }, _variables, context) => {
       if (options?.optimisticUpdate && context?.previousData !== undefined) {
         queryClient.setQueryData(
           options.optimisticUpdate.queryKey,
@@ -75,9 +81,12 @@ export function useApiMutation<TEndpoint extends AnyEndpoint>(
         );
       }
 
-      toast.error(
-        options?.errorMessage || error.message || 'An error occurred'
-      );
+      const isRateLimitError = error.status === 429;
+      const errorMessage = isRateLimitError
+        ? error.message
+        : options?.errorMessage || error.message || 'An error occurred';
+
+      toast.error(errorMessage);
       options?.onError?.(error);
     },
   });

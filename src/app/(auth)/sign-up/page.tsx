@@ -59,30 +59,18 @@ export default function SignUpPage() {
   });
 
   const onSubmit = async (data: SignUpFormData) => {
-    try {
-      setIsPending(true);
-      await signUp.email({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        fetchOptions: {
-          onSuccess: () => {
-            setIsSuccess(true);
-            toast.success(
-              'Account created! Please check your email to verify.'
-            );
-          },
-          onError: (ctx) => {
-            toast.error(ctx.error.message || 'Failed to create account');
-          },
+    setIsPending(true);
+    await signUp.email({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      fetchOptions: {
+        onSuccess: () => {
+          setIsSuccess(true);
+          toast.success('Account created! Please check your email to verify.');
         },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred. Please try again.');
-      console.error('Sign up error:', error);
-    } finally {
-      setIsPending(false);
-    }
+      },
+    });
   };
 
   if (isSuccess) {

@@ -44,30 +44,18 @@ export default function ForgotPasswordPage() {
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
-    try {
-      setIsPending(true);
-      await requestPasswordReset({
-        email: data.email,
-        redirectTo: passwordResetPageRedirect,
-        fetchOptions: {
-          onSuccess: () => {
-            setIsSuccess(true);
-            toast.success('Password reset link sent to your email.');
-          },
-          onError: (ctx) => {
-            toast.error(
-              ctx.error.message ||
-                'Failed to send reset link. Please try again.'
-            );
-          },
+    setIsPending(true);
+    await requestPasswordReset({
+      email: data.email,
+      redirectTo: passwordResetPageRedirect,
+      fetchOptions: {
+        onSuccess: () => {
+          setIsSuccess(true);
+          toast.success('Password reset link sent to your email.');
         },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred. Please try again.');
-      console.error('Forgot password error:', error);
-    } finally {
-      setIsPending(false);
-    }
+      },
+    });
+    setIsPending(false);
   };
 
   if (isSuccess) {

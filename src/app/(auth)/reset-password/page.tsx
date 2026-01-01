@@ -62,27 +62,18 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    try {
-      setIsPending(true);
-      await resetPassword({
-        newPassword: data.password,
-        token,
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success('Password reset successfully');
-            router.push(passwordResetRedirect);
-          },
-          onError: (ctx) => {
-            toast.error(ctx.error.message || 'Failed to reset password');
-          },
+    setIsPending(true);
+    await resetPassword({
+      newPassword: data.password,
+      token,
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success('Password reset successfully');
+          router.push(passwordResetRedirect);
         },
-      });
-    } catch (error) {
-      toast.error('An unexpected error occurred. Please try again.');
-      console.error('Reset password error:', error);
-    } finally {
-      setIsPending(false);
-    }
+      },
+    });
+    setIsPending(false);
   };
 
   if (!token) {
