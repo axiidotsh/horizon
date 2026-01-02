@@ -79,16 +79,7 @@ export function useEditSession() {
         snapshots: [],
       };
     },
-    // @ts-expect-error - onError receives context parameter at runtime from React Query
-    onError: (
-      _error: Error,
-      _variables: unknown,
-      context?: {
-        previousSessionData?: Array<{ queryKey: QueryKey; data: unknown }>;
-        previousActiveSession?: unknown;
-        previousStats?: unknown;
-      }
-    ) => {
+    onError: (_error, _variables, context) => {
       if (context?.previousActiveSession) {
         queryClient.setQueryData(
           FOCUS_QUERY_KEYS.activeSession,

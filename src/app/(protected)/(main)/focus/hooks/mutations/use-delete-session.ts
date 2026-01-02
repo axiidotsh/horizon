@@ -59,15 +59,7 @@ export function useDeleteSession() {
       const previousStats = queryClient.getQueryData(FOCUS_QUERY_KEYS.stats);
       return { previousSessionData, previousStats, snapshots: [] };
     },
-    // @ts-expect-error - onError receives context parameter at runtime from React Query
-    onError: (
-      _error: Error,
-      _variables: unknown,
-      context?: {
-        previousSessionData?: Array<{ queryKey: QueryKey; data: unknown }>;
-        previousStats?: unknown;
-      }
-    ) => {
+    onError: (_error, _variables, context) => {
       if (context?.previousSessionData) {
         context.previousSessionData.forEach(({ queryKey, data }) => {
           queryClient.setQueryData(queryKey, data);

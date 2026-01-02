@@ -58,13 +58,7 @@ export function useToggleTask(taskId?: string) {
       const previousStats = queryClient.getQueryData(TASK_QUERY_KEYS.stats);
       return { previousData, previousStats, snapshots: [] };
     },
-    onError: (
-      _error: Error,
-      context?: {
-        previousData?: Array<{ queryKey: QueryKey; data: unknown }>;
-        previousStats?: unknown;
-      }
-    ) => {
+    onError: (_error, _variables, context) => {
       if (context?.previousData) {
         context.previousData.forEach(({ queryKey, data }) => {
           queryClient.setQueryData(queryKey, data);

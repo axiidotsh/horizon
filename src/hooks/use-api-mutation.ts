@@ -15,11 +15,6 @@ type ClientResponse = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyEndpoint = (args: any) => Promise<ClientResponse>;
 
-type OptimisticUpdate<TVariables> = {
-  queryKey: QueryKey;
-  updater: (oldData: unknown, variables: TVariables) => unknown;
-};
-
 type OptimisticUpdateContext = {
   snapshots: Array<{
     queryKey: QueryKey;
@@ -27,22 +22,24 @@ type OptimisticUpdateContext = {
   }>;
 };
 
-export function useApiMutation<TEndpoint extends AnyEndpoint>(
+export function useApiMutation<
+  TEndpoint extends AnyEndpoint,
+  TContext extends OptimisticUpdateContext = OptimisticUpdateContext,
+>(
   endpoint: TEndpoint,
   options?: {
     mutationKey?: QueryKey;
     invalidateKeys?: QueryKey[];
     onSuccess?: (data: InferResponseType<TEndpoint>) => void;
-    onError?: (error: Error) => void;
+    onError?: (
+      error: Error,
+      variables: InferRequestType<TEndpoint>,
+      context?: TContext
+    ) => void;
     errorMessage?: string;
-    optimisticUpdate?: OptimisticUpdate<InferRequestType<TEndpoint>>;
-    optimisticUpdates?: Array<OptimisticUpdate<InferRequestType<TEndpoint>>>;
     onMutate?: (
       variables: InferRequestType<TEndpoint>
-    ) =>
-      | Promise<OptimisticUpdateContext | void>
-      | OptimisticUpdateContext
-      | void;
+    ) => Promise<TContext | void> | TContext | void;
   }
 ) {
   const queryClient = useQueryClient();
@@ -61,56 +58,21 @@ export function useApiMutation<TEndpoint extends AnyEndpoint>(
       }
       return res.json() as Promise<InferResponseType<TEndpoint>>;
     },
-    onMutate: async (variables) => {
-      const updates =
-        options?.optimisticUpdates ||
-        (options?.optimisticUpdate ? [options.optimisticUpdate] : []);
-
-      if (updates.length > 0) {
-        await Promise.all(
-          updates.map((update) =>
-            queryClient.cancelQueries({ queryKey: update.queryKey })
-          )
-        );
-
-        const snapshots = updates.map((update) => ({
-          queryKey: update.queryKey,
-          data: queryClient.getQueryData(update.queryKey),
-        }));
-
-        updates.forEach((update) => {
-          queryClient.setQueryData(update.queryKey, (old: unknown) =>
-            update.updater(old, variables)
-          );
-        });
-
-        const customContext = await options?.onMutate?.(variables);
-
-        return customContext ? { ...customContext, snapshots } : { snapshots };
-      }
-
-      return options?.onMutate?.(variables);
-    },
+    onMutate: options?.onMutate,
     onSuccess: (data) => {
       options?.invalidateKeys?.forEach((key) => {
         queryClient.invalidateQueries({ queryKey: key });
       });
       options?.onSuccess?.(data);
     },
-    onError: (error: Error & { status?: number }, _variables, context) => {
-      if (context?.snapshots) {
-        context.snapshots.forEach(({ queryKey, data }) => {
-          queryClient.setQueryData(queryKey, data);
-        });
-      }
-
+    onError: (error: Error & { status?: number }, variables, context) => {
       const isRateLimitError = error.status === 429;
       const errorMessage = isRateLimitError
         ? error.message
         : options?.errorMessage || error.message || 'An error occurred';
 
       toast.error(errorMessage);
-      options?.onError?.(error);
+      options?.onError?.(error, variables, context as TContext | undefined);
     },
   });
 }

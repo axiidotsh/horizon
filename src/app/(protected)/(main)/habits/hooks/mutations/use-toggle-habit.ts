@@ -60,51 +60,55 @@ export function useToggleHabit(habitId?: string) {
     });
   };
 
-  const createOptimisticUpdate = (getDate: (variables?: unknown) => Date) => ({
-    onMutate: async (variables?: unknown) => {
-      const queries = queryClient.getQueriesData<{ habits: Habit[] }>({
-        queryKey: HABITS_QUERY_KEYS.list,
-      });
-
-      const previousData = queries.map(([queryKey, data]) => ({
-        queryKey,
-        data,
-      }));
-
-      if (queries.length > 0 && queries[0][1]) {
-        const data = queries[0][1];
-        const date = getDate(variables);
-        const updatedHabits = toggleHabitCompletion(
-          data.habits,
-          habitId!,
-          date
-        );
-        updateAllHabitQueries(updatedHabits);
-      }
-
-      const previousStats = queryClient.getQueryData(HABITS_QUERY_KEYS.stats);
-      return { previousData, previousStats, snapshots: [] };
-    },
-    onError: (
-      _error: Error,
-      context?: {
-        previousData?: Array<{ queryKey: QueryKey; data: unknown }>;
-        previousStats?: unknown;
-      }
-    ) => {
-      if (context?.previousData) {
-        context.previousData.forEach(({ queryKey, data }) => {
-          queryClient.setQueryData(queryKey, data);
+  const createOptimisticUpdate = (getDate: (variables?: unknown) => Date) => {
+    return {
+      onMutate: async (variables?: unknown) => {
+        const queries = queryClient.getQueriesData<{ habits: Habit[] }>({
+          queryKey: HABITS_QUERY_KEYS.list,
         });
-      }
-      if (context?.previousStats) {
-        queryClient.setQueryData(
-          HABITS_QUERY_KEYS.stats,
-          context.previousStats
-        );
-      }
-    },
-  });
+
+        const previousData = queries.map(([queryKey, data]) => ({
+          queryKey,
+          data,
+        }));
+
+        if (queries.length > 0 && queries[0][1]) {
+          const data = queries[0][1];
+          const date = getDate(variables);
+          const updatedHabits = toggleHabitCompletion(
+            data.habits,
+            habitId!,
+            date
+          );
+          updateAllHabitQueries(updatedHabits);
+        }
+
+        const previousStats = queryClient.getQueryData(HABITS_QUERY_KEYS.stats);
+        return { previousData, previousStats, snapshots: [] };
+      },
+      onError: (
+        _error: Error,
+        _variables: unknown,
+        context?: {
+          previousData?: Array<{ queryKey: QueryKey; data: unknown }>;
+          previousStats?: unknown;
+          snapshots: Array<{ queryKey: QueryKey; data: unknown }>;
+        }
+      ) => {
+        if (context?.previousData) {
+          context.previousData.forEach(({ queryKey, data }) => {
+            queryClient.setQueryData(queryKey, data);
+          });
+        }
+        if (context?.previousStats) {
+          queryClient.setQueryData(
+            HABITS_QUERY_KEYS.stats,
+            context.previousStats
+          );
+        }
+      },
+    };
+  };
 
   const toggleToday = useApiMutation(api.habits[':id'].toggle.$post, {
     mutationKey: habitId ? ['toggleHabit', habitId, 'today'] : undefined,
