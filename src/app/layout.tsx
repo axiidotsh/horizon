@@ -1,5 +1,4 @@
 import { Providers } from '@/components/providers';
-import { Toaster } from '@/components/ui/sonner';
 import '@/styles/globals.css';
 import { cn } from '@/utils/utils';
 import type { Metadata } from 'next';
@@ -36,7 +35,6 @@ export default function RootLayout({
         )}
       >
         <Providers>{children}</Providers>
-        <Toaster />
       </body>
     </html>
   );

@@ -16,6 +16,7 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { signIn } from '@/lib/auth-client';
 import { signInRedirect } from '@/lib/config/redirects.config';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -94,9 +95,8 @@ export default function SignInPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}

@@ -16,6 +16,7 @@ import {
   FieldSeparator,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { signUp } from '@/lib/auth-client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon } from 'lucide-react';
@@ -136,9 +137,8 @@ export default function SignUpPage() {
             </Field>
             <Field data-invalid={!!errors.password}>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.password}
@@ -151,9 +151,8 @@ export default function SignUpPage() {
               <FieldLabel htmlFor="confirmPassword">
                 Confirm Password
               </FieldLabel>
-              <Input
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
                 aria-invalid={!!errors.confirmPassword}
