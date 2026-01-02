@@ -10,55 +10,52 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { useAtom } from 'jotai';
+import { showDiscardDialogAtom } from '../../atoms/session-dialogs';
 import { useFocusSession } from '../../hooks/mutations/use-focus-session';
 import { useActiveSession } from '../../hooks/queries/use-active-session';
 
-interface SessionEndEarlyDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const SessionEndEarlyDialog = ({
-  open,
-  onOpenChange,
-}: SessionEndEarlyDialogProps) => {
+export const FocusSessionDiscardDialog = () => {
+  const [open, setOpen] = useAtom(showDiscardDialogAtom);
   const { data: activeSession } = useActiveSession();
-  const { endEarly } = useFocusSession(activeSession?.id);
+  const { cancel } = useFocusSession(activeSession?.id);
 
-  const handleEndEarly = () => {
+  const handleDiscard = () => {
     if (!activeSession) return;
-    endEarly.mutate(
+    cancel.mutate(
       { param: { id: activeSession.id } },
       {
-        onSuccess: () => onOpenChange(false),
+        onSuccess: () => setOpen(false),
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>End Session Early?</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>
+            Discard Completed Session?
+          </ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Your progress will be saved. The session duration will be updated to
-            reflect the actual time spent.
+            Are you sure you want to discard this session? This action cannot be
+            undone and the session will not be saved.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <ResponsiveDialogFooter>
           <ResponsiveDialogClose asChild>
-            <Button variant="outline" disabled={endEarly.isPending}>
-              Keep Going
+            <Button variant="outline" disabled={cancel.isPending}>
+              Cancel
             </Button>
           </ResponsiveDialogClose>
           <Button
             variant="destructive"
-            onClick={handleEndEarly}
-            disabled={endEarly.isPending}
-            isLoading={endEarly.isPending}
-            loadingContent="Ending..."
+            onClick={handleDiscard}
+            disabled={cancel.isPending}
+            isLoading={cancel.isPending}
+            loadingContent="Discarding..."
           >
-            End Session
+            Discard Session
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

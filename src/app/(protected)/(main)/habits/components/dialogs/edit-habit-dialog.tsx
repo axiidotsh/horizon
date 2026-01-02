@@ -12,24 +12,22 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
+import { useEffect, useMemo, useState } from 'react';
+import { editingHabitIdAtom } from '../../atoms/dialog-atoms';
 import { useUpdateHabit } from '../../hooks/mutations/use-update-habit';
-import type { HabitWithMetrics } from '../../hooks/types';
+import { useHabits } from '../../hooks/queries/use-habits';
+import { enrichHabitsWithMetrics } from '../../utils/habit-calculations';
 
-interface EditHabitDialogProps {
-  habit: HabitWithMetrics | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const EditHabitDialog = ({
-  habit,
-  open,
-  onOpenChange,
-}: EditHabitDialogProps) => {
+export const EditHabitDialog = () => {
+  const [editingHabitId, setEditingHabitId] = useAtom(editingHabitIdAtom);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+
+  const { data: rawHabits = [] } = useHabits(7);
+  const habits = useMemo(() => enrichHabitsWithMetrics(rawHabits), [rawHabits]);
+  const habit = habits.find((h) => h.id === editingHabitId) || null;
 
   const updateHabit = useUpdateHabit();
 
@@ -55,14 +53,17 @@ export const EditHabitDialog = ({
       },
       {
         onSuccess: () => {
-          onOpenChange(false);
+          setEditingHabitId(null);
         },
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog
+      open={!!editingHabitId}
+      onOpenChange={(open) => !open && setEditingHabitId(null)}
+    >
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Edit Habit</ResponsiveDialogTitle>
@@ -102,7 +103,7 @@ export const EditHabitDialog = ({
         <ResponsiveDialogFooter>
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => setEditingHabitId(null)}
             disabled={updateHabit.isPending}
           >
             Cancel

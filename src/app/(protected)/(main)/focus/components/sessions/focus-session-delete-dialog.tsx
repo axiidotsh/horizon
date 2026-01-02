@@ -10,20 +10,12 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { useAtom } from 'jotai';
+import { deletingSessionAtom } from '../../atoms/session-dialogs';
 import { useDeleteSession } from '../../hooks/mutations/use-delete-session';
-import type { FocusSession } from '../../hooks/types';
 
-interface SessionDeleteDialogProps {
-  session: FocusSession | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const SessionDeleteDialog = ({
-  session,
-  open,
-  onOpenChange,
-}: SessionDeleteDialogProps) => {
+export const FocusSessionDeleteDialog = () => {
+  const [session, setSession] = useAtom(deletingSessionAtom);
   const deleteSession = useDeleteSession();
 
   const handleDelete = () => {
@@ -32,13 +24,16 @@ export const SessionDeleteDialog = ({
     deleteSession.mutate(
       { param: { id: session.id } },
       {
-        onSuccess: () => onOpenChange(false),
+        onSuccess: () => setSession(null),
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog
+      open={!!session}
+      onOpenChange={(open) => !open && setSession(null)}
+    >
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Delete Session?</ResponsiveDialogTitle>

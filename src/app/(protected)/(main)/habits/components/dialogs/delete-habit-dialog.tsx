@@ -9,20 +9,20 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { useAtom } from 'jotai';
+import { useMemo } from 'react';
+import { deletingHabitIdAtom } from '../../atoms/dialog-atoms';
 import { useDeleteHabit } from '../../hooks/mutations/use-delete-habit';
-import type { HabitWithMetrics } from '../../hooks/types';
+import { useHabits } from '../../hooks/queries/use-habits';
+import { enrichHabitsWithMetrics } from '../../utils/habit-calculations';
 
-interface DeleteHabitDialogProps {
-  habit: HabitWithMetrics | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+export const DeleteHabitDialog = () => {
+  const [deletingHabitId, setDeletingHabitId] = useAtom(deletingHabitIdAtom);
 
-export const DeleteHabitDialog = ({
-  habit,
-  open,
-  onOpenChange,
-}: DeleteHabitDialogProps) => {
+  const { data: rawHabits = [] } = useHabits(7);
+  const habits = useMemo(() => enrichHabitsWithMetrics(rawHabits), [rawHabits]);
+  const habit = habits.find((h) => h.id === deletingHabitId) || null;
+
   const deleteHabit = useDeleteHabit();
 
   const handleDelete = () => {
@@ -32,14 +32,17 @@ export const DeleteHabitDialog = ({
       { param: { id: habit.id } },
       {
         onSuccess: () => {
-          onOpenChange(false);
+          setDeletingHabitId(null);
         },
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog
+      open={!!deletingHabitId}
+      onOpenChange={(open) => !open && setDeletingHabitId(null)}
+    >
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Delete Habit</ResponsiveDialogTitle>
@@ -51,7 +54,7 @@ export const DeleteHabitDialog = ({
         <ResponsiveDialogFooter>
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => setDeletingHabitId(null)}
             disabled={deleteHabit.isPending}
           >
             Cancel

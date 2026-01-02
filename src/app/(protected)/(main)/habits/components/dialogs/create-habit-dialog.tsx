@@ -12,18 +12,13 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { useAtom } from 'jotai';
 import { useState } from 'react';
+import { createDialogOpenAtom } from '../../atoms/dialog-atoms';
 import { useCreateHabit } from '../../hooks/mutations/use-create-habit';
 
-interface CreateHabitDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const CreateHabitDialog = ({
-  open,
-  onOpenChange,
-}: CreateHabitDialogProps) => {
+export const CreateHabitDialog = () => {
+  const [open, setOpen] = useAtom(createDialogOpenAtom);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -46,14 +41,14 @@ export const CreateHabitDialog = ({
           setTitle('');
           setDescription('');
           setCategory('');
-          onOpenChange(false);
+          setOpen(false);
         },
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Create New Habit</ResponsiveDialogTitle>
@@ -96,7 +91,7 @@ export const CreateHabitDialog = ({
         <ResponsiveDialogFooter>
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => setOpen(false)}
             disabled={createHabit.isPending}
           >
             Cancel

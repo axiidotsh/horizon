@@ -10,55 +10,50 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { useAtom } from 'jotai';
+import { showEndEarlyDialogAtom } from '../../atoms/session-dialogs';
 import { useFocusSession } from '../../hooks/mutations/use-focus-session';
 import { useActiveSession } from '../../hooks/queries/use-active-session';
 
-interface SessionCancelDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const SessionCancelDialog = ({
-  open,
-  onOpenChange,
-}: SessionCancelDialogProps) => {
+export const FocusSessionEndEarlyDialog = () => {
+  const [open, setOpen] = useAtom(showEndEarlyDialogAtom);
   const { data: activeSession } = useActiveSession();
-  const { cancel } = useFocusSession(activeSession?.id);
+  const { endEarly } = useFocusSession(activeSession?.id);
 
-  const handleCancel = () => {
+  const handleEndEarly = () => {
     if (!activeSession) return;
-    cancel.mutate(
+    endEarly.mutate(
       { param: { id: activeSession.id } },
       {
-        onSuccess: () => onOpenChange(false),
+        onSuccess: () => setOpen(false),
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Cancel Focus Session?</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>End Session Early?</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Are you sure you want to cancel this focus session? Your progress
-            will not be saved.
+            Your progress will be saved. The session duration will be updated to
+            reflect the actual time spent.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <ResponsiveDialogFooter>
           <ResponsiveDialogClose asChild>
-            <Button variant="outline" disabled={cancel.isPending}>
+            <Button variant="outline" disabled={endEarly.isPending}>
               Keep Going
             </Button>
           </ResponsiveDialogClose>
           <Button
             variant="destructive"
-            onClick={handleCancel}
-            disabled={cancel.isPending}
-            isLoading={cancel.isPending}
-            loadingContent="Cancelling..."
+            onClick={handleEndEarly}
+            disabled={endEarly.isPending}
+            isLoading={endEarly.isPending}
+            loadingContent="Ending..."
           >
-            Cancel Session
+            End Session
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

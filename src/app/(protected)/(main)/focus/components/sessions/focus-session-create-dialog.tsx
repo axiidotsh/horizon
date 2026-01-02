@@ -12,20 +12,15 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { useAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { createCustomSessionAtom } from '../../atoms/session-dialogs';
 import { MAX_DURATION, MIN_DURATION } from '../../constants';
 import { useFocusSession } from '../../hooks/mutations/use-focus-session';
 
-interface SessionCreateDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const SessionCreateDialog = ({
-  open,
-  onOpenChange,
-}: SessionCreateDialogProps) => {
+export const FocusSessionCreateDialog = () => {
+  const [open, setOpen] = useAtom(createCustomSessionAtom);
   const { start } = useFocusSession();
   const router = useRouter();
   const [task, setTask] = useState('');
@@ -45,17 +40,16 @@ export const SessionCreateDialog = ({
       },
       {
         onSuccess: () => {
-          onOpenChange(false);
+          setOpen(false);
           setTask('');
           setDurationMinutes('');
-          router.push('/focus');
         },
       }
     );
   }
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>
@@ -67,23 +61,25 @@ export const SessionCreateDialog = ({
         </ResponsiveDialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
+            <Label htmlFor="duration">Duration (minutes)</Label>
+            <Input
+              id="duration"
+              placeholder="x"
+              inputMode="numeric"
+              type="number"
+              min={MIN_DURATION}
+              max={MAX_DURATION}
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="task">Task (optional)</Label>
             <Input
               id="task"
               placeholder="What will you work on?"
               value={task}
               onChange={(e) => setTask(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="duration">Duration (minutes)</Label>
-            <Input
-              id="duration"
-              type="number"
-              min={MIN_DURATION}
-              max={MAX_DURATION}
-              value={durationMinutes}
-              onChange={(e) => setDurationMinutes(e.target.value)}
             />
           </div>
         </div>

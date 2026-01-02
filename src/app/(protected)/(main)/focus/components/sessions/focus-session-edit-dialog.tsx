@@ -12,22 +12,14 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
+import { editingSessionAtom } from '../../atoms/session-dialogs';
 import { MAX_DURATION, MIN_DURATION } from '../../constants';
 import { useEditSession } from '../../hooks/mutations/use-edit-session';
-import type { FocusSession } from '../../hooks/types';
 
-interface SessionEditDialogProps {
-  session: FocusSession | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const SessionEditDialog = ({
-  session,
-  open,
-  onOpenChange,
-}: SessionEditDialogProps) => {
+export const FocusSessionEditDialog = () => {
+  const [session, setSession] = useAtom(editingSessionAtom);
   const editSession = useEditSession();
   const [task, setTask] = useState('');
   const [durationMinutes, setDurationMinutes] = useState('');
@@ -55,13 +47,16 @@ export const SessionEditDialog = ({
         },
       },
       {
-        onSuccess: () => onOpenChange(false),
+        onSuccess: () => setSession(null),
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog
+      open={!!session}
+      onOpenChange={(open) => !open && setSession(null)}
+    >
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Edit Session</ResponsiveDialogTitle>

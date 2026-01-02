@@ -10,57 +10,50 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { useAtom } from 'jotai';
+import { showCancelDialogAtom } from '../../atoms/session-dialogs';
 import { useFocusSession } from '../../hooks/mutations/use-focus-session';
 import { useActiveSession } from '../../hooks/queries/use-active-session';
 
-interface SessionDiscardDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const SessionDiscardDialog = ({
-  open,
-  onOpenChange,
-}: SessionDiscardDialogProps) => {
+export const FocusSessionCancelDialog = () => {
+  const [open, setOpen] = useAtom(showCancelDialogAtom);
   const { data: activeSession } = useActiveSession();
   const { cancel } = useFocusSession(activeSession?.id);
 
-  const handleDiscard = () => {
+  const handleCancel = () => {
     if (!activeSession) return;
     cancel.mutate(
       { param: { id: activeSession.id } },
       {
-        onSuccess: () => onOpenChange(false),
+        onSuccess: () => setOpen(false),
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>
-            Discard Completed Session?
-          </ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Cancel Focus Session?</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Are you sure you want to discard this session? This action cannot be
-            undone and the session will not be saved.
+            Are you sure you want to cancel this focus session? Your progress
+            will not be saved.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <ResponsiveDialogFooter>
           <ResponsiveDialogClose asChild>
             <Button variant="outline" disabled={cancel.isPending}>
-              Cancel
+              Keep Going
             </Button>
           </ResponsiveDialogClose>
           <Button
             variant="destructive"
-            onClick={handleDiscard}
+            onClick={handleCancel}
             disabled={cancel.isPending}
             isLoading={cancel.isPending}
-            loadingContent="Discarding..."
+            loadingContent="Cancelling..."
           >
-            Discard Session
+            Cancel Session
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

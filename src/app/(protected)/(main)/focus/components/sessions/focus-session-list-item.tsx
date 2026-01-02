@@ -5,21 +5,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useSetAtom } from 'jotai';
 import { MoreHorizontalIcon, PencilIcon, Trash2Icon } from 'lucide-react';
+import {
+  deletingSessionAtom,
+  editingSessionAtom,
+} from '../../atoms/session-dialogs';
 import type { FocusSession } from '../../hooks/types';
 import { formatSessionDateTime } from '../../utils/session-metrics';
 
-interface SessionListItemProps {
+interface FocusSessionListItemProps {
   session: FocusSession;
-  onEdit: (session: FocusSession) => void;
-  onDelete: (session: FocusSession) => void;
 }
 
-export const SessionListItem = ({
+export const FocusSessionListItem = ({
   session,
-  onEdit,
-  onDelete,
-}: SessionListItemProps) => {
+}: FocusSessionListItemProps) => {
+  const setEditingSession = useSetAtom(editingSessionAtom);
+  const setDeletingSession = useSetAtom(deletingSessionAtom);
+
   return (
     <li className="border-border flex items-center justify-between gap-4 border-b pb-4 last:border-0 last:pb-0">
       <div className="flex-1">
@@ -39,13 +43,13 @@ export const SessionListItem = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(session)}>
+            <DropdownMenuItem onClick={() => setEditingSession(session)}>
               <PencilIcon />
               Edit
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
-              onClick={() => onDelete(session)}
+              onClick={() => setDeletingSession(session)}
             >
               <Trash2Icon />
               Delete
