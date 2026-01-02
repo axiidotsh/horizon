@@ -111,7 +111,8 @@ export const formatHeatmapTooltip = (day: HeatmapDay): string => {
   const minutes = day.focusMinutes % 60;
   const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 
-  return `${dateStr}\n${timeStr} focus • ${day.tasksCompleted} tasks • ${day.habitsCompleted} habits`;
+  const habitText = day.habitsCompleted === 1 ? 'habit' : 'habits';
+  return `${dateStr}\n${timeStr} focus • ${day.tasksCompleted} tasks • ${day.habitsCompleted} ${habitText}`;
 };
 
 /**

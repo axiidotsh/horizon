@@ -140,7 +140,7 @@ function HeatmapCell({ day }: { day: HeatmapDay | null }) {
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="max-w-[200px] font-mono text-[11px] whitespace-pre-line"
+          className="font-mono text-[11px] whitespace-pre-line"
         >
           {formatHeatmapTooltip(day)}
         </TooltipContent>
