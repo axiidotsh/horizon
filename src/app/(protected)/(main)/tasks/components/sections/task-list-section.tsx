@@ -41,6 +41,7 @@ export const TaskListSection = () => {
     if (groupedTasks.dueThisWeek.length > 0) return 'dueThisWeek';
     if (groupedTasks.upcoming.length > 0) return 'upcoming';
     if (groupedTasks.overdue.length > 0) return 'overdue';
+    if (groupedTasks.noDueDate.length > 0) return 'noDueDate';
     return 'dueToday';
   }, [groupedTasks]);
 
@@ -112,6 +113,12 @@ export const TaskListSection = () => {
           tasks={groupedTasks.upcoming}
           isOpen={openSections.has('upcoming')}
           onToggle={() => toggleSection('upcoming')}
+        />
+        <TaskListGroup
+          title="No due date"
+          tasks={groupedTasks.noDueDate}
+          isOpen={openSections.has('noDueDate')}
+          onToggle={() => toggleSection('noDueDate')}
         />
       </div>
     );

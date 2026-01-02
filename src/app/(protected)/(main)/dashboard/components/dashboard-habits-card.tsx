@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAtom } from 'jotai';
 import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export function DashboardHabitsCard() {
   const [, setCreateDialogOpen] = useAtom(createDialogOpenAtom);
@@ -63,17 +64,30 @@ export function DashboardHabitsCard() {
           </p>
         </div>
       ) : (
-        <ScrollArea className="h-[300px]">
-          <div>
-            {enrichedHabits.slice(0, 10).map((habit, index) => (
-              <HabitItem
-                key={habit.id}
-                habit={habit}
-                showSeparator={index < enrichedHabits.slice(0, 10).length - 1}
-              />
-            ))}
+        <>
+          <ScrollArea className="h-[300px]">
+            <div>
+              {enrichedHabits.slice(0, 10).map((habit, index) => (
+                <HabitItem
+                  key={habit.id}
+                  habit={habit}
+                  showSeparator={index < enrichedHabits.slice(0, 10).length - 1}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="mt-3">
+            <Link href="/habits">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground w-full text-xs"
+              >
+                View all
+              </Button>
+            </Link>
           </div>
-        </ScrollArea>
+        </>
       )}
     </ContentCard>
   );

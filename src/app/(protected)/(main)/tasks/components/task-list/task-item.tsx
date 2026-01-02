@@ -18,7 +18,9 @@ interface TaskItemProps {
 
 export const TaskItem = ({ task, showSeparator }: TaskItemProps) => {
   const toggleTask = useToggleTask(task.id);
-  const urgency = task.dueDate ? getDueDateUrgency(task.dueDate) : 'none';
+  const urgency = task.dueDate
+    ? getDueDateUrgency(task.dueDate, task.completed)
+    : 'none';
 
   return (
     <div>
@@ -73,12 +75,12 @@ export const TaskItem = ({ task, showSeparator }: TaskItemProps) => {
           <div
             className={cn(
               'shrink-0 text-xs whitespace-nowrap',
-              urgency === 'overdue' && 'text-destructive',
-              urgency === 'today' && 'text-orange-500',
-              urgency === 'upcoming' && 'text-muted-foreground'
+              urgency === 'overdue'
+                ? 'text-destructive'
+                : 'text-muted-foreground'
             )}
           >
-            {formatDueDate(task.dueDate)}
+            {formatDueDate(task.dueDate, task.completed)}
           </div>
         )}
       </div>

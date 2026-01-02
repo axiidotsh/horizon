@@ -79,13 +79,14 @@ export function groupTasksByDueDate(tasks: Task[]) {
     dueToday: [] as Task[],
     dueThisWeek: [] as Task[],
     upcoming: [] as Task[],
+    noDueDate: [] as Task[],
   };
 
   const today = normalizeDateToMidnight(new Date());
 
   tasks.forEach((task) => {
     if (!task.dueDate) {
-      groups.upcoming.push(task);
+      groups.noDueDate.push(task);
       return;
     }
 
@@ -107,7 +108,10 @@ export function groupTasksByDueDate(tasks: Task[]) {
   return groups;
 }
 
-export function formatDueDate(date: Date | string): string {
+export function formatDueDate(
+  date: Date | string,
+  completed?: boolean
+): string {
   const dueDate = normalizeDateToMidnight(new Date(date));
   const today = normalizeDateToMidnight(new Date());
 
@@ -115,16 +119,23 @@ export function formatDueDate(date: Date | string): string {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays < 0) {
-    return `${Math.abs(diffDays)} days overdue`;
+    if (completed) {
+      return dueDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+    }
+    const absDays = Math.abs(diffDays);
+    return absDays === 1 ? '1 day overdue' : `${absDays} days overdue`;
   }
   if (diffDays === 0) {
-    return 'Due today';
+    return 'Today';
   }
   if (diffDays === 1) {
-    return 'Due tomorrow';
+    return 'Tomorrow';
   }
   if (diffDays <= 7) {
-    return `Due in ${diffDays} days`;
+    return `In ${diffDays} days`;
   }
   return dueDate.toLocaleDateString('en-US', {
     month: 'short',
@@ -139,7 +150,8 @@ export function isOverdue(date: Date | string): boolean {
 }
 
 export function getDueDateUrgency(
-  dueDate: Date | string
+  dueDate: Date | string,
+  completed?: boolean
 ): 'overdue' | 'today' | 'upcoming' | 'none' {
   if (!dueDate) return 'none';
 
@@ -147,7 +159,7 @@ export function getDueDateUrgency(
   const today = normalizeDateToMidnight(new Date());
   const due = normalizeDateToMidnight(date);
 
-  if (due < today) return 'overdue';
+  if (due < today) return completed ? 'none' : 'overdue';
   if (due.getTime() === today.getTime()) return 'today';
   return 'upcoming';
 }

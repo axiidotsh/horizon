@@ -112,7 +112,7 @@ export const TaskListItem = ({ task }: TaskListItemProps) => {
                     : 'text-muted-foreground'
                 )}
               >
-                {formatDueDate(task.dueDate)}
+                {formatDueDate(task.dueDate, task.completed)}
               </span>
             )}
           </div>
