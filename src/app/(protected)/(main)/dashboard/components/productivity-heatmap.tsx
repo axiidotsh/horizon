@@ -16,19 +16,11 @@ import {
   type HeatmapDay,
 } from '@/utils/heatmap';
 import { cn } from '@/utils/utils';
-import type { HeatmapData } from '../hooks/types';
+import { useHeatmapData } from '../hooks/queries/use-heatmap-data';
 
-interface ProductivityHeatmapProps {
-  data: HeatmapData | undefined;
-  isLoading: boolean;
-  error: Error | null;
-}
+export function ProductivityHeatmap() {
+  const { data, isLoading, error } = useHeatmapData(52);
 
-export function ProductivityHeatmap({
-  data,
-  isLoading,
-  error,
-}: ProductivityHeatmapProps) {
   if (error) {
     return (
       <ContentCard title="Productivity" contentClassName="mt-6">

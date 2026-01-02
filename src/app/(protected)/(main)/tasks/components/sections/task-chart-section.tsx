@@ -18,7 +18,7 @@ export const TaskChartSection = () => {
 
   return (
     <GenericAreaChart
-      title="Task Completion Trend"
+      title="Task Completion"
       data={chartData ?? []}
       xAxisKey="date"
       yAxisKey="completionRate"

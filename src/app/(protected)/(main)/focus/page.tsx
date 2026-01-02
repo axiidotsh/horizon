@@ -1,10 +1,10 @@
 'use client';
 
 import { PageHeading } from '@/components/page-heading';
+import { FocusChartSection } from './components/sections/focus-chart-section';
 import { FocusMetricsSection } from './components/sections/focus-metrics-section';
 import { FocusTimerSection } from './components/sections/focus-timer-section';
 import { RecentSessionsSection } from './components/sections/recent-sessions-section';
-import { SessionDurationChartSection } from './components/sections/session-duration-chart-section';
 
 export default function FocusPage() {
   return (
@@ -23,7 +23,7 @@ export default function FocusPage() {
         <FocusMetricsSection />
         <FocusTimerSection />
         <RecentSessionsSection />
-        <SessionDurationChartSection />
+        <FocusChartSection />
       </div>
     </div>
   );

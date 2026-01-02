@@ -4,6 +4,7 @@ import { ContentCard } from '@/app/(protected)/(main)/components/content-card';
 import { createTaskDialogAtom } from '@/app/(protected)/(main)/tasks/atoms/task-dialogs';
 import { TaskItem } from '@/app/(protected)/(main)/tasks/components/task-list/task-item';
 import { useTasks } from '@/app/(protected)/(main)/tasks/hooks/queries/use-tasks';
+import { ErrorState } from '@/components/error-state';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,7 +14,7 @@ import Link from 'next/link';
 
 export function DashboardTasksCard() {
   const [, setCreateDialogOpen] = useAtom(createTaskDialogAtom);
-  const { data: allTasks, isLoading } = useTasks();
+  const { data: allTasks, isLoading, error, refetch } = useTasks();
 
   const displayTasks = allTasks?.slice(0, 10) || [];
 
@@ -26,6 +27,16 @@ export function DashboardTasksCard() {
           ))}
         </div>
       </ContentCard>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        onRetry={refetch}
+        title="Failed to load tasks"
+        description="Unable to fetch tasks. Please try again."
+      />
     );
   }
 

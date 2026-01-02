@@ -1,4 +1,6 @@
 import { DASHBOARD_QUERY_KEYS } from '@/app/(protected)/(main)/dashboard/hooks/dashboard-query-keys';
+import type { DashboardMetrics } from '@/app/(protected)/(main)/dashboard/hooks/types';
+import { updateDashboardMetricsForHabitToggle } from '@/app/(protected)/(main)/dashboard/utils/dashboard-calculations';
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { api } from '@/lib/rpc';
 import { useQueryClient, type QueryKey } from '@tanstack/react-query';
@@ -72,6 +74,10 @@ export function useToggleHabit(habitId?: string) {
           data,
         }));
 
+        const previousMetrics = queryClient.getQueryData<{
+          metrics: DashboardMetrics;
+        }>(DASHBOARD_QUERY_KEYS.metrics);
+
         if (queries.length > 0 && queries[0][1]) {
           const data = queries[0][1];
           const date = getDate(variables);
@@ -81,10 +87,22 @@ export function useToggleHabit(habitId?: string) {
             date
           );
           updateAllHabitQueries(updatedHabits);
+
+          if (previousMetrics) {
+            const updatedMetrics = updateDashboardMetricsForHabitToggle(
+              previousMetrics.metrics,
+              data.habits,
+              habitId!,
+              date
+            );
+            queryClient.setQueryData(DASHBOARD_QUERY_KEYS.metrics, {
+              metrics: updatedMetrics,
+            });
+          }
         }
 
         const previousStats = queryClient.getQueryData(HABITS_QUERY_KEYS.stats);
-        return { previousData, previousStats, snapshots: [] };
+        return { previousData, previousStats, previousMetrics, snapshots: [] };
       },
       onError: (
         _error: Error,
@@ -92,6 +110,7 @@ export function useToggleHabit(habitId?: string) {
         context?: {
           previousData?: Array<{ queryKey: QueryKey; data: unknown }>;
           previousStats?: unknown;
+          previousMetrics?: unknown;
           snapshots: Array<{ queryKey: QueryKey; data: unknown }>;
         }
       ) => {
@@ -104,6 +123,12 @@ export function useToggleHabit(habitId?: string) {
           queryClient.setQueryData(
             HABITS_QUERY_KEYS.stats,
             context.previousStats
+          );
+        }
+        if (context?.previousMetrics) {
+          queryClient.setQueryData(
+            DASHBOARD_QUERY_KEYS.metrics,
+            context.previousMetrics
           );
         }
       },

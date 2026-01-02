@@ -1,4 +1,6 @@
 import { DASHBOARD_QUERY_KEYS } from '@/app/(protected)/(main)/dashboard/hooks/dashboard-query-keys';
+import type { DashboardMetrics } from '@/app/(protected)/(main)/dashboard/hooks/types';
+import { updateDashboardMetricsForTaskToggle } from '@/app/(protected)/(main)/dashboard/utils/dashboard-calculations';
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { api } from '@/lib/rpc';
 import { useQueryClient, type QueryKey } from '@tanstack/react-query';
@@ -71,8 +73,16 @@ export function useToggleTask(taskId?: string) {
         data,
       }));
 
+      const previousMetrics = queryClient.getQueryData<{
+        metrics: DashboardMetrics;
+      }>(DASHBOARD_QUERY_KEYS.metrics);
+
       if (queries.length > 0 && queries[0][1]) {
         const data = queries[0][1];
+        const toggledTask = data.tasks.find(
+          (task) => task.id === variables.param.id
+        );
+
         const updatedTasks = data.tasks.map((task) =>
           task.id === variables.param.id
             ? {
@@ -83,10 +93,27 @@ export function useToggleTask(taskId?: string) {
             : task
         );
         updateAllTaskQueries(updatedTasks);
+
+        if (toggledTask && previousMetrics) {
+          const updatedMetrics = updateDashboardMetricsForTaskToggle(
+            previousMetrics.metrics,
+            toggledTask,
+            toggledTask.completed
+          );
+          queryClient.setQueryData(DASHBOARD_QUERY_KEYS.metrics, {
+            metrics: updatedMetrics,
+          });
+        }
       }
 
       const previousStats = queryClient.getQueryData(TASK_QUERY_KEYS.stats);
-      return { previousData, previousStats, previousChartData, snapshots: [] };
+      return {
+        previousData,
+        previousStats,
+        previousChartData,
+        previousMetrics,
+        snapshots: [],
+      };
     },
     onError: (_error, _variables, context) => {
       if (context?.previousData) {
@@ -101,6 +128,12 @@ export function useToggleTask(taskId?: string) {
         context.previousChartData.forEach(({ queryKey, data }) => {
           queryClient.setQueryData(queryKey, data);
         });
+      }
+      if (context?.previousMetrics) {
+        queryClient.setQueryData(
+          DASHBOARD_QUERY_KEYS.metrics,
+          context.previousMetrics
+        );
       }
     },
     errorMessage: 'Failed to toggle task',

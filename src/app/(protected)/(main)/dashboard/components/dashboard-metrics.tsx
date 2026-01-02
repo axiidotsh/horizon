@@ -1,44 +1,54 @@
 import { MetricCard } from '@/app/(protected)/(main)/components/metric-card';
+import { ErrorState } from '@/components/error-state';
 import { CheckCircle2, Clock, Flame, Target } from 'lucide-react';
-import type { DashboardMetrics as DashboardMetricsType } from '../hooks/types';
+import { useDashboardMetrics } from '../hooks/queries/use-dashboard-metrics';
 
-interface DashboardMetricsProps {
-  metrics: DashboardMetricsType;
-}
+export function DashboardMetrics() {
+  const { data, isLoading, error, refetch } = useDashboardMetrics();
 
-export function DashboardMetrics({ metrics }: DashboardMetricsProps) {
+  if (error) {
+    return (
+      <ErrorState
+        onRetry={refetch}
+        title="Failed to load metrics"
+        description="Unable to fetch metrics. Please try again."
+      />
+    );
+  }
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <MetricCard
         title="Focus"
         icon={Clock}
-        content={formatMinutesToTime(metrics.focus.todayMinutes)}
-        footer={metrics.focus.timeDiffLabel}
+        content={formatMinutesToTime(data?.focus.todayMinutes ?? 0)}
+        footer={data?.focus.timeDiffLabel}
+        isLoading={isLoading}
       />
-
       <MetricCard
         title="Tasks"
         icon={CheckCircle2}
-        content={`${metrics.tasks.completedToday}/${metrics.tasks.totalToday}`}
+        content={`${data?.tasks.completedToday}/${data?.tasks.totalToday}`}
         footer={
-          metrics.tasks.overdue > 0
-            ? `${metrics.tasks.overdue} overdue`
-            : metrics.tasks.comparisonLabel
+          data?.tasks.overdue && data?.tasks.overdue > 0
+            ? `${data?.tasks.overdue} overdue`
+            : data?.tasks.comparisonLabel
         }
+        isLoading={isLoading}
       />
-
       <MetricCard
         title="Habits"
         icon={Target}
-        content={`${metrics.habits.completedToday}/${metrics.habits.totalActive}`}
-        footer={metrics.habits.comparisonLabel}
+        content={`${data?.habits.completedToday}/${data?.habits.totalActive}`}
+        footer={data?.habits.comparisonLabel}
+        isLoading={isLoading}
       />
-
       <MetricCard
         title="Overall Streak"
         icon={Flame}
-        content={`${metrics.streak.currentStreak} days`}
-        footer={metrics.streak.comparisonLabel}
+        content={`${data?.streak.currentStreak} days`}
+        footer={data?.streak.comparisonLabel}
+        isLoading={isLoading}
       />
     </div>
   );

@@ -5,6 +5,7 @@ import { createDialogOpenAtom } from '@/app/(protected)/(main)/habits/atoms/dial
 import { HabitItem } from '@/app/(protected)/(main)/habits/components/habit-item';
 import { useHabits } from '@/app/(protected)/(main)/habits/hooks/queries/use-habits';
 import { enrichHabitsWithMetrics } from '@/app/(protected)/(main)/habits/utils/habit-calculations';
+import { ErrorState } from '@/components/error-state';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,7 +14,7 @@ import { Plus } from 'lucide-react';
 
 export function DashboardHabitsCard() {
   const [, setCreateDialogOpen] = useAtom(createDialogOpenAtom);
-  const { data: habits, isLoading } = useHabits(7);
+  const { data: habits, isLoading, error, refetch } = useHabits(7);
 
   const enrichedHabits = habits ? enrichHabitsWithMetrics(habits) : [];
 
@@ -26,6 +27,16 @@ export function DashboardHabitsCard() {
           ))}
         </div>
       </ContentCard>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        onRetry={refetch}
+        title="Failed to load habits"
+        description="Unable to fetch habits. Please try again."
+      />
     );
   }
 

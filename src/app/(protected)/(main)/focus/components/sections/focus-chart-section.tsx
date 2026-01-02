@@ -15,7 +15,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const SessionDurationChartSection = () => {
+export const FocusChartSection = () => {
   const [chartPeriod, setChartPeriod] = useState(7);
 
   const {
@@ -39,7 +39,7 @@ export const SessionDurationChartSection = () => {
 
   return (
     <GenericAreaChart
-      title="Session Duration Timeline"
+      title="Focus Time"
       data={chartData}
       xAxisKey="date"
       yAxisKey="duration"
