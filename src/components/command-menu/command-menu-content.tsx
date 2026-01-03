@@ -65,7 +65,7 @@ export const CommandMenuContent = ({
 
   return (
     <PopoverContent
-      className="dark:bg-popover/70 bg-popover/50 w-(--radix-popover-trigger-width) p-0 shadow-lg backdrop-blur-xl backdrop-saturate-150"
+      className="dark:bg-popover/70 bg-popover/50 data-[state=closed]:zoom-out-100! data-[state=open]:zoom-in-100! data-[side=bottom]:slide-in-from-top-4! w-(--radix-popover-trigger-width) p-0 shadow-lg backdrop-blur-xl backdrop-saturate-150"
       align="start"
       sideOffset={20}
       onOpenAutoFocus={(e) => e.preventDefault()}
