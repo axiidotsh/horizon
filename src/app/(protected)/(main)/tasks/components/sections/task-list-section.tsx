@@ -20,7 +20,13 @@ import { TaskListSkeleton } from '../skeletons/task-list-skeleton';
 import { TaskListActions } from '../task-list/task-list-actions';
 import { TaskListGroup } from '../task-list/task-list-group';
 
-export const TaskListSection = () => {
+interface TaskListSectionProps {
+  isDashboard?: boolean;
+}
+
+export const TaskListSection = ({
+  isDashboard = false,
+}: TaskListSectionProps) => {
   const { data: tasks = [], isLoading } = useTasks();
   const sortBy = useAtomValue(sortByAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
@@ -37,13 +43,18 @@ export const TaskListSection = () => {
   const groupedTasks = groupTasksByDueDate(sortedTasks);
 
   const defaultOpenSection = useMemo(() => {
+    if (isDashboard) {
+      if (groupedTasks.dueToday.length > 0) return 'dueToday';
+      if (groupedTasks.overdue.length > 0) return 'overdue';
+      return 'dueToday';
+    }
     if (groupedTasks.dueToday.length > 0) return 'dueToday';
     if (groupedTasks.dueThisWeek.length > 0) return 'dueThisWeek';
     if (groupedTasks.upcoming.length > 0) return 'upcoming';
     if (groupedTasks.overdue.length > 0) return 'overdue';
     if (groupedTasks.noDueDate.length > 0) return 'noDueDate';
     return 'dueToday';
-  }, [groupedTasks]);
+  }, [groupedTasks, isDashboard]);
 
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
 
@@ -84,6 +95,43 @@ export const TaskListSection = () => {
           <ListChecksIcon className="mb-2 size-12 stroke-1 opacity-50" />
           <p className="text-sm font-medium">No tasks found</p>
           <p className="text-xs">Try adjusting your search or filters</p>
+        </div>
+      );
+    }
+
+    if (isDashboard) {
+      return (
+        <div className="my-4 space-y-1">
+          <TaskListGroup
+            title="Due Today"
+            tasks={groupedTasks.dueToday}
+            isOpen={openSections.has('dueToday')}
+            onToggle={() => toggleSection('dueToday')}
+          />
+          <TaskListGroup
+            title="Overdue"
+            tasks={groupedTasks.overdue}
+            isOpen={openSections.has('overdue')}
+            onToggle={() => toggleSection('overdue')}
+          />
+          <TaskListGroup
+            title="No due date"
+            tasks={groupedTasks.noDueDate}
+            isOpen={openSections.has('noDueDate')}
+            onToggle={() => toggleSection('noDueDate')}
+          />
+          <TaskListGroup
+            title="Due this week"
+            tasks={groupedTasks.dueThisWeek}
+            isOpen={openSections.has('dueThisWeek')}
+            onToggle={() => toggleSection('dueThisWeek')}
+          />
+          <TaskListGroup
+            title="Upcoming"
+            tasks={groupedTasks.upcoming}
+            isOpen={openSections.has('upcoming')}
+            onToggle={() => toggleSection('upcoming')}
+          />
         </div>
       );
     }

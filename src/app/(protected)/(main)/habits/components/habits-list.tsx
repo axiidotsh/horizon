@@ -1,12 +1,26 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/utils/utils';
+import { useAtomValue } from 'jotai';
 import { ListChecksIcon, TargetIcon } from 'lucide-react';
+import { useMemo } from 'react';
+import {
+  searchQueryAtom,
+  sortByAtom,
+  statusFilterAtom,
+} from '../atoms/habit-atoms';
+import { useHabits } from '../hooks/queries/use-habits';
 import type { HabitWithMetrics } from '../hooks/types';
+import {
+  enrichHabitsWithMetrics,
+  filterHabits,
+  sortHabits,
+} from '../utils/habit-calculations';
 import { HabitRow } from './habit-row';
 
 // Helper to get the last 7 days (today + 6 previous days)
@@ -152,12 +166,61 @@ export interface CompletionRecord {
 
 export type Habit = HabitWithMetrics;
 
-interface HabitsListProps {
-  habits: Habit[];
-  sortedHabits: Habit[];
+function HabitTrackerSkeleton() {
+  return (
+    <div className="my-4 space-y-3 pr-4">
+      <div className="border-border mb-2 flex items-center gap-3 border-b pb-2">
+        <div className="flex-1" />
+        <div className="flex gap-1">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <Skeleton key={i} className="size-3.5" />
+          ))}
+        </div>
+        <div className="w-8 shrink-0" />
+      </div>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div
+          key={i}
+          className="border-border flex items-center gap-3 border-b pb-3"
+        >
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+          <div className="flex gap-1">
+            {Array.from({ length: 7 }).map((_, j) => (
+              <Skeleton key={j} className="size-3.5 rounded-full" />
+            ))}
+          </div>
+          <Skeleton className="size-8 shrink-0" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
-export function HabitsList({ habits, sortedHabits }: HabitsListProps) {
+export function HabitsList() {
+  const { data: rawHabits = [], isLoading } = useHabits();
+  const sortBy = useAtomValue(sortByAtom);
+  const searchQuery = useAtomValue(searchQueryAtom);
+  const statusFilter = useAtomValue(statusFilterAtom);
+
+  const habits = useMemo(() => enrichHabitsWithMetrics(rawHabits), [rawHabits]);
+
+  const filteredHabits = useMemo(
+    () => filterHabits(habits, searchQuery, statusFilter),
+    [habits, searchQuery, statusFilter]
+  );
+
+  const sortedHabits = useMemo(
+    () => sortHabits(filteredHabits, sortBy),
+    [filteredHabits, sortBy]
+  );
+
+  if (isLoading) {
+    return <HabitTrackerSkeleton />;
+  }
+
   return (
     <ScrollArea className="my-4">
       <div className="max-h-[600px]">
@@ -175,7 +238,6 @@ export function HabitsList({ habits, sortedHabits }: HabitsListProps) {
           </div>
         ) : (
           <div className="pr-4">
-            {/* Fixed header row with day labels */}
             <div className="border-border mb-2 flex items-center gap-3 border-b pb-2">
               <span className="text-muted-foreground font-mono text-xs font-medium">
                 {sortedHabits.length}{' '}
@@ -183,7 +245,6 @@ export function HabitsList({ habits, sortedHabits }: HabitsListProps) {
               </span>
               <div className="flex-1" />
               <WeekDayHeader />
-              {/* Spacer for dropdown button alignment */}
               <div className="w-8 shrink-0" />
             </div>
             <ul className="space-y-3">
