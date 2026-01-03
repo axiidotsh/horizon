@@ -8,14 +8,9 @@ import {
 } from 'lucide-react';
 import { MetricCard } from '../../../components/metric-card';
 import { useTaskStats } from '../../hooks/queries/use-task-stats';
-import { TaskMetricsSkeleton } from '../skeletons/task-metrics-skeleton';
 
 export const TaskMetricsSection = () => {
   const { data: stats, isLoading } = useTaskStats();
-
-  if (isLoading) {
-    return <TaskMetricsSkeleton />;
-  }
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -24,24 +19,28 @@ export const TaskMetricsSection = () => {
         icon={ListTodoIcon}
         content={stats?.total.toString() ?? '0'}
         footer="This week"
+        isLoading={isLoading}
       />
       <MetricCard
         title="Completed"
         icon={CheckCircle2Icon}
         content={stats?.completed.toString() ?? '0'}
         footer="This week"
+        isLoading={isLoading}
       />
       <MetricCard
         title="Pending"
         icon={CircleDashed}
         content={stats?.pending.toString() ?? '0'}
         footer="This week"
+        isLoading={isLoading}
       />
       <MetricCard
         title="Completion Rate"
         icon={TrendingUpIcon}
         content={`${stats?.completionRate ?? 0}%`}
         footer="This week"
+        isLoading={isLoading}
       />
     </div>
   );
