@@ -13,6 +13,7 @@ import { focusRouter } from './routes/focus';
 import { habitsRouter } from './routes/habits';
 import { projectsRouter } from './routes/projects';
 import { tasksRouter } from './routes/tasks';
+import { userRouter } from './routes/user';
 
 const app = new Hono().basePath('/api').use(
   '*',
@@ -35,6 +36,7 @@ const router = app
   .route('/projects', projectsRouter)
   .route('/habits', habitsRouter)
   .route('/dashboard', dashboardRouter)
+  .route('/user', userRouter)
   .route('/docs', docsRouter);
 
 export type AppType = typeof router;
