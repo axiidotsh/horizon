@@ -9,36 +9,47 @@ import {
   PaletteIcon,
   ShieldAlertIcon,
 } from 'lucide-react';
-import { AppearanceSettings } from './appearance-settings';
-import { DangerZoneSettings } from './danger-zone-settings';
-import { FocusSettings } from './focus-settings';
-import { TasksSettings } from './tasks-settings';
+import { AppearanceSettings } from './components/appearance-settings';
+import { DangerZoneSettings } from './components/danger-zone-settings';
+import { FocusSettings } from './components/focus-settings';
+import { AppearanceSettingsSkeleton } from './components/skeletons/appearance-settings-skeleton';
+import { DangerZoneSettingsSkeleton } from './components/skeletons/danger-zone-settings-skeleton';
+import { FocusSettingsSkeleton } from './components/skeletons/focus-settings-skeleton';
+import { TasksSettingsSkeleton } from './components/skeletons/tasks-settings-skeleton';
+import { TasksSettings } from './components/tasks-settings';
+import { useSettings } from './hooks/queries/use-settings';
 
 export default function SettingsPage() {
+  const { isLoading } = useSettings();
+
   const tabs = [
     {
       value: 'appearance',
       icon: PaletteIcon,
       label: 'Appearance',
       content: <AppearanceSettings />,
+      skeleton: <AppearanceSettingsSkeleton />,
     },
     {
       value: 'focus',
       icon: ClockIcon,
       label: 'Focus',
       content: <FocusSettings />,
+      skeleton: <FocusSettingsSkeleton />,
     },
     {
       value: 'tasks',
       icon: ListTodoIcon,
       label: 'Tasks',
       content: <TasksSettings />,
+      skeleton: <TasksSettingsSkeleton />,
     },
     {
       value: 'danger',
       icon: ShieldAlertIcon,
       label: 'Danger Zone',
       content: <DangerZoneSettings />,
+      skeleton: <DangerZoneSettingsSkeleton />,
     },
   ];
 
@@ -69,7 +80,7 @@ export default function SettingsPage() {
         <div className="min-w-0 flex-1 md:px-10">
           {tabs.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-0">
-              {tab.content}
+              {isLoading ? tab.skeleton : tab.content}
             </TabsContent>
           ))}
         </div>

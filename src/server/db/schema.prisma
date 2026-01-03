@@ -26,6 +26,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  commandMenuPosition   String       @default("top")
+  defaultFocusDuration  Int          @default(45)
+  defaultTaskPriority   TaskPriority @default(MEDIUM)
+
   sessions         Session[]
   accounts         Account[]
   focusSessions    FocusSession[]

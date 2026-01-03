@@ -1,6 +1,7 @@
 'use client';
 
-import { settingsAtom } from '@/atoms/settings-atoms';
+import { useUpdateSettings } from '@/app/(protected)/(main)/settings/hooks/mutations/use-update-settings';
+import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,18 +16,23 @@ import {
 } from '@/components/ui/responsive-dialog';
 import { cn } from '@/utils/utils';
 import { useAtom } from 'jotai';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { customDurationSettingsDialogAtom } from '../../atoms/session-dialogs';
 import { MAX_DURATION, MIN_DURATION } from '../../constants';
 
 export const CustomDurationSettingsDialog = () => {
   const [open, setOpen] = useAtom(customDurationSettingsDialogAtom);
-  const [settings, setSettings] = useAtom(settingsAtom);
-  const [durationMinutes, setDurationMinutes] = useState(
-    settings.defaultFocusDuration.toString()
-  );
+  const { data: settings } = useSettings();
+  const { mutate: updateSettings } = useUpdateSettings();
+  const [durationMinutes, setDurationMinutes] = useState('45');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (settings?.defaultFocusDuration) {
+      setDurationMinutes(settings.defaultFocusDuration.toString());
+    }
+  }, [settings]);
 
   function handleDurationChange(value: string) {
     setDurationMinutes(value);
@@ -56,10 +62,9 @@ export const CustomDurationSettingsDialog = () => {
     if (isNaN(duration) || duration < MIN_DURATION || duration > MAX_DURATION)
       return;
 
-    setSettings((prev) => ({
-      ...prev,
-      defaultFocusDuration: duration,
-    }));
+    updateSettings({
+      json: { defaultFocusDuration: duration },
+    });
 
     const displayValue =
       duration >= 60
@@ -71,7 +76,7 @@ export const CustomDurationSettingsDialog = () => {
   }
 
   function handleOpenChange(newOpen: boolean) {
-    if (!newOpen) {
+    if (!newOpen && settings?.defaultFocusDuration) {
       setDurationMinutes(settings.defaultFocusDuration.toString());
       setError('');
     }

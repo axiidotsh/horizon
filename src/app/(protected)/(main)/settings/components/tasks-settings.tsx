@@ -1,6 +1,5 @@
 'use client';
 
-import { settingsAtom } from '@/atoms/settings-atoms';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -10,7 +9,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { TaskPriority } from '@/server/db/generated/client';
-import { useAtom } from 'jotai';
+import { useUpdateSettings } from '../hooks/mutations/use-update-settings';
+import { useSettings } from '../hooks/queries/use-settings';
 import { SettingSection } from './setting-section';
 
 const PRIORITY_OPTIONS = [
@@ -20,14 +20,14 @@ const PRIORITY_OPTIONS = [
 ];
 
 export const TasksSettings = () => {
-  const [settings, setSettings] = useAtom(settingsAtom);
+  const { data: settings } = useSettings();
+  const { mutate: updateSettings } = useUpdateSettings();
 
   function handleTaskPriorityChange(priority: string) {
-    setSettings((prev) => ({
-      ...prev,
-      defaultTaskPriority: priority as TaskPriority,
-    }));
+    updateSettings({ json: { defaultTaskPriority: priority as TaskPriority } });
   }
+
+  if (!settings) return null;
 
   return (
     <SettingSection

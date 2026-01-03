@@ -30,6 +30,28 @@ export const auth = betterAuth({
       clientSecret: serverEnv.GOOGLE_CLIENT_SECRET,
     },
   },
+  user: {
+    additionalFields: {
+      commandMenuPosition: {
+        type: ['top', 'center'],
+        required: true,
+        defaultValue: 'top',
+        input: true,
+      },
+      defaultFocusDuration: {
+        type: 'number',
+        required: true,
+        defaultValue: 45,
+        input: true,
+      },
+      defaultTaskPriority: {
+        type: ['LOW', 'MEDIUM', 'HIGH'],
+        required: true,
+        defaultValue: 'MEDIUM',
+        input: true,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,

@@ -1,12 +1,14 @@
 'use client';
 
-import { type CommandMenuPosition, settingsAtom } from '@/atoms/settings-atoms';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/utils/utils';
-import { useAtom } from 'jotai';
 import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useUpdateSettings } from '../hooks/mutations/use-update-settings';
+import { useSettings } from '../hooks/queries/use-settings';
 import { SettingSection } from './setting-section';
+
+type CommandMenuPosition = 'top' | 'center';
 
 const TopPositionPreview = () => (
   <div className="bg-muted/50 flex aspect-video w-full flex-col gap-1.5 rounded-md border p-2">
@@ -77,11 +79,14 @@ const THEME_OPTIONS = [
 
 export const AppearanceSettings = () => {
   const { theme, setTheme } = useTheme();
-  const [settings, setSettings] = useAtom(settingsAtom);
+  const { data: settings } = useSettings();
+  const { mutate: updateSettings } = useUpdateSettings();
 
   function handlePositionChange(position: CommandMenuPosition) {
-    setSettings((prev) => ({ ...prev, commandMenuPosition: position }));
+    updateSettings({ json: { commandMenuPosition: position } });
   }
+
+  if (!settings) return null;
 
   return (
     <div className="space-y-6">

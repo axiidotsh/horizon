@@ -1,4 +1,3 @@
-import type { CommandMenuPosition } from '@/atoms/settings-atoms';
 import type { TaskPriority } from '@/server/db/generated/client';
 import {
   BrainIcon,
@@ -23,6 +22,8 @@ import {
   TimerIcon,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
+
+type CommandMenuPosition = 'top' | 'center';
 
 interface CommandItemBase {
   name: string;

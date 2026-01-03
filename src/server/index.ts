@@ -12,6 +12,7 @@ import { docsRouter } from './routes/docs';
 import { focusRouter } from './routes/focus';
 import { habitsRouter } from './routes/habits';
 import { projectsRouter } from './routes/projects';
+import { settingsRouter } from './routes/settings';
 import { tasksRouter } from './routes/tasks';
 import { userRouter } from './routes/user';
 
@@ -37,6 +38,7 @@ const router = app
   .route('/habits', habitsRouter)
   .route('/dashboard', dashboardRouter)
   .route('/user', userRouter)
+  .route('/settings', settingsRouter)
   .route('/docs', docsRouter);
 
 export type AppType = typeof router;

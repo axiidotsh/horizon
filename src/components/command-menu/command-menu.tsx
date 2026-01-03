@@ -1,6 +1,6 @@
 'use client';
 
-import { settingsAtom } from '@/atoms/settings-atoms';
+import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
 import { CommandActionsView } from '@/components/command-menu/command-actions-view';
 import { CommandMenuContent } from '@/components/command-menu/command-menu-content';
 import { CommandMenuFooter } from '@/components/command-menu/command-menu-footer';
@@ -14,7 +14,6 @@ import { useCommandItems } from '@/hooks/command-menu/use-command-items';
 import { useCommandRegistry } from '@/hooks/command-menu/use-command-registry';
 import { useCommandState } from '@/hooks/command-menu/use-command-state';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAtomValue } from 'jotai';
 import { useCallback, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
@@ -23,13 +22,13 @@ export const CommandMenu = () => {
   const commands = useCommandRegistry();
   const items = useCommandItems();
   const { handleAction, handleDateToggle } = useCommandActions();
-  const settings = useAtomValue(settingsAtom);
+  const { data: settings } = useSettings();
   const isMobile = useIsMobile();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogInputRef = useRef<HTMLInputElement>(null);
 
-  const isCentered = settings.commandMenuPosition === 'center';
+  const isCentered = settings?.commandMenuPosition === 'center';
   const showStartFocusItem = !commands.some((cmd) => cmd.category === 'focus');
 
   useHotkeys(

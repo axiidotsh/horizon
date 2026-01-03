@@ -1,6 +1,6 @@
 'use client';
 
-import { settingsAtom } from '@/atoms/settings-atoms';
+import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { createTaskDialogAtom } from '../../atoms/task-dialogs';
 import { PRIORITY_OPTIONS } from '../../constants';
@@ -31,7 +31,7 @@ import { TagInput } from './tag-input';
 
 export const CreateTaskDialog = () => {
   const [open, setOpen] = useAtom(createTaskDialogAtom);
-  const settings = useAtomValue(settingsAtom);
+  const { data: settings } = useSettings();
   const createTask = useCreateTask();
   const { data: projects = [] } = useProjects();
   const existingTags = useExistingTags();
@@ -39,21 +39,21 @@ export const CreateTaskDialog = () => {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState<string>(
-    settings.defaultTaskPriority
+    settings?.defaultTaskPriority ?? 'MEDIUM'
   );
   const [projectId, setProjectId] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
-    if (open) {
+    if (open && settings?.defaultTaskPriority) {
       setPriority(settings.defaultTaskPriority);
     }
-  }, [open, settings.defaultTaskPriority]);
+  }, [open, settings]);
 
   const resetForm = () => {
     setTitle('');
     setDueDate(undefined);
-    setPriority(settings.defaultTaskPriority);
+    setPriority(settings?.defaultTaskPriority ?? 'MEDIUM');
     setProjectId('');
     setTags([]);
   };

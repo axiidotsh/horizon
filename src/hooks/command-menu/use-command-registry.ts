@@ -8,11 +8,11 @@ import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
 import { calculateRemainingSeconds } from '@/app/(protected)/(main)/focus/utils/timer-calculations';
 import { createDialogOpenAtom } from '@/app/(protected)/(main)/habits/atoms/dialog-atoms';
+import { useUpdateSettings } from '@/app/(protected)/(main)/settings/hooks/mutations/use-update-settings';
 import {
   bulkAddTasksSheetAtom,
   createTaskDialogAtom,
 } from '@/app/(protected)/(main)/tasks/atoms/task-dialogs';
-import { settingsAtom } from '@/atoms/settings-atoms';
 import { logoutDialogOpenAtom } from '@/atoms/ui-atoms';
 import {
   ACCOUNT_ACTIONS,
@@ -36,6 +36,7 @@ export function useCommandRegistry() {
   const { setTheme } = useTheme();
   const { data: activeSession } = useActiveSession();
   const { pause, resume, complete } = useFocusSession();
+  const { mutate: updateSettings } = useUpdateSettings();
 
   const setCreateTaskDialogOpen = useSetAtom(createTaskDialogAtom);
   const setBulkAddTasksSheetOpen = useSetAtom(bulkAddTasksSheetAtom);
@@ -44,7 +45,6 @@ export function useCommandRegistry() {
   const setShowCancel = useSetAtom(showCancelDialogAtom);
   const setShowEndEarly = useSetAtom(showEndEarlyDialogAtom);
   const setShowDiscard = useSetAtom(showDiscardDialogAtom);
-  const setSettings = useSetAtom(settingsAtom);
   const setCustomDurationSettingsDialogOpen = useSetAtom(
     customDurationSettingsDialogAtom
   );
@@ -200,10 +200,9 @@ export function useCommandRegistry() {
         keywords: ['position', 'command menu', ...(position.searchWords || [])],
         category: 'position' as const,
         handler: () =>
-          setSettings((prev) => ({
-            ...prev,
-            commandMenuPosition: position.value,
-          })),
+          updateSettings({
+            json: { commandMenuPosition: position.value },
+          }),
       })),
       ...ACCOUNT_ACTIONS.map((action) => ({
         id: action.action,
@@ -228,10 +227,9 @@ export function useCommandRegistry() {
           if (duration.value === -1) {
             setCustomDurationSettingsDialogOpen(true);
           } else {
-            setSettings((prev) => ({
-              ...prev,
-              defaultFocusDuration: duration.value,
-            }));
+            updateSettings({
+              json: { defaultFocusDuration: duration.value },
+            });
             const displayValue =
               duration.value >= 60
                 ? `${duration.value / 60} hour${duration.value > 60 ? 's' : ''}`
@@ -247,10 +245,9 @@ export function useCommandRegistry() {
         keywords: priority.searchWords,
         category: 'settings' as const,
         handler: () => {
-          setSettings((prev) => ({
-            ...prev,
-            defaultTaskPriority: priority.value,
-          }));
+          updateSettings({
+            json: { defaultTaskPriority: priority.value },
+          });
           const displayValue = priority.value.toLowerCase();
           toast.success(`Default task priority set to ${displayValue}`);
         },
@@ -260,7 +257,7 @@ export function useCommandRegistry() {
       router,
       focusCommands,
       setTheme,
-      setSettings,
+      updateSettings,
       setCreateTaskDialogOpen,
       setBulkAddTasksSheetOpen,
       setCreateHabitDialogOpen,

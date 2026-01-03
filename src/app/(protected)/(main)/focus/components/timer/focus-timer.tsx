@@ -1,7 +1,9 @@
 'use client';
 
+import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
 import { Input } from '@/components/ui/input';
 import { useAtom, useSetAtom } from 'jotai';
+import { useEffect } from 'react';
 import {
   customMinutesAtom,
   isCustomDurationAtom,
@@ -30,6 +32,7 @@ interface FocusTimerProps {
 
 export const FocusTimer = ({ activeSession }: FocusTimerProps) => {
   const { start, pause, resume, complete } = useFocusSession(activeSession?.id);
+  const { data: settings } = useSettings();
 
   const [selectedMinutes, setSelectedMinutes] = useAtom(selectedMinutesAtom);
   const setCustomMinutes = useSetAtom(customMinutesAtom);
@@ -42,6 +45,12 @@ export const FocusTimer = ({ activeSession }: FocusTimerProps) => {
   const { sessionTask, handleTaskChange } = useSessionTask(activeSession);
   const { remainingSeconds, isCompleted, setIsCompleted } =
     useTimerLogic(activeSession);
+
+  useEffect(() => {
+    if (settings?.defaultFocusDuration && !activeSession) {
+      setSelectedMinutes(settings.defaultFocusDuration);
+    }
+  }, [settings, activeSession, setSelectedMinutes]);
 
   const handleStart = () => {
     start.mutate({
@@ -68,7 +77,7 @@ export const FocusTimer = ({ activeSession }: FocusTimerProps) => {
   };
 
   const handleReset = () => {
-    setSelectedMinutes(45);
+    setSelectedMinutes(settings?.defaultFocusDuration ?? 45);
     setCustomMinutes('');
     setIsCustomDuration(false);
   };

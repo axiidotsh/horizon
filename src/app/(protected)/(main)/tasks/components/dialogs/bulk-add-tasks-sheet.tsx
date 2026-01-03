@@ -1,6 +1,6 @@
 'use client';
 
-import { settingsAtom } from '@/atoms/settings-atoms';
+import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -22,7 +22,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom } from 'jotai';
 import { PlusIcon, XIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { bulkAddTasksSheetAtom } from '../../atoms/task-dialogs';
@@ -41,7 +41,7 @@ interface PendingTask {
 
 export const BulkAddTasksSheet = () => {
   const [open, setOpen] = useAtom(bulkAddTasksSheetAtom);
-  const settings = useAtomValue(settingsAtom);
+  const { data: settings } = useSettings();
   const bulkCreateTasks = useBulkCreateTasks();
   const { data: projects = [] } = useProjects() as {
     data: Project[] | undefined;
@@ -51,7 +51,7 @@ export const BulkAddTasksSheet = () => {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState<string>(
-    settings.defaultTaskPriority
+    settings?.defaultTaskPriority ?? 'MEDIUM'
   );
   const [projectId, setProjectId] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
@@ -59,15 +59,15 @@ export const BulkAddTasksSheet = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) {
+    if (open && settings?.defaultTaskPriority) {
       setPriority(settings.defaultTaskPriority);
     }
-  }, [open, settings.defaultTaskPriority]);
+  }, [open, settings]);
 
   const resetForm = () => {
     setTitle('');
     setDueDate(undefined);
-    setPriority(settings.defaultTaskPriority);
+    setPriority(settings?.defaultTaskPriority ?? 'MEDIUM');
     setProjectId('');
     setTags([]);
     setPendingTasks([]);

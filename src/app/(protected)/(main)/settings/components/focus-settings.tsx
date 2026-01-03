@@ -1,6 +1,5 @@
 'use client';
 
-import { settingsAtom } from '@/atoms/settings-atoms';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,8 +10,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/utils/utils';
-import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
+import { useUpdateSettings } from '../hooks/mutations/use-update-settings';
+import { useSettings } from '../hooks/queries/use-settings';
 import { SettingSection } from './setting-section';
 
 const DURATION_OPTIONS = [
@@ -25,41 +25,47 @@ const DURATION_OPTIONS = [
 const MAX_DURATION_MINUTES = 480;
 
 export const FocusSettings = () => {
-  const [settings, setSettings] = useAtom(settingsAtom);
+  const { data: settings } = useSettings();
+  const { mutate: updateSettings } = useUpdateSettings();
+
+  const [isCustomMode, setIsCustomMode] = useState(false);
+  const [customValue, setCustomValue] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (settings) {
+      const isCustomDuration = !DURATION_OPTIONS.some(
+        (option) => option.value === settings.defaultFocusDuration
+      );
+      if (isCustomDuration && !customValue) {
+        setCustomValue(settings?.defaultFocusDuration?.toString() ?? '');
+        setIsCustomMode(true);
+      }
+    }
+  }, [settings, customValue]);
+
+  if (!settings || !('defaultFocusDuration' in settings)) return null;
 
   const isCustomDuration = !DURATION_OPTIONS.some(
     (option) => option.value === settings.defaultFocusDuration
   );
 
-  const [isCustomMode, setIsCustomMode] = useState(isCustomDuration);
-  const [customValue, setCustomValue] = useState(
-    isCustomDuration ? settings.defaultFocusDuration.toString() : ''
-  );
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (isCustomDuration && !customValue) {
-      setCustomValue(settings.defaultFocusDuration.toString());
-      setIsCustomMode(true);
-    }
-  }, [isCustomDuration, settings.defaultFocusDuration, customValue]);
-
   const selectValue =
     isCustomMode || isCustomDuration
       ? 'custom'
-      : settings.defaultFocusDuration.toString();
+      : (settings?.defaultFocusDuration?.toString() ?? '');
 
   function handleFocusDurationChange(value: string) {
+    if (!settings || !('defaultFocusDuration' in settings)) return;
+
     if (value === 'custom') {
       setIsCustomMode(true);
-      setCustomValue(settings.defaultFocusDuration.toString());
+      setCustomValue(settings?.defaultFocusDuration?.toString() ?? '');
       setError('');
     } else {
       setIsCustomMode(false);
-      setSettings((prev) => ({
-        ...prev,
-        defaultFocusDuration: parseInt(value, 10),
-      }));
+      const duration = parseInt(value, 10);
+      updateSettings({ json: { defaultFocusDuration: duration } });
       setError('');
     }
   }
@@ -85,10 +91,7 @@ export const FocusSettings = () => {
     }
 
     setError('');
-    setSettings((prev) => ({
-      ...prev,
-      defaultFocusDuration: numValue,
-    }));
+    updateSettings({ json: { defaultFocusDuration: numValue } });
   }
 
   return (
