@@ -1,5 +1,4 @@
 import {
-  customDurationSettingsDialogAtom,
   showCancelDialogAtom,
   showDiscardDialogAtom,
   showEndEarlyDialogAtom,
@@ -17,10 +16,8 @@ import { logoutDialogOpenAtom } from '@/atoms/ui-atoms';
 import {
   ACCOUNT_ACTIONS,
   CREATE_COMMANDS,
-  FOCUS_DURATION_SETTINGS,
   PAGES,
   POSITIONS,
-  TASK_PRIORITY_SETTINGS,
   THEMES,
 } from '@/config/commands';
 import type { CommandDefinition } from '@/hooks/command-menu/types';
@@ -29,7 +26,6 @@ import { PauseIcon, PlayIcon, SaveIcon, SquareIcon, XIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
-import { toast } from 'sonner';
 
 export function useCommandRegistry() {
   const router = useRouter();
@@ -45,9 +41,6 @@ export function useCommandRegistry() {
   const setShowCancel = useSetAtom(showCancelDialogAtom);
   const setShowEndEarly = useSetAtom(showEndEarlyDialogAtom);
   const setShowDiscard = useSetAtom(showDiscardDialogAtom);
-  const setCustomDurationSettingsDialogOpen = useSetAtom(
-    customDurationSettingsDialogAtom
-  );
 
   const focusCommands = useMemo(() => {
     const commands: CommandDefinition[] = [];
@@ -217,41 +210,6 @@ export function useCommandRegistry() {
           }
         },
       })),
-      ...FOCUS_DURATION_SETTINGS.map((duration) => ({
-        id: `focus-duration-${duration.value}`,
-        name: duration.name,
-        icon: duration.icon,
-        keywords: duration.searchWords,
-        category: 'settings' as const,
-        handler: () => {
-          if (duration.value === -1) {
-            setCustomDurationSettingsDialogOpen(true);
-          } else {
-            updateSettings({
-              json: { defaultFocusDuration: duration.value },
-            });
-            const displayValue =
-              duration.value >= 60
-                ? `${duration.value / 60} hour${duration.value > 60 ? 's' : ''}`
-                : `${duration.value} minutes`;
-            toast.success(`Default focus duration set to ${displayValue}`);
-          }
-        },
-      })),
-      ...TASK_PRIORITY_SETTINGS.map((priority) => ({
-        id: `task-priority-${priority.value}`,
-        name: priority.name,
-        icon: priority.icon,
-        keywords: priority.searchWords,
-        category: 'settings' as const,
-        handler: () => {
-          updateSettings({
-            json: { defaultTaskPriority: priority.value },
-          });
-          const displayValue = priority.value.toLowerCase();
-          toast.success(`Default task priority set to ${displayValue}`);
-        },
-      })),
     ],
     [
       router,
@@ -262,7 +220,6 @@ export function useCommandRegistry() {
       setBulkAddTasksSheetOpen,
       setCreateHabitDialogOpen,
       setLogoutDialogOpen,
-      setCustomDurationSettingsDialogOpen,
     ]
   );
 }

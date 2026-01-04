@@ -7,7 +7,9 @@ export type CommandMenuItem =
   | { type: 'todo'; data: Task }
   | { type: 'habit'; data: Habit }
   | { type: 'session'; data: FocusSession }
-  | { type: 'focus-start' };
+  | { type: 'focus-start' }
+  | { type: 'focus-duration' }
+  | { type: 'task-priority' };
 
 export interface CommandDefinition {
   id: string;

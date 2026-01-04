@@ -6,12 +6,16 @@ export type CommandMenuItem =
   | { type: 'todo'; data: Task }
   | { type: 'habit'; data: Habit }
   | { type: 'session'; data: FocusSession }
-  | { type: 'focus-start' };
+  | { type: 'focus-start' }
+  | { type: 'focus-duration' }
+  | { type: 'task-priority' };
 
 export function getItemTitle(item: CommandMenuItem): string {
   if (item.type === 'todo') return item.data.title;
   if (item.type === 'habit') return item.data.title;
   if (item.type === 'session') return item.data.task || 'Focus session';
   if (item.type === 'focus-start') return 'Start focus session';
+  if (item.type === 'focus-duration') return 'Set default focus duration';
+  if (item.type === 'task-priority') return 'Set default task priority';
   return '';
 }

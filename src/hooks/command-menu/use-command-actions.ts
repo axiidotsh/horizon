@@ -1,5 +1,6 @@
 import {
   createCustomSessionAtom,
+  customDurationSettingsDialogAtom,
   deletingSessionAtom,
   editingSessionAtom,
 } from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
@@ -9,6 +10,7 @@ import {
   editingHabitIdAtom,
 } from '@/app/(protected)/(main)/habits/atoms/dialog-atoms';
 import { useToggleHabit } from '@/app/(protected)/(main)/habits/hooks/mutations/use-toggle-habit';
+import { useUpdateSettings } from '@/app/(protected)/(main)/settings/hooks/mutations/use-update-settings';
 import {
   deletingTaskAtom,
   editingTaskAtom,
@@ -16,11 +18,10 @@ import {
 import { useToggleTask } from '@/app/(protected)/(main)/tasks/hooks/mutations/use-toggle-task';
 import type { CommandMenuItem } from '@/hooks/command-menu/types';
 import { useSetAtom } from 'jotai';
-import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
+import { toast } from 'sonner';
 
 export function useCommandActions() {
-  const router = useRouter();
   const setEditingTask = useSetAtom(editingTaskAtom);
   const setDeletingTask = useSetAtom(deletingTaskAtom);
   const setEditingHabitId = useSetAtom(editingHabitIdAtom);
@@ -28,10 +29,14 @@ export function useCommandActions() {
   const setEditingSession = useSetAtom(editingSessionAtom);
   const setDeletingSession = useSetAtom(deletingSessionAtom);
   const setCreateCustomSession = useSetAtom(createCustomSessionAtom);
+  const setCustomDurationSettingsDialogOpen = useSetAtom(
+    customDurationSettingsDialogAtom
+  );
 
   const toggleTask = useToggleTask();
   const toggleHabit = useToggleHabit();
   const { start } = useFocusSession();
+  const { mutate: updateSettings } = useUpdateSettings();
 
   const handleAction = useCallback(
     (action: string, item: CommandMenuItem) => {
@@ -41,6 +46,39 @@ export function useCommandActions() {
         } else if (action.startsWith('start-')) {
           const duration = parseInt(action.replace('start-', ''), 10);
           start.mutate({ json: { durationMinutes: duration } });
+        }
+        return;
+      }
+
+      if (item.type === 'focus-duration') {
+        if (action === 'duration-custom') {
+          setCustomDurationSettingsDialogOpen(true);
+        } else if (action.startsWith('duration-')) {
+          const duration = parseInt(action.replace('duration-', ''), 10);
+          updateSettings({
+            json: { defaultFocusDuration: duration },
+          });
+          const displayValue =
+            duration >= 60
+              ? `${duration / 60} hour${duration > 60 ? 's' : ''}`
+              : `${duration} minutes`;
+          toast.success(`Default focus duration set to ${displayValue}`);
+        }
+        return;
+      }
+
+      if (item.type === 'task-priority') {
+        if (action.startsWith('priority-')) {
+          const priority = action.replace('priority-', '') as
+            | 'LOW'
+            | 'MEDIUM'
+            | 'HIGH';
+          updateSettings({
+            json: { defaultTaskPriority: priority },
+          });
+          toast.success(
+            `Default task priority set to ${priority.toLowerCase()}`
+          );
         }
         return;
       }
@@ -72,8 +110,9 @@ export function useCommandActions() {
       setEditingSession,
       setDeletingSession,
       setCreateCustomSession,
+      setCustomDurationSettingsDialogOpen,
+      updateSettings,
       start,
-      router,
     ]
   );
 

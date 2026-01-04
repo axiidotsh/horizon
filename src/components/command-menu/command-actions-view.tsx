@@ -8,6 +8,9 @@ import {
   CircleIcon,
   ClockIcon,
   PencilIcon,
+  SignalHighIcon,
+  SignalLowIcon,
+  SignalMediumIcon,
   TrashIcon,
 } from 'lucide-react';
 import { useMemo } from 'react';
@@ -26,6 +29,19 @@ const PRESET_TIMERS = [
   { label: '60 minutes', value: '60' },
   { label: '90 minutes', value: '90' },
   { label: '120 minutes', value: '120' },
+];
+
+const FOCUS_DURATION_OPTIONS = [
+  { label: '25 minutes', value: '25' },
+  { label: '45 minutes', value: '45' },
+  { label: '1 hour', value: '60' },
+  { label: '1.5 hours', value: '90' },
+];
+
+const TASK_PRIORITY_OPTIONS = [
+  { label: 'Low', value: 'LOW', icon: SignalLowIcon },
+  { label: 'Medium', value: 'MEDIUM', icon: SignalMediumIcon },
+  { label: 'High', value: 'HIGH', icon: SignalHighIcon },
 ];
 
 function formatDate(date: Date): string {
@@ -78,6 +94,42 @@ export const CommandActionsView = ({
             <PencilIcon className="size-4" />
             <span>Custom...</span>
           </CommandItem>
+        </>
+      );
+    }
+
+    if (item.type === 'focus-duration') {
+      return (
+        <>
+          {FOCUS_DURATION_OPTIONS.map((option) => (
+            <CommandItem
+              key={option.value}
+              onSelect={() => onAction(`duration-${option.value}`)}
+            >
+              <ClockIcon className="size-4" />
+              <span>{option.label}</span>
+            </CommandItem>
+          ))}
+          <CommandItem onSelect={() => onAction('duration-custom')}>
+            <PencilIcon className="size-4" />
+            <span>Custom...</span>
+          </CommandItem>
+        </>
+      );
+    }
+
+    if (item.type === 'task-priority') {
+      return (
+        <>
+          {TASK_PRIORITY_OPTIONS.map((option) => (
+            <CommandItem
+              key={option.value}
+              onSelect={() => onAction(`priority-${option.value}`)}
+            >
+              <option.icon className="size-4" />
+              <span>{option.label}</span>
+            </CommandItem>
+          ))}
         </>
       );
     }

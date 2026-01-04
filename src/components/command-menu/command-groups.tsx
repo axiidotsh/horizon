@@ -12,6 +12,7 @@ import {
   CircleIcon,
   ClockPlusIcon,
   PlayIcon,
+  SignalIcon,
   TimerIcon,
 } from 'lucide-react';
 
@@ -190,6 +191,31 @@ export const CommandGroups = ({
           </CommandItem>
         </CommandGroup>
       )}
+
+      <CommandGroup heading="Settings">
+        <CommandItem
+          value="set default focus duration timer minutes session pomodoro"
+          onSelect={() => onItemSelect({ type: 'focus-duration' })}
+        >
+          <TimerIcon className="size-3.5" />
+          <span>Set default focus duration</span>
+          <span className="text-muted-foreground ml-auto flex items-center gap-1 text-xs">
+            Actions
+            <Kbd>↵</Kbd>
+          </span>
+        </CommandItem>
+        <CommandItem
+          value="set default task priority low medium high"
+          onSelect={() => onItemSelect({ type: 'task-priority' })}
+        >
+          <SignalIcon className="size-3.5" />
+          <span>Set default task priority</span>
+          <span className="text-muted-foreground ml-auto flex items-center gap-1 text-xs">
+            Actions
+            <Kbd>↵</Kbd>
+          </span>
+        </CommandItem>
+      </CommandGroup>
 
       {todos.length > 0 && (
         <CommandGroup heading="Todos">
