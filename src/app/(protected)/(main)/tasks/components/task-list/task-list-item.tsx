@@ -70,11 +70,12 @@ export const TaskListItem = ({ task }: TaskListItemProps) => {
             <Badge
               variant={task.priority === 'HIGH' ? 'destructive' : 'secondary'}
               className={cn(
-                'text-xs',
+                'border text-xs',
                 task.priority === 'LOW' &&
-                  'bg-green-500/10 text-green-700 dark:text-green-400',
+                  'border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400',
                 task.priority === 'MEDIUM' &&
-                  'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                  'border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+                task.priority === 'HIGH' && 'border-red-500/50'
               )}
             >
               {formattedPriority}
