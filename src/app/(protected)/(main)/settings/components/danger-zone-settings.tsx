@@ -13,10 +13,12 @@ import {
   ResponsiveDialogTitle,
   ResponsiveDialogTrigger,
 } from '@/components/ui/responsive-dialog';
+import { Separator } from '@/components/ui/separator';
 import { useDeleteAccount } from '@/hooks/use-delete-account';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ClearDataDialog } from './clear-data-dialog';
 import { SettingSection } from './setting-section';
 
 export const DangerZoneSettings = () => {
@@ -53,54 +55,63 @@ export const DangerZoneSettings = () => {
   }
 
   return (
-    <SettingSection
-      title="Delete Account"
-      description="Permanently delete your account and all associated data"
-    >
-      <ResponsiveDialog open={isOpen} onOpenChange={handleOpenChange}>
-        <ResponsiveDialogTrigger asChild>
-          <Button variant="destructive">Delete Account</Button>
-        </ResponsiveDialogTrigger>
-        <ResponsiveDialogContent>
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>
-              Are you absolutely sure?
-            </ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove all your data from our servers.
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-          <div className="space-y-3 pb-2">
-            <Label htmlFor="delete-confirmation">
-              Type <span className="font-mono font-semibold">DELETE</span> to
-              confirm
-            </Label>
-            <Input
-              id="delete-confirmation"
-              value={deleteConfirmation}
-              onChange={(e) => setDeleteConfirmation(e.target.value)}
-              placeholder="Type DELETE here"
-            />
-          </div>
-          <ResponsiveDialogFooter>
-            <ResponsiveDialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </ResponsiveDialogClose>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={
-                deleteConfirmation !== 'DELETE' || deleteAccount.isPending
-              }
-              isLoading={deleteAccount.isPending}
-              loadingContent="Deleting..."
-            >
-              Delete Account
-            </Button>
-          </ResponsiveDialogFooter>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
-    </SettingSection>
+    <div className="space-y-6">
+      <SettingSection
+        title="Clear Data"
+        description="Delete specific types of data within a selected date range"
+      >
+        <ClearDataDialog />
+      </SettingSection>
+      <Separator />
+      <SettingSection
+        title="Delete Account"
+        description="Permanently delete your account and all associated data"
+      >
+        <ResponsiveDialog open={isOpen} onOpenChange={handleOpenChange}>
+          <ResponsiveDialogTrigger asChild>
+            <Button variant="destructive">Delete Account</Button>
+          </ResponsiveDialogTrigger>
+          <ResponsiveDialogContent>
+            <ResponsiveDialogHeader>
+              <ResponsiveDialogTitle>
+                Are you absolutely sure?
+              </ResponsiveDialogTitle>
+              <ResponsiveDialogDescription>
+                This action cannot be undone. This will permanently delete your
+                account and remove all your data from our servers.
+              </ResponsiveDialogDescription>
+            </ResponsiveDialogHeader>
+            <div className="space-y-3 pb-2">
+              <Label htmlFor="delete-confirmation">
+                Type <span className="font-mono font-semibold">DELETE</span> to
+                confirm
+              </Label>
+              <Input
+                id="delete-confirmation"
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder="Type DELETE here"
+              />
+            </div>
+            <ResponsiveDialogFooter>
+              <ResponsiveDialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </ResponsiveDialogClose>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={
+                  deleteConfirmation !== 'DELETE' || deleteAccount.isPending
+                }
+                isLoading={deleteAccount.isPending}
+                loadingContent="Deleting..."
+              >
+                Delete Account
+              </Button>
+            </ResponsiveDialogFooter>
+          </ResponsiveDialogContent>
+        </ResponsiveDialog>
+      </SettingSection>
+    </div>
   );
 };

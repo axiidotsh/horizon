@@ -45,5 +45,15 @@ export default defineConfig({
       apiPrefix: '/dashboard',
       appTypePath: 'src/server/routes/dashboard.ts',
     },
+    {
+      name: 'User',
+      apiPrefix: '/user',
+      appTypePath: 'src/server/routes/user.ts',
+    },
+    {
+      name: 'Settings',
+      apiPrefix: '/settings',
+      appTypePath: 'src/server/routes/settings.ts',
+    },
   ],
 });

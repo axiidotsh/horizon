@@ -51,3 +51,5 @@ export const settingsRouter = new Hono()
       defaultTaskPriority: updatedUser.defaultTaskPriority,
     });
   });
+
+export type AppType = typeof settingsRouter;

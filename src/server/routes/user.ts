@@ -4,8 +4,50 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 import { auth } from '../auth';
 import { db } from '../db';
+import { authMiddleware } from '../middleware/auth';
 
-const userRouter = new Hono()
+function calculateDateCutoff(dateRange: string): Date | null {
+  if (dateRange === 'all') {
+    return null;
+  }
+
+  const now = new Date();
+  const cutoffDate = new Date(now);
+
+  switch (dateRange) {
+    case '1d':
+      cutoffDate.setDate(now.getDate() - 1);
+      break;
+    case '7d':
+      cutoffDate.setDate(now.getDate() - 7);
+      break;
+    case '14d':
+      cutoffDate.setDate(now.getDate() - 14);
+      break;
+    case '1m':
+      cutoffDate.setMonth(now.getMonth() - 1);
+      break;
+    case '3m':
+      cutoffDate.setMonth(now.getMonth() - 3);
+      break;
+    case '6m':
+      cutoffDate.setMonth(now.getMonth() - 6);
+      break;
+    case '9m':
+      cutoffDate.setMonth(now.getMonth() - 9);
+      break;
+    case '1y':
+      cutoffDate.setFullYear(now.getFullYear() - 1);
+      break;
+    default:
+      return null;
+  }
+
+  return cutoffDate;
+}
+
+export const userRouter = new Hono()
+  .use(authMiddleware)
   .post(
     '/change-password',
     zValidator(
@@ -36,19 +78,89 @@ const userRouter = new Hono()
       return c.json({ success: true });
     }
   )
-  .delete('/account', async (c) => {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+  .post(
+    '/clear-data',
+    authMiddleware,
+    zValidator(
+      'json',
+      z.object({
+        focusSessions: z.boolean(),
+        tasks: z.boolean(),
+        habits: z.boolean(),
+        chats: z.boolean(),
+        dateRange: z.string(),
+      })
+    ),
+    async (c) => {
+      const user = c.get('user');
 
-    if (!session?.user) {
-      return c.json({ error: 'Unauthorized' }, 401);
+      const { focusSessions, tasks, habits, chats, dateRange } =
+        c.req.valid('json');
+      const cutoffDate = calculateDateCutoff(dateRange);
+
+      const userId = user.id;
+
+      const deletePromises: Promise<unknown>[] = [];
+
+      if (focusSessions) {
+        const whereClause = cutoffDate
+          ? { userId, createdAt: { gte: cutoffDate } }
+          : { userId };
+
+        deletePromises.push(
+          db.focusSession.deleteMany({
+            where: whereClause,
+          })
+        );
+      }
+
+      if (tasks) {
+        const whereClause = cutoffDate
+          ? { userId, createdAt: { gte: cutoffDate } }
+          : { userId };
+
+        deletePromises.push(
+          db.task.deleteMany({
+            where: whereClause,
+          })
+        );
+      }
+
+      if (habits) {
+        const whereClause = cutoffDate
+          ? { userId, createdAt: { gte: cutoffDate } }
+          : { userId };
+
+        const habitsToDelete = await db.habit.findMany({
+          where: whereClause,
+          select: { id: true },
+        });
+
+        if (habitsToDelete.length > 0) {
+          const habitIds = habitsToDelete.map((h) => h.id);
+
+          deletePromises.push(
+            db.habitCompletion.deleteMany({
+              where: { habitId: { in: habitIds } },
+            }),
+            db.habit.deleteMany({
+              where: { id: { in: habitIds } },
+            })
+          );
+        }
+      }
+
+      await Promise.all(deletePromises);
+
+      return c.json({ success: true });
     }
+  )
+  .delete('/account', async (c) => {
+    const user = c.get('user');
 
     await db.user.delete({
-      where: { id: session.user.id },
+      where: { id: user.id },
     });
-
     await auth.api.signOut({
       headers: await headers(),
     });
@@ -56,4 +168,4 @@ const userRouter = new Hono()
     return c.json({ success: true });
   });
 
-export { userRouter };
+export type AppType = typeof userRouter;
