@@ -9,7 +9,9 @@ const createTaskSchema = z.object({
   title: z.string().min(1).max(500),
   projectId: z.string().optional(),
   dueDate: z.string().optional(),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).default('MEDIUM'),
+  priority: z
+    .enum(['NO_PRIORITY', 'LOW', 'MEDIUM', 'HIGH'])
+    .default('NO_PRIORITY'),
   tags: z.array(z.string()).max(5).default([]),
 });
 
@@ -21,7 +23,9 @@ const bulkCreateTasksSchema = z.object({
   ),
   projectId: z.string().optional(),
   dueDate: z.string().optional(),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).default('MEDIUM'),
+  priority: z
+    .enum(['NO_PRIORITY', 'LOW', 'MEDIUM', 'HIGH'])
+    .default('NO_PRIORITY'),
   tags: z.array(z.string()).max(5).default([]),
 });
 
@@ -29,7 +33,7 @@ const updateTaskSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   projectId: z.string().nullable().optional(),
   dueDate: z.string().nullable().optional(),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  priority: z.enum(['NO_PRIORITY', 'LOW', 'MEDIUM', 'HIGH']).optional(),
   tags: z.array(z.string()).max(5).optional(),
   completed: z.boolean().optional(),
 });
@@ -50,7 +54,7 @@ const chartQuerySchema = z.object({
   days: z.coerce.number().int().min(1).max(365).default(7),
 });
 
-const PRIORITY_ORDER = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+const PRIORITY_ORDER = { HIGH: 0, MEDIUM: 1, LOW: 2, NO_PRIORITY: 3 };
 
 export const tasksRouter = new Hono()
   .use(authMiddleware)

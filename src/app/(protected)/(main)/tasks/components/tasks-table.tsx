@@ -161,7 +161,13 @@ const TaskTableRow = ({ task, onEdit, onDelete }: TaskTableRowProps) => {
         )}
       </TableCell>
       <TableCell>
-        <PriorityBadge priority={task.priority} />
+        {task.priority === 'NO_PRIORITY' ? (
+          <span className="text-muted-foreground text-xs">
+            <MinusIcon className="size-2" />
+          </span>
+        ) : (
+          <PriorityBadge priority={task.priority} />
+        )}
       </TableCell>
       <TableCell>
         {task.project ? (

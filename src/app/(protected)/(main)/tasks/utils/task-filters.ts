@@ -6,6 +6,7 @@ const PRIORITY_ORDER: Record<TaskPriority, number> = {
   HIGH: 0,
   MEDIUM: 1,
   LOW: 2,
+  NO_PRIORITY: 3,
 };
 
 function normalizeDateToMidnight(date: Date) {

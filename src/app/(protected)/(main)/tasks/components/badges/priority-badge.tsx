@@ -9,6 +9,10 @@ interface PriorityBadgeProps {
 }
 
 export const PriorityBadge = ({ priority, className }: PriorityBadgeProps) => {
+  if (priority === 'NO_PRIORITY') {
+    return null;
+  }
+
   return (
     <Badge
       variant="secondary"

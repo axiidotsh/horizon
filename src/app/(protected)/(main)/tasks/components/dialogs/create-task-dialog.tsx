@@ -32,21 +32,21 @@ export const CreateTaskDialog = () => {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState<string>(
-    settings?.defaultTaskPriority ?? 'MEDIUM'
+    settings?.defaultTaskPriority ?? 'NO_PRIORITY'
   );
   const [projectId, setProjectId] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
-    if (open && settings?.defaultTaskPriority) {
-      setPriority(settings.defaultTaskPriority);
+    if (open) {
+      setPriority(settings?.defaultTaskPriority ?? 'NO_PRIORITY');
     }
   }, [open, settings]);
 
   const resetForm = () => {
     setTitle('');
     setDueDate(undefined);
-    setPriority(settings?.defaultTaskPriority ?? 'MEDIUM');
+    setPriority(settings?.defaultTaskPriority ?? 'NO_PRIORITY');
     setProjectId('');
     setTags([]);
   };
@@ -71,7 +71,7 @@ export const CreateTaskDialog = () => {
         json: {
           title: title.trim(),
           dueDate: normalizedDueDate,
-          priority: priority as 'LOW' | 'MEDIUM' | 'HIGH',
+          priority: priority as 'NO_PRIORITY' | 'LOW' | 'MEDIUM' | 'HIGH',
           projectId: projectId || undefined,
           tags,
         },

@@ -11,21 +11,14 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { editingTaskAtom } from '../../atoms/task-dialogs';
-import { PRIORITY_OPTIONS } from '../../constants';
 import { useUpdateTask } from '../../hooks/mutations/use-update-task';
 import { useProjects } from '../../hooks/queries/use-projects';
 import type { Project } from '../../hooks/types';
 import { useExistingTags } from '../../hooks/use-existing-tags';
+import { PrioritySelect } from '../priority-select';
 import { ProjectSelect } from '../project-select';
 import { TagInput } from './tag-input';
 
@@ -39,7 +32,7 @@ export const EditTaskDialog = () => {
 
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
-  const [priority, setPriority] = useState<string>('MEDIUM');
+  const [priority, setPriority] = useState<string>('NO_PRIORITY');
   const [projectId, setProjectId] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
 
@@ -73,7 +66,7 @@ export const EditTaskDialog = () => {
         json: {
           title: title.trim(),
           dueDate: normalizedDueDate,
-          priority: priority as 'LOW' | 'MEDIUM' | 'HIGH',
+          priority: priority as 'NO_PRIORITY' | 'LOW' | 'MEDIUM' | 'HIGH',
           projectId: projectId || null,
           tags,
         },
@@ -114,18 +107,11 @@ export const EditTaskDialog = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-priority">Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger id="edit-priority" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRIORITY_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <PrioritySelect
+                id="edit-priority"
+                value={priority}
+                onValueChange={setPriority}
+              />
             </div>
           </div>
           <div className="space-y-2">

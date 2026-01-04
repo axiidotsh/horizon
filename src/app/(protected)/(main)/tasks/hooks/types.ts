@@ -13,4 +13,4 @@ export type TaskStats = StatsResponse['stats'];
 type ChartResponse = InferResponseType<typeof api.tasks.chart.$get>;
 export type ChartData = ChartResponse['chartData'];
 
-export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+export type TaskPriority = 'NO_PRIORITY' | 'LOW' | 'MEDIUM' | 'HIGH';

@@ -21,7 +21,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { bulkAddTasksSheetAtom } from '../../atoms/task-dialogs';
 import { useBulkCreateTasks } from '../../hooks/mutations/use-bulk-create-tasks';
 import { useProjects } from '../../hooks/queries/use-projects';
-import type { Project, TaskPriority } from '../../hooks/types';
+import type { Project } from '../../hooks/types';
 import { useExistingTags } from '../../hooks/use-existing-tags';
 import { TagBadge } from '../badges/tag-badge';
 import { PrioritySelect } from '../priority-select';
@@ -45,7 +45,7 @@ export const BulkAddTasksSheet = () => {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState<string>(
-    settings?.defaultTaskPriority ?? 'MEDIUM'
+    settings?.defaultTaskPriority ?? 'NO_PRIORITY'
   );
   const [projectId, setProjectId] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
@@ -53,15 +53,15 @@ export const BulkAddTasksSheet = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open && settings?.defaultTaskPriority) {
-      setPriority(settings.defaultTaskPriority);
+    if (open) {
+      setPriority(settings?.defaultTaskPriority ?? 'NO_PRIORITY');
     }
   }, [open, settings]);
 
   const resetForm = () => {
     setTitle('');
     setDueDate(undefined);
-    setPriority(settings?.defaultTaskPriority ?? 'MEDIUM');
+    setPriority(settings?.defaultTaskPriority ?? 'NO_PRIORITY');
     setProjectId('');
     setTags([]);
     setPendingTasks([]);
@@ -116,7 +116,7 @@ export const BulkAddTasksSheet = () => {
         json: {
           tasks: pendingTasks.map((task) => ({ title: task.title })),
           dueDate: normalizedDueDate,
-          priority: priority as TaskPriority,
+          priority: priority as 'NO_PRIORITY' | 'LOW' | 'MEDIUM' | 'HIGH',
           projectId: projectId || undefined,
           tags,
         },

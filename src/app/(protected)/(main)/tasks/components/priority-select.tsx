@@ -23,8 +23,10 @@ function getPriorityCircleColor(priority: string) {
       return 'bg-amber-500';
     case 'HIGH':
       return 'bg-red-500';
+    case 'NO_PRIORITY':
+      return 'bg-muted-foreground/30';
     default:
-      return 'bg-gray-500';
+      return 'bg-muted-foreground/30';
   }
 }
 
@@ -52,17 +54,16 @@ export const PrioritySelect = ({
   className,
 }: PrioritySelectProps) => {
   const selectedOption = PRIORITY_OPTIONS.find((opt) => opt.value === value);
+  const displayOption = selectedOption || PRIORITY_OPTIONS[0];
 
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger id={id} className={cn('w-full', className)}>
         <SelectValue>
-          {selectedOption && (
-            <PriorityOption
-              priority={selectedOption.value}
-              label={selectedOption.label}
-            />
-          )}
+          <PriorityOption
+            priority={displayOption.value}
+            label={displayOption.label}
+          />
         </SelectValue>
       </SelectTrigger>
       <SelectContent>

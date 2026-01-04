@@ -1,4 +1,5 @@
 export const PRIORITY_OPTIONS = [
+  { label: 'No priority', value: 'NO_PRIORITY' },
   { label: 'Low', value: 'LOW' },
   { label: 'Medium', value: 'MEDIUM' },
   { label: 'High', value: 'HIGH' },
