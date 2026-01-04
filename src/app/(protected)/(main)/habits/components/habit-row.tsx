@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/utils/utils';
 import { useSetAtom } from 'jotai';
 import { EllipsisIcon, FlameIcon, PencilIcon, Trash2Icon } from 'lucide-react';
 import { deletingHabitIdAtom, editingHabitIdAtom } from '../atoms/dialog-atoms';
@@ -55,7 +56,10 @@ export const HabitRow = ({ habit, WeekDayToggle }: HabitRowProps) => {
     <li className="border-border flex items-center gap-3 border-b pb-3 last:border-0 last:pb-0">
       <div className="min-w-0 flex-1">
         <p
-          className={`truncate text-sm ${habit.completed ? 'text-muted-foreground line-through' : ''}`}
+          className={cn(
+            'text-sm',
+            habit.completed && 'text-muted-foreground line-through'
+          )}
         >
           {habit.title}
         </p>

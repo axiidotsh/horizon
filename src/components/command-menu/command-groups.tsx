@@ -233,11 +233,12 @@ export const CommandGroups = ({
                   <CircleIcon className="size-3.5" />
                 )}
                 <span
-                  className={
+                  className={cn(
+                    'line-clamp-2',
                     item.data.completed
                       ? 'text-muted-foreground line-through'
                       : ''
-                  }
+                  )}
                 >
                   {item.data.title}
                 </span>
@@ -261,7 +262,7 @@ export const CommandGroups = ({
                 onSelect={() => onItemSelect(item)}
               >
                 <TimerIcon className="size-3.5" />
-                <span>{item.data.title}</span>
+                <span className="line-clamp-2">{item.data.title}</span>
                 <span className="text-muted-foreground ml-auto flex items-center gap-1 text-xs">
                   Actions
                   <Kbd>↵</Kbd>
@@ -282,7 +283,9 @@ export const CommandGroups = ({
                 onSelect={() => onItemSelect(item)}
               >
                 <ClockPlusIcon className="size-3.5" />
-                <span>{item.data.task || 'Focus session'}</span>
+                <span className="line-clamp-2">
+                  {item.data.task || 'Focus session'}
+                </span>
                 <span className="text-muted-foreground text-xs">
                   {item.data.durationMinutes}m
                 </span>

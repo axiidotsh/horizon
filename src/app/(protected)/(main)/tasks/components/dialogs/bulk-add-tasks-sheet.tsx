@@ -25,6 +25,7 @@ import {
 import { useAtom } from 'jotai';
 import { PlusIcon, XIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import TextareaAutosize from 'react-textarea-autosize';
 import { bulkAddTasksSheetAtom } from '../../atoms/task-dialogs';
 import { PRIORITY_OPTIONS } from '../../constants';
 import { useBulkCreateTasks } from '../../hooks/mutations/use-bulk-create-tasks';
@@ -225,13 +226,12 @@ export const BulkAddTasksSheet = () => {
                 pendingTasks.map((task, index) => (
                   <div key={task.id}>
                     <div className="hover:bg-accent group flex items-center gap-2 px-2.5 py-1 transition-colors">
-                      <input
-                        type="text"
+                      <TextareaAutosize
                         value={task.title}
                         onChange={(e) =>
                           updateTaskTitle(task.id, e.target.value)
                         }
-                        className="flex-1 bg-transparent text-sm outline-none"
+                        className="flex-1 resize-none text-sm outline-none"
                       />
                       <Button
                         size="icon"
@@ -242,7 +242,9 @@ export const BulkAddTasksSheet = () => {
                         <XIcon className="size-4" />
                       </Button>
                     </div>
-                    {index < pendingTasks.length - 1 && <Separator />}
+                    {index < pendingTasks.length - 1 && (
+                      <Separator className="my-1" />
+                    )}
                   </div>
                 ))
               )}
