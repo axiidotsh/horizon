@@ -1,6 +1,5 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import {
   Command,
   CommandEmpty,
@@ -15,8 +14,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from 'lucide-react';
+import { cn } from '@/utils/utils';
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react';
 import { useState } from 'react';
+import { TagBadge } from '../badges/tag-badge';
 
 const MAX_TAGS = 5;
 
@@ -75,32 +76,24 @@ export const TagInput = ({ tags, onChange, suggestions }: TagInputProps) => {
         <div
           role="combobox"
           aria-expanded={open}
-          className="border-input bg-background ring-offset-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+          className={cn(
+            'border-input bg-background ring-offset-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring',
+            'flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm',
+            'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden'
+          )}
           onClick={() => setOpen(!open)}
         >
           {tags.length > 0 ? (
             <div className="flex flex-wrap gap-1">
               {tags.map((tag) => (
-                <Badge
+                <TagBadge
                   key={tag}
-                  variant="secondary"
-                  className="gap-1 pr-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  tag={tag}
+                  onRemove={(e) => {
+                    e?.stopPropagation();
+                    removeTag(tag);
                   }}
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    className="inline-flex size-3 cursor-pointer items-center justify-center p-0 hover:opacity-70"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeTag(tag);
-                    }}
-                  >
-                    <XIcon className="size-3" />
-                  </button>
-                </Badge>
+                />
               ))}
             </div>
           ) : (

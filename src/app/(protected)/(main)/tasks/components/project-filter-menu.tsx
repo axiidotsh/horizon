@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { CheckIcon } from 'lucide-react';
+import { DEFAULT_PROJECT_COLOR, FILTER_MENU_MAX_HEIGHT } from '../constants';
 import type { Project } from '../hooks/types';
 
 interface ProjectFilterMenuProps {
@@ -55,7 +56,10 @@ export const ProjectFilterMenu = ({
           />
         </div>
         <DropdownMenuSeparator />
-        <div className="max-h-[200px] overflow-y-auto">
+        <div
+          style={{ maxHeight: FILTER_MENU_MAX_HEIGHT }}
+          className="overflow-y-auto"
+        >
           {filteredProjects.length === 0 ? (
             <div className="text-muted-foreground px-2 py-6 text-center text-sm">
               No projects found
@@ -71,7 +75,7 @@ export const ProjectFilterMenu = ({
                   <div
                     className="size-2 shrink-0 rounded-full"
                     style={{
-                      backgroundColor: project.color || '#808080',
+                      backgroundColor: project.color || DEFAULT_PROJECT_COLOR,
                     }}
                   />
                   <span>{project.name}</span>

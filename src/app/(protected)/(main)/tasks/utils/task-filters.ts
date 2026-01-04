@@ -1,4 +1,5 @@
 import type { SortOption } from '../atoms/task-atoms';
+import { DAYS_IN_WEEK } from '../constants';
 import type { Task, TaskPriority } from '../hooks/types';
 
 const PRIORITY_ORDER: Record<TaskPriority, number> = {
@@ -98,7 +99,7 @@ export function groupTasksByDueDate(tasks: Task[]) {
       groups.overdue.push(task);
     } else if (diffDays === 0) {
       groups.dueToday.push(task);
-    } else if (diffDays <= 7) {
+    } else if (diffDays <= DAYS_IN_WEEK) {
       groups.dueThisWeek.push(task);
     } else {
       groups.upcoming.push(task);
@@ -134,7 +135,7 @@ export function formatDueDate(
   if (diffDays === 1) {
     return 'Tomorrow';
   }
-  if (diffDays <= 7) {
+  if (diffDays <= DAYS_IN_WEEK) {
     return `In ${diffDays} days`;
   }
   return dueDate.toLocaleDateString('en-US', {

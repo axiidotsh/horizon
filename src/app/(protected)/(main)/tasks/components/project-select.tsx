@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { CheckIcon, SearchIcon } from 'lucide-react';
 import { useState } from 'react';
-import { MAX_DROPDOWN_HEIGHT } from '../constants';
+import { DEFAULT_PROJECT_COLOR, MAX_DROPDOWN_HEIGHT } from '../constants';
 import type { Project } from '../hooks/types';
 
 interface ProjectSelectProps {
@@ -85,7 +85,7 @@ export const ProjectSelect = ({
                   <div
                     className="size-2 shrink-0 rounded-full"
                     style={{
-                      backgroundColor: project.color || '#808080',
+                      backgroundColor: project.color || DEFAULT_PROJECT_COLOR,
                     }}
                   />
                   <span>{project.name}</span>

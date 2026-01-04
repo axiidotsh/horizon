@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { CheckIcon } from 'lucide-react';
+import { FILTER_MENU_MAX_HEIGHT } from '../constants';
 
 interface TagFilterMenuProps {
   tags: string[];
@@ -54,7 +55,10 @@ export const TagFilterMenu = ({
           />
         </div>
         <DropdownMenuSeparator />
-        <div className="max-h-[200px] overflow-y-auto">
+        <div
+          style={{ maxHeight: FILTER_MENU_MAX_HEIGHT }}
+          className="overflow-y-auto"
+        >
           {filteredTags.length === 0 ? (
             <div className="text-muted-foreground px-2 py-6 text-center text-sm">
               No tags found

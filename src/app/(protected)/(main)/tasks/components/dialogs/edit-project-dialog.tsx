@@ -14,6 +14,7 @@ import {
 import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { editingProjectAtom } from '../../atoms/task-dialogs';
+import { DEFAULT_BLUE_COLOR } from '../../constants';
 import { useUpdateProject } from '../../hooks/mutations/use-update-project';
 
 export const EditProjectDialog = () => {
@@ -21,12 +22,12 @@ export const EditProjectDialog = () => {
   const updateProject = useUpdateProject();
 
   const [name, setName] = useState('');
-  const [color, setColor] = useState<string>('#3b82f6');
+  const [color, setColor] = useState<string>(DEFAULT_BLUE_COLOR);
 
   useEffect(() => {
     if (project) {
       setName(project.name);
-      setColor(project.color ?? '#3b82f6');
+      setColor(project.color ?? DEFAULT_BLUE_COLOR);
     }
   }, [project]);
 

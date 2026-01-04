@@ -1,28 +1,55 @@
 'use client';
 
 import { PageHeading } from '@/components/page-heading';
-import { TaskChartSection } from './components/sections/task-chart-section';
-import { TaskListSection } from './components/sections/task-list-section';
-import { TaskMetricsSection } from './components/sections/task-metrics-section';
+import { SearchBar } from '@/components/search-bar';
+import { useAtom, useAtomValue } from 'jotai';
+import {
+  searchQueryAtom,
+  selectedProjectsAtom,
+  selectedTagsAtom,
+  sortByAtom,
+} from './atoms/task-atoms';
+import { TaskMetricsBadges } from './components/sections/task-metrics-badges';
+import { TaskListActions } from './components/task-list/task-list-actions';
+import { TasksTable } from './components/tasks-table';
+import { useTasks } from './hooks/queries/use-tasks';
+import { filterTasks, sortTasks } from './utils/task-filters';
 
 export default function TasksPage() {
+  const { data: tasks = [], isLoading } = useTasks();
+  const sortBy = useAtomValue(sortByAtom);
+  const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
+  const selectedTags = useAtomValue(selectedTagsAtom);
+  const selectedProjects = useAtomValue(selectedProjectsAtom);
+
+  const filteredTasks = filterTasks(
+    tasks,
+    searchQuery,
+    selectedTags,
+    selectedProjects
+  );
+  const sortedTasks = sortTasks(filteredTasks, sortBy);
+
   return (
-    <div className="flex flex-col">
-      <div className="flex items-center justify-between gap-2">
-        <PageHeading>Tasks</PageHeading>
-        {/* <Button
-          size="icon-sm"
-          variant="ghost"
-          tooltip="Configure dashboard cards"
-        >
-          <Settings2Icon />
-        </Button> */}
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-row items-center gap-3">
+            <PageHeading>Tasks</PageHeading>
+            <TaskMetricsBadges />
+          </div>
+          <div className="flex items-center gap-2">
+            <SearchBar
+              placeholder="Search tasks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border md:w-80 lg:w-96"
+            />
+            <TaskListActions />
+          </div>
+        </div>
       </div>
-      <div className="mt-4 space-y-4">
-        <TaskMetricsSection />
-        <TaskListSection />
-        <TaskChartSection />
-      </div>
+      <TasksTable tasks={sortedTasks} isLoading={isLoading} />
     </div>
   );
 }

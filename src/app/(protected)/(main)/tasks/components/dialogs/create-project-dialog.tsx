@@ -14,6 +14,7 @@ import {
 import { useAtom } from 'jotai';
 import { useState } from 'react';
 import { createProjectDialogAtom } from '../../atoms/task-dialogs';
+import { DEFAULT_BLUE_COLOR } from '../../constants';
 import { useCreateProject } from '../../hooks/mutations/use-create-project';
 
 export const CreateProjectDialog = () => {
@@ -21,11 +22,11 @@ export const CreateProjectDialog = () => {
   const createProject = useCreateProject();
 
   const [name, setName] = useState('');
-  const [color, setColor] = useState<string>('#3b82f6');
+  const [color, setColor] = useState<string>(DEFAULT_BLUE_COLOR);
 
   const resetForm = () => {
     setName('');
-    setColor('#3b82f6');
+    setColor(DEFAULT_BLUE_COLOR);
   };
 
   const handleClose = () => {

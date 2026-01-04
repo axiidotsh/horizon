@@ -1,7 +1,6 @@
 'use client';
 
 import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
@@ -32,6 +31,7 @@ import { useBulkCreateTasks } from '../../hooks/mutations/use-bulk-create-tasks'
 import { useProjects } from '../../hooks/queries/use-projects';
 import type { Project, TaskPriority } from '../../hooks/types';
 import { useExistingTags } from '../../hooks/use-existing-tags';
+import { TagBadge } from '../badges/tag-badge';
 import { ProjectSelect } from '../project-select';
 import { TagInput } from './tag-input';
 
@@ -215,7 +215,7 @@ export const BulkAddTasksSheet = () => {
           <div className="-mx-6 flex flex-1 flex-col gap-3 overflow-hidden border-t px-6 pt-4">
             <div className="flex items-center gap-2">
               <Label>Tasks</Label>
-              <Badge variant="secondary">{pendingTasks.length}</Badge>
+              <TagBadge tag={pendingTasks.length.toString()} />
             </div>
             <ScrollArea className="-mx-6 flex-1 overflow-y-auto px-6">
               {pendingTasks.length === 0 ? (

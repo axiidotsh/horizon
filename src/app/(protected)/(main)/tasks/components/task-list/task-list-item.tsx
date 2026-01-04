@@ -1,6 +1,5 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -11,17 +10,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/utils/utils';
 import { useSetAtom } from 'jotai';
-import {
-  DotIcon,
-  EllipsisIcon,
-  FolderIcon,
-  PencilIcon,
-  Trash2Icon,
-} from 'lucide-react';
+import { DotIcon, EllipsisIcon, PencilIcon, Trash2Icon } from 'lucide-react';
 import { deletingTaskAtom, editingTaskAtom } from '../../atoms/task-dialogs';
 import { useToggleTask } from '../../hooks/mutations/use-toggle-task';
 import type { Task } from '../../hooks/types';
 import { formatDueDate, isOverdue } from '../../utils/task-filters';
+import { PriorityBadge } from '../badges/priority-badge';
+import { ProjectBadge } from '../badges/project-badge';
+import { TagBadge } from '../badges/tag-badge';
 
 interface TaskListItemProps {
   task: Task;
@@ -44,9 +40,6 @@ export const TaskListItem = ({ task }: TaskListItemProps) => {
     setDeletingTask(task);
   };
 
-  const formattedPriority =
-    task.priority.charAt(0) + task.priority.slice(1).toLowerCase();
-
   return (
     <li className="border-border flex items-start gap-3 border-b pb-3 last:border-0 last:pb-0">
       <Checkbox
@@ -67,40 +60,13 @@ export const TaskListItem = ({ task }: TaskListItemProps) => {
             {task.title}
           </p>
           <div className="flex flex-wrap items-center gap-1.5">
-            <Badge
-              variant={task.priority === 'HIGH' ? 'destructive' : 'secondary'}
-              className={cn(
-                'border text-xs',
-                task.priority === 'LOW' &&
-                  'border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400',
-                task.priority === 'MEDIUM' &&
-                  'border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-400',
-                task.priority === 'HIGH' && 'border-red-500/50'
-              )}
-            >
-              {formattedPriority}
-            </Badge>
+            <PriorityBadge priority={task.priority} />
             {(task.project || task.tags?.length || task.dueDate) && (
               <DotIcon className="text-muted-foreground size-3" />
             )}
             {task.project && (
               <>
-                <Badge
-                  variant="outline"
-                  className="gap-1 border"
-                  style={{
-                    backgroundColor: task.project.color
-                      ? `${task.project.color}20`
-                      : undefined,
-                    borderColor: task.project.color
-                      ? `${task.project.color}80`
-                      : undefined,
-                    color: task.project.color || undefined,
-                  }}
-                >
-                  <FolderIcon className="size-3" />
-                  {task.project.name}
-                </Badge>
+                <ProjectBadge project={task.project} />
                 {(task.tags?.length || task.dueDate) && (
                   <DotIcon className="text-muted-foreground size-3" />
                 )}
@@ -109,13 +75,7 @@ export const TaskListItem = ({ task }: TaskListItemProps) => {
             {task.tags && task.tags.length > 0 && (
               <>
                 {task.tags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="dark:bg-secondary bg-foreground/10"
-                  >
-                    {tag}
-                  </Badge>
+                  <TagBadge key={tag} tag={tag} />
                 ))}
                 {task.dueDate && (
                   <DotIcon className="text-muted-foreground size-3" />
