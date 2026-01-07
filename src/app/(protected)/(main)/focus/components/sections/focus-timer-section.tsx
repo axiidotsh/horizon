@@ -15,17 +15,27 @@ export const FocusTimerSection = () => {
 
   if (isError) {
     return (
-      <ErrorState
-        onRetry={refetch}
-        title="Failed to load session"
-        description="Unable to fetch active session. Please try again."
-      />
+      <div className="w-full">
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load session"
+          description="Unable to fetch active session. Please try again."
+        />
+      </div>
     );
   }
 
   if (isLoading) {
-    return <TimerSkeleton />;
+    return (
+      <div className="w-full">
+        <TimerSkeleton />
+      </div>
+    );
   }
 
-  return <FocusTimer activeSession={activeSession} />;
+  return (
+    <div className="w-full">
+      <FocusTimer activeSession={activeSession} />
+    </div>
+  );
 };

@@ -122,7 +122,7 @@ export const FocusTimer = ({ activeSession }: FocusTimerProps) => {
       : 'idle';
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 py-8">
+    <div className="flex min-h-[600px] flex-col items-center justify-center gap-8 py-8">
       <div className="flex flex-col items-center gap-6">
         {hasActiveSession ? (
           <div className="flex items-baseline gap-2 text-sm">

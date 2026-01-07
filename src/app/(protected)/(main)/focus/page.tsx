@@ -12,7 +12,7 @@ export default function FocusPage() {
   const [showSessionsDialog, setShowSessionsDialog] = useState(false);
 
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex min-h-[calc(100vh-8rem)] flex-col overflow-y-auto">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex flex-row items-center gap-3">
@@ -29,7 +29,9 @@ export default function FocusPage() {
           </Button>
         </div>
       </div>
-      <FocusTimerSection />
+      <div className="flex flex-1 items-center">
+        <FocusTimerSection />
+      </div>
       <RecentSessionsDialog
         open={showSessionsDialog}
         onOpenChange={setShowSessionsDialog}
