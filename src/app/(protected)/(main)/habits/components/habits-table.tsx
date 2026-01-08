@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -46,8 +47,57 @@ export const HabitsTable = ({ habits, isLoading }: HabitsTableProps) => {
 
   if (isLoading) {
     return (
-      <div className="text-muted-foreground flex items-center justify-center py-24 text-center">
-        <p className="text-sm">Loading habits...</p>
+      <div className="w-full">
+        <Table>
+          <TableHeader className="bg-background sticky top-0 z-10">
+            <TableRow>
+              <TableHead className="text-muted-foreground max-w-[400px] min-w-[250px] text-xs font-normal">
+                Habit
+              </TableHead>
+              <TableHead className="text-muted-foreground text-center text-xs font-normal">
+                <div className="flex items-center justify-center gap-1">
+                  {days.map((day, index) => (
+                    <span
+                      key={index}
+                      className={cn(
+                        'w-3.5 text-center',
+                        isToday(day) && 'font-semibold'
+                      )}
+                    >
+                      {formatDayLabel(day)}
+                    </span>
+                  ))}
+                </div>
+              </TableHead>
+              <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
+                Streak
+              </TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <TableRow key={index}>
+                <TableCell className="max-w-[400px]">
+                  <Skeleton className="h-5 w-full max-w-xs" />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center justify-center gap-1">
+                    {Array.from({ length: 7 }).map((_, i) => (
+                      <Skeleton key={i} className="size-3.5 rounded-full" />
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-16" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="size-8 rounded-md" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
@@ -80,9 +130,6 @@ export const HabitsTable = ({ habits, isLoading }: HabitsTableProps) => {
             <TableHead className="text-muted-foreground max-w-[400px] min-w-[250px] text-xs font-normal">
               Habit
             </TableHead>
-            <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
-              Streak
-            </TableHead>
             <TableHead className="text-muted-foreground text-center text-xs font-normal">
               <div className="flex items-center justify-center gap-1">
                 {days.map((day, index) => (
@@ -97,6 +144,9 @@ export const HabitsTable = ({ habits, isLoading }: HabitsTableProps) => {
                   </span>
                 ))}
               </div>
+            </TableHead>
+            <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
+              Streak
             </TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
@@ -144,6 +194,15 @@ const HabitTableRow = ({ habit }: HabitTableRowProps) => {
         </span>
       </TableCell>
       <TableCell>
+        <div className="flex items-center justify-center">
+          <WeekDayToggle
+            completionHistory={habit.completionHistory}
+            onToggleDay={handleToggleDay}
+            disabled={toggleDate.isPending}
+          />
+        </div>
+      </TableCell>
+      <TableCell>
         {habit.currentStreak > 0 ? (
           <div
             className={cn(
@@ -159,15 +218,6 @@ const HabitTableRow = ({ habit }: HabitTableRowProps) => {
         ) : (
           <span className="text-muted-foreground text-xs">No streak</span>
         )}
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center justify-center">
-          <WeekDayToggle
-            completionHistory={habit.completionHistory}
-            onToggleDay={handleToggleDay}
-            disabled={toggleDate.isPending}
-          />
-        </div>
       </TableCell>
       <TableCell>
         <DropdownMenu>

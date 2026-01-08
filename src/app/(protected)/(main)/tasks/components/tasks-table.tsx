@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -49,8 +50,60 @@ export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
 
   if (isLoading) {
     return (
-      <div className="text-muted-foreground flex items-center justify-center py-24 text-center">
-        <p className="text-sm">Loading tasks...</p>
+      <div className="w-full">
+        <Table>
+          <TableHeader className="bg-background sticky top-0 z-10">
+            <TableRow>
+              <TableHead className="w-12"></TableHead>
+              <TableHead className="text-muted-foreground max-w-[500px] min-w-[300px] text-xs font-normal">
+                Task
+              </TableHead>
+              <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
+                Due Date
+              </TableHead>
+              <TableHead className="text-muted-foreground w-[100px] text-xs font-normal">
+                Priority
+              </TableHead>
+              <TableHead className="text-muted-foreground w-[150px] text-xs font-normal">
+                Project
+              </TableHead>
+              <TableHead className="text-muted-foreground min-w-[200px] text-xs font-normal">
+                Tags
+              </TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <Skeleton className="size-4 rounded-full" />
+                </TableCell>
+                <TableCell className="max-w-[500px]">
+                  <Skeleton className="h-5 w-full max-w-xs" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-16" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="size-8 rounded-md" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
