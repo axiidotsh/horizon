@@ -25,7 +25,11 @@ import {
   PencilIcon,
   Trash2Icon,
 } from 'lucide-react';
-import { deletingTaskAtom, editingTaskAtom } from '../atoms/task-dialogs';
+import {
+  createTaskDialogAtom,
+  deletingTaskAtom,
+  editingTaskAtom,
+} from '../atoms/task-dialogs';
 import { useToggleTask } from '../hooks/mutations/use-toggle-task';
 import type { Task } from '../hooks/types';
 import { formatDueDate, isOverdue } from '../utils/task-filters';
@@ -41,6 +45,7 @@ interface TasksTableProps {
 export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
   const setEditingTask = useSetAtom(editingTaskAtom);
   const setDeletingTask = useSetAtom(deletingTaskAtom);
+  const setCreateTaskDialog = useSetAtom(createTaskDialogAtom);
 
   if (isLoading) {
     return (
@@ -52,10 +57,18 @@ export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
 
   if (tasks.length === 0) {
     return (
-      <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-24 text-center">
+      <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-32 text-center sm:py-48">
         <ClipboardCheckIcon className="mb-2 size-12 stroke-1 opacity-50" />
         <p className="text-sm font-medium">No tasks found</p>
         <p className="text-xs">Create your first task or adjust your filters</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCreateTaskDialog(true)}
+          className="mt-4"
+        >
+          Add Task
+        </Button>
       </div>
     );
   }

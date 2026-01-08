@@ -24,7 +24,11 @@ import {
   TargetIcon,
   Trash2Icon,
 } from 'lucide-react';
-import { deletingHabitIdAtom, editingHabitIdAtom } from '../atoms/dialog-atoms';
+import {
+  createDialogOpenAtom,
+  deletingHabitIdAtom,
+  editingHabitIdAtom,
+} from '../atoms/dialog-atoms';
 import { useToggleHabit } from '../hooks/mutations/use-toggle-habit';
 import type { HabitWithMetrics } from '../hooks/types';
 import { formatDayLabel, getLast7Days, isToday } from '../utils/date-helpers';
@@ -37,6 +41,7 @@ interface HabitsTableProps {
 }
 
 export const HabitsTable = ({ habits, isLoading }: HabitsTableProps) => {
+  const setCreateDialogOpen = useSetAtom(createDialogOpenAtom);
   const days = getLast7Days();
 
   if (isLoading) {
@@ -49,12 +54,20 @@ export const HabitsTable = ({ habits, isLoading }: HabitsTableProps) => {
 
   if (habits.length === 0) {
     return (
-      <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-24 text-center">
+      <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-32 text-center sm:py-48">
         <TargetIcon className="mb-2 size-12 stroke-1 opacity-50" />
         <p className="text-sm font-medium">No habits found</p>
         <p className="text-xs">
           Create your first habit or adjust your filters
         </p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCreateDialogOpen(true)}
+          className="mt-4"
+        >
+          Add Habit
+        </Button>
       </div>
     );
   }
