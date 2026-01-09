@@ -9,6 +9,7 @@ import { emailService } from './services/email';
 
 const RESET_PASSWORD_EXPIRY = 30 * 60; // 30 minutes
 const EMAIL_VERIFICATION_EXPIRY = 24 * 60 * 60; // 24 hours
+const SESSION_CACHE_EXPIRY = 2 * 60 * 60; // 2 hours
 
 export const auth = betterAuth({
   plugins: [
@@ -28,6 +29,12 @@ export const auth = betterAuth({
     google: {
       clientId: serverEnv.GOOGLE_CLIENT_ID,
       clientSecret: serverEnv.GOOGLE_CLIENT_SECRET,
+    },
+  },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: SESSION_CACHE_EXPIRY,
     },
   },
   user: {
