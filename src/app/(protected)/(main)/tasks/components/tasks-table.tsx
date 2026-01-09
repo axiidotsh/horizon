@@ -196,8 +196,11 @@ const TaskTableRow = ({ task, onEdit, onDelete }: TaskTableRowProps) => {
         </button>
       </TableCell>
       <TableCell
-        className="max-w-[500px] cursor-pointer whitespace-normal"
-        onClick={handleToggle}
+        className={cn(
+          'max-w-[500px] whitespace-normal',
+          !toggleTask.isPending && 'cursor-pointer'
+        )}
+        onClick={toggleTask.isPending ? undefined : handleToggle}
       >
         <span
           className={cn(

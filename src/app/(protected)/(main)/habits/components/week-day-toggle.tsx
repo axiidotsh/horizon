@@ -51,7 +51,8 @@ export const WeekDayToggle = ({
                     : 'border-muted-foreground/30 hover:border-muted-foreground/50 bg-transparent',
                   today && !completed && 'ring-primary/30 ring-1 ring-offset-1',
                   today && completed && 'ring-1 ring-emerald-300 ring-offset-1',
-                  disabled && 'cursor-not-allowed opacity-50'
+                  disabled &&
+                    'pointer-events-none cursor-not-allowed opacity-50'
                 )}
                 aria-label={`${completed ? 'Completed' : 'Not completed'} on ${formatFullDate(day)}`}
               >
