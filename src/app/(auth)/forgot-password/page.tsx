@@ -15,15 +15,13 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { requestPasswordReset } from '@/lib/auth-client';
 import { passwordResetPageRedirect } from '@/lib/config/redirects.config';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { z } from 'zod';
+import { useRequestPasswordReset } from '../hooks/use-request-password-reset';
 
 const forgotPasswordSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -32,9 +30,6 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordPage() {
-  const [isPending, setIsPending] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -43,19 +38,17 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
-    setIsPending(true);
-    await requestPasswordReset({
+  const {
+    mutate: requestReset,
+    isPending,
+    isSuccess,
+  } = useRequestPasswordReset();
+
+  const onSubmit = (data: ForgotPasswordFormData) => {
+    requestReset({
       email: data.email,
       redirectTo: passwordResetPageRedirect,
-      fetchOptions: {
-        onSuccess: () => {
-          setIsSuccess(true);
-          toast.success('Password reset link sent to your email.');
-        },
-      },
     });
-    setIsPending(false);
   };
 
   if (isSuccess) {

@@ -17,16 +17,12 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
-import { signIn } from '@/lib/auth-client';
-import { signInRedirect } from '@/lib/config/redirects.config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { GoogleSignInButton } from '../components/google-sign-in-button';
+import { useSignInEmail } from '../hooks/use-sign-in-email';
 
 const signInSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -36,9 +32,6 @@ const signInSchema = z.object({
 type SignInFormData = z.infer<typeof signInSchema>;
 
 export default function SignInPage() {
-  const router = useRouter();
-  const [isPending, setIsPending] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -47,18 +40,13 @@ export default function SignInPage() {
     resolver: zodResolver(signInSchema),
   });
 
-  const onSubmit = async (data: SignInFormData) => {
-    setIsPending(true);
-    await signIn.email({
+  const { mutate: signInEmail, isPending } = useSignInEmail();
+
+  const onSubmit = (data: SignInFormData) => {
+    signInEmail({
       email: data.email,
       password: data.password,
-      fetchOptions: {
-        onSuccess: () => {
-          router.push(signInRedirect);
-        },
-      },
     });
-    setIsPending(false);
   };
 
   return (
@@ -80,7 +68,6 @@ export default function SignInPage() {
                 placeholder="you@example.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
-                disabled={isPending}
                 {...register('email')}
               />
               <FieldError>{errors.email?.message}</FieldError>
@@ -100,13 +87,17 @@ export default function SignInPage() {
                 placeholder="••••••••"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
-                disabled={isPending}
                 {...register('password')}
               />
               <FieldError>{errors.password?.message}</FieldError>
             </Field>
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending && <Loader2Icon className="size-4 animate-spin" />}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isPending}
+              isLoading={isPending}
+              loadingContent="Signing in..."
+            >
               Sign in
             </Button>
           </FieldGroup>

@@ -17,15 +17,13 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
-import { signUp } from '@/lib/auth-client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import { z } from 'zod';
 import { GoogleSignInButton } from '../components/google-sign-in-button';
+import { useSignUpEmail } from '../hooks/use-sign-up-email';
 
 const signUpSchema = z
   .object({
@@ -48,9 +46,6 @@ const signUpSchema = z
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function SignUpPage() {
-  const [isPending, setIsPending] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -59,18 +54,13 @@ export default function SignUpPage() {
     resolver: zodResolver(signUpSchema),
   });
 
-  const onSubmit = async (data: SignUpFormData) => {
-    setIsPending(true);
-    await signUp.email({
+  const { mutate: signUpEmail, isPending, isSuccess } = useSignUpEmail();
+
+  const onSubmit = (data: SignUpFormData) => {
+    signUpEmail({
       name: data.name,
       email: data.email,
       password: data.password,
-      fetchOptions: {
-        onSuccess: () => {
-          setIsSuccess(true);
-          toast.success('Account created! Please check your email to verify.');
-        },
-      },
     });
   };
 

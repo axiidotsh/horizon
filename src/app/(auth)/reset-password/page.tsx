@@ -15,16 +15,14 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { resetPassword } from '@/lib/auth-client';
-import { passwordResetRedirect } from '@/lib/config/redirects.config';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { useResetPassword } from '../hooks/use-reset-password';
 
 const resetPasswordSchema = z
   .object({
@@ -42,11 +40,8 @@ const resetPasswordSchema = z
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export default function ResetPasswordPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-
-  const [isPending, setIsPending] = useState(false);
 
   const {
     register,
@@ -56,24 +51,18 @@ export default function ResetPasswordPage() {
     resolver: zodResolver(resetPasswordSchema),
   });
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
+  const { mutate: resetPasswordMutation, isPending } = useResetPassword();
+
+  const onSubmit = (data: ResetPasswordFormData) => {
     if (!token) {
       toast.error('Invalid or missing reset token');
       return;
     }
 
-    setIsPending(true);
-    await resetPassword({
+    resetPasswordMutation({
       newPassword: data.password,
       token,
-      fetchOptions: {
-        onSuccess: () => {
-          toast.success('Password reset successfully');
-          router.push(passwordResetRedirect);
-        },
-      },
     });
-    setIsPending(false);
   };
 
   if (!token) {
