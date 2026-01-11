@@ -15,7 +15,6 @@ export const HabitMetricsBadges = () => {
     return (
       <div className="flex items-center gap-2">
         <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-6 w-24" />
       </div>
     );
   }

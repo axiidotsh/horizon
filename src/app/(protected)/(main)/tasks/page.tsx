@@ -3,6 +3,7 @@
 import { PageHeading } from '@/components/page-heading';
 import { SearchBar } from '@/components/search-bar';
 import { useAtom, useAtomValue } from 'jotai';
+import { useInView } from 'react-intersection-observer';
 import {
   searchQueryAtom,
   selectedProjectsAtom,
@@ -12,23 +13,31 @@ import {
 import { TaskMetricsBadges } from './components/sections/task-metrics-badges';
 import { TaskListActions } from './components/task-list/task-list-actions';
 import { TasksTable } from './components/tasks-table';
-import { useTasks } from './hooks/queries/use-tasks';
-import { filterTasks, sortTasks } from './utils/task-filters';
+import { useInfiniteTasks } from './hooks/queries/use-infinite-tasks';
 
 export default function TasksPage() {
-  const { data: tasks = [], isLoading } = useTasks();
   const sortBy = useAtomValue(sortByAtom);
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
   const selectedTags = useAtomValue(selectedTagsAtom);
   const selectedProjects = useAtomValue(selectedProjectsAtom);
 
-  const filteredTasks = filterTasks(
-    tasks,
-    searchQuery,
-    selectedTags,
-    selectedProjects
-  );
-  const sortedTasks = sortTasks(filteredTasks, sortBy);
+  const { tasks, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useInfiniteTasks({
+      search: searchQuery || undefined,
+      sortBy: sortBy === 'completed' ? 'createdAt' : sortBy,
+      sortOrder: sortBy === 'priority' ? 'desc' : 'asc',
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
+      projectIds: selectedProjects.length > 0 ? selectedProjects : undefined,
+    });
+
+  const { ref: sentinelRef } = useInView({
+    onChange: (inView) => {
+      if (inView && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    threshold: 0,
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -49,7 +58,12 @@ export default function TasksPage() {
           </div>
         </div>
       </div>
-      <TasksTable tasks={sortedTasks} isLoading={isLoading} />
+      <TasksTable
+        tasks={tasks}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        sentinelRef={sentinelRef}
+      />
     </div>
   );
 }

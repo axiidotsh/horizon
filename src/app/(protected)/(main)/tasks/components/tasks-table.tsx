@@ -41,9 +41,16 @@ import { TagBadge } from './badges/tag-badge';
 interface TasksTableProps {
   tasks: Task[];
   isLoading?: boolean;
+  isFetchingNextPage?: boolean;
+  sentinelRef?: (node?: Element | null) => void;
 }
 
-export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
+export const TasksTable = ({
+  tasks,
+  isLoading,
+  isFetchingNextPage,
+  sentinelRef,
+}: TasksTableProps) => {
   const setEditingTask = useSetAtom(editingTaskAtom);
   const setDeletingTask = useSetAtom(deletingTaskAtom);
   const setCreateTaskDialog = useSetAtom(createTaskDialogAtom);
@@ -52,10 +59,10 @@ export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
     return (
       <div className="w-full">
         <Table>
-          <TableHeader className="bg-background sticky top-0 z-10">
+          <TableHeader className="bg-background">
             <TableRow>
               <TableHead className="w-12"></TableHead>
-              <TableHead className="text-muted-foreground max-w-[500px] min-w-[300px] text-xs font-normal">
+              <TableHead className="text-muted-foreground min-w-[200px] text-xs font-normal">
                 Task
               </TableHead>
               <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
@@ -67,7 +74,7 @@ export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
               <TableHead className="text-muted-foreground w-[150px] text-xs font-normal">
                 Project
               </TableHead>
-              <TableHead className="text-muted-foreground min-w-[200px] text-xs font-normal">
+              <TableHead className="text-muted-foreground text-xs font-normal">
                 Tags
               </TableHead>
               <TableHead className="w-12"></TableHead>
@@ -79,7 +86,7 @@ export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
                 <TableCell>
                   <Skeleton className="size-4 rounded-full" />
                 </TableCell>
-                <TableCell className="max-w-[500px]">
+                <TableCell className="min-w-[200px]">
                   <Skeleton className="h-5 w-full max-w-xs" />
                 </TableCell>
                 <TableCell>
@@ -132,7 +139,7 @@ export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
         <TableHeader className="bg-background sticky top-0 z-10">
           <TableRow>
             <TableHead className="w-12"></TableHead>
-            <TableHead className="text-muted-foreground max-w-[500px] min-w-[300px] text-xs font-normal">
+            <TableHead className="text-muted-foreground min-w-[200px] text-xs font-normal">
               Task
             </TableHead>
             <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
@@ -144,7 +151,7 @@ export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
             <TableHead className="text-muted-foreground w-[150px] text-xs font-normal">
               Project
             </TableHead>
-            <TableHead className="text-muted-foreground min-w-[200px] text-xs font-normal">
+            <TableHead className="text-muted-foreground text-xs font-normal">
               Tags
             </TableHead>
             <TableHead className="w-12"></TableHead>
@@ -159,8 +166,18 @@ export const TasksTable = ({ tasks, isLoading }: TasksTableProps) => {
               onDelete={() => setDeletingTask(task)}
             />
           ))}
+          {isFetchingNextPage && (
+            <TableRow>
+              <TableCell colSpan={7}>
+                <div className="flex justify-center py-4">
+                  <Skeleton className="h-5 w-full max-w-xs" />
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
+      {sentinelRef && <div ref={sentinelRef} className="h-px" />}
     </div>
   );
 };
@@ -197,7 +214,7 @@ const TaskTableRow = ({ task, onEdit, onDelete }: TaskTableRowProps) => {
       </TableCell>
       <TableCell
         className={cn(
-          'max-w-[500px] whitespace-normal',
+          'min-w-[200px] whitespace-normal',
           !toggleTask.isPending && 'cursor-pointer'
         )}
         onClick={toggleTask.isPending ? undefined : handleToggle}
@@ -238,20 +255,23 @@ const TaskTableRow = ({ task, onEdit, onDelete }: TaskTableRowProps) => {
           <PriorityBadge priority={task.priority} />
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="max-w-[150px]">
         {task.project ? (
-          <ProjectBadge project={task.project} />
+          <ProjectBadge
+            project={task.project}
+            className="max-w-full truncate"
+          />
         ) : (
           <span className="text-muted-foreground text-xs">
             <MinusIcon className="size-2" />
           </span>
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="whitespace-normal">
         {task.tags && task.tags.length > 0 ? (
           <div className="flex flex-wrap gap-1">
             {task.tags.map((tag) => (
-              <TagBadge key={tag} tag={tag} />
+              <TagBadge key={tag} tag={tag} className="max-w-full truncate" />
             ))}
           </div>
         ) : (

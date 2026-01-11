@@ -29,11 +29,17 @@ export const habitsRouter = new Hono()
       'query',
       z.object({
         days: z.coerce.number().min(1).max(365).default(7),
+        limit: z.coerce.number().min(1).max(100).default(50),
+        offset: z.coerce.number().min(0).default(0),
+        search: z.string().optional(),
+        sortBy: z.enum(['title', 'createdAt']).default('createdAt'),
+        sortOrder: z.enum(['asc', 'desc']).default('desc'),
       })
     ),
     async (c) => {
       const user = c.get('user');
-      const { days } = c.req.valid('query');
+      const { days, limit, offset, search, sortBy, sortOrder } =
+        c.req.valid('query');
 
       const now = new Date();
       const cutoffDate = new Date(
@@ -48,25 +54,54 @@ export const habitsRouter = new Hono()
         )
       );
 
-      const habits = await db.habit.findMany({
-        where: {
-          userId: user.id,
-          archived: false,
-        },
-        include: {
-          completions: {
-            where: {
-              date: { gte: cutoffDate },
-            },
-            select: {
-              date: true,
+      const where: {
+        userId: string;
+        archived: boolean;
+        OR?: Array<{
+          title?: { contains: string; mode: 'insensitive' };
+          category?: { contains: string; mode: 'insensitive' };
+        }>;
+      } = {
+        userId: user.id,
+        archived: false,
+      };
+
+      if (search) {
+        where.OR = [
+          { title: { contains: search, mode: 'insensitive' } },
+          { category: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      const orderBy: Record<string, 'asc' | 'desc'>[] = [
+        { [sortBy]: sortOrder },
+        { id: sortOrder },
+      ];
+
+      const [habits, totalCount] = await Promise.all([
+        db.habit.findMany({
+          where,
+          include: {
+            completions: {
+              where: {
+                date: { gte: cutoffDate },
+              },
+              select: {
+                date: true,
+              },
             },
           },
-        },
-        orderBy: { createdAt: 'desc' },
-      });
+          orderBy,
+          take: limit,
+          skip: offset,
+        }),
+        db.habit.count({ where }),
+      ]);
 
-      return c.json({ habits });
+      const hasMore = offset + limit < totalCount;
+      const nextOffset = hasMore ? offset + limit : null;
+
+      return c.json({ habits, nextOffset });
     }
   )
   .post('/', zValidator('json', createHabitSchema), async (c) => {

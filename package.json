@@ -19,7 +19,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "db:reset:seed": "prisma migrate reset --force",
     "db:studio": "prisma studio"
@@ -69,6 +69,7 @@
     "react-dom": "19.1.0",
     "react-hook-form": "^7.67.0",
     "react-hotkeys-hook": "^5.2.1",
+    "react-intersection-observer": "^10.0.0",
     "react-textarea-autosize": "^8.5.9",
     "recharts": "2.15.4",
     "resend": "^6.5.2",

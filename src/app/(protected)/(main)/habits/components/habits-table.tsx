@@ -39,9 +39,16 @@ import { WeekDayToggle } from './week-day-toggle';
 interface HabitsTableProps {
   habits: HabitWithMetrics[];
   isLoading?: boolean;
+  isFetchingNextPage?: boolean;
+  sentinelRef?: (node?: Element | null) => void;
 }
 
-export const HabitsTable = ({ habits, isLoading }: HabitsTableProps) => {
+export const HabitsTable = ({
+  habits,
+  isLoading,
+  isFetchingNextPage,
+  sentinelRef,
+}: HabitsTableProps) => {
   const setCreateDialogOpen = useSetAtom(createDialogOpenAtom);
   const days = getLast7Days();
 
@@ -125,7 +132,7 @@ export const HabitsTable = ({ habits, isLoading }: HabitsTableProps) => {
   return (
     <div className="w-full">
       <Table>
-        <TableHeader className="bg-background sticky top-0 z-10">
+        <TableHeader className="bg-background">
           <TableRow>
             <TableHead className="text-muted-foreground max-w-[400px] min-w-[250px] text-xs font-normal">
               Habit
@@ -155,8 +162,18 @@ export const HabitsTable = ({ habits, isLoading }: HabitsTableProps) => {
           {habits.map((habit) => (
             <HabitTableRow key={habit.id} habit={habit} />
           ))}
+          {isFetchingNextPage && (
+            <TableRow>
+              <TableCell colSpan={4}>
+                <div className="flex justify-center py-4">
+                  <Skeleton className="h-5 w-full max-w-xs" />
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
+      {sentinelRef && <div ref={sentinelRef} className="h-px" />}
     </div>
   );
 };

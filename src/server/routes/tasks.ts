@@ -39,7 +39,7 @@ const updateTaskSchema = z.object({
 });
 
 const listTasksSchema = z.object({
-  projectId: z.string().optional(),
+  projectIds: z.string().optional(),
   completed: z
     .string()
     .transform((v) => v === 'true')
@@ -47,7 +47,9 @@ const listTasksSchema = z.object({
   sortBy: z.enum(['dueDate', 'priority', 'title', 'createdAt']).optional(),
   sortOrder: z.enum(['asc', 'desc']).default('asc'),
   limit: z.coerce.number().min(1).max(100).default(50),
-  cursor: z.string().optional(),
+  offset: z.coerce.number().min(0).default(0),
+  search: z.string().optional(),
+  tags: z.string().optional(),
 });
 
 const chartQuerySchema = z.object({
@@ -136,56 +138,82 @@ export const tasksRouter = new Hono()
   })
   .get('/', zValidator('query', listTasksSchema), async (c) => {
     const user = c.get('user');
-    const { projectId, completed, sortBy, sortOrder, limit, cursor } =
-      c.req.valid('query');
+    const {
+      projectIds,
+      completed,
+      sortBy,
+      sortOrder,
+      limit,
+      offset,
+      search,
+      tags,
+    } = c.req.valid('query');
 
     const where: {
       userId: string;
-      projectId?: string;
+      projectId?: { in: string[] };
       completed?: boolean;
-      createdAt?: { lt: Date };
+      title?: { contains: string; mode: 'insensitive' };
+      tags?: { hasSome: string[] };
     } = { userId: user.id };
 
-    if (projectId) where.projectId = projectId;
+    if (projectIds) where.projectId = { in: projectIds.split(',') };
     if (completed !== undefined) where.completed = completed;
-    if (cursor) where.createdAt = { lt: new Date(cursor) };
+    if (search) where.title = { contains: search, mode: 'insensitive' };
+    if (tags) where.tags = { hasSome: tags.split(',') };
 
-    let orderBy: Record<string, 'asc' | 'desc'>[] = [{ createdAt: 'desc' }];
-
-    if (sortBy === 'dueDate') {
-      orderBy = [{ dueDate: sortOrder }, { createdAt: 'desc' }];
-    } else if (sortBy === 'title') {
-      orderBy = [{ title: sortOrder }, { createdAt: 'desc' }];
-    } else if (sortBy === 'createdAt') {
-      orderBy = [{ createdAt: sortOrder }];
-    }
-
-    const tasks = await db.task.findMany({
-      where,
-      orderBy,
-      take: limit + 1,
-      include: {
-        project: {
-          select: { id: true, name: true, color: true },
-        },
-      },
-    });
-
-    let sortedTasks = tasks;
     if (sortBy === 'priority') {
-      sortedTasks = [...tasks].sort((a, b) => {
-        const diff = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
-        return sortOrder === 'asc' ? diff : -diff;
+      const allTasks = await db.task.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }],
+        include: {
+          project: {
+            select: { id: true, name: true, color: true },
+          },
+        },
       });
+
+      const sortedTasks = allTasks.sort((a, b) => {
+        const priorityDiff =
+          PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+        if (priorityDiff !== 0) {
+          return sortOrder === 'asc' ? priorityDiff : -priorityDiff;
+        }
+        return sortOrder === 'asc'
+          ? a.id.localeCompare(b.id)
+          : b.id.localeCompare(a.id);
+      });
+
+      const items = sortedTasks.slice(offset, offset + limit);
+      const hasMore = sortedTasks.length > offset + limit;
+      const nextOffset = hasMore ? offset + limit : null;
+
+      return c.json({ tasks: items, nextOffset });
     }
 
-    const hasMore = sortedTasks.length > limit;
-    const items = hasMore ? sortedTasks.slice(0, limit) : sortedTasks;
-    const nextCursor = hasMore
-      ? items[items.length - 1].createdAt.toISOString()
-      : null;
+    const orderBy: Record<string, 'asc' | 'desc'>[] = sortBy
+      ? [{ [sortBy]: sortOrder }, { id: sortOrder }]
+      : [{ createdAt: 'desc' }, { id: 'desc' }];
 
-    return c.json({ tasks: items, nextCursor });
+    const [tasks, totalCount] = await Promise.all([
+      db.task.findMany({
+        where,
+        orderBy,
+        take: limit,
+        skip: offset,
+        include: {
+          project: {
+            select: { id: true, name: true, color: true },
+          },
+        },
+      }),
+      db.task.count({ where }),
+    ]);
+
+    const hasMore = offset + limit < totalCount;
+    const nextOffset = hasMore ? offset + limit : null;
+
+    return c.json({ tasks, nextOffset });
   })
   .post('/', zValidator('json', createTaskSchema), async (c) => {
     const user = c.get('user');
