@@ -136,7 +136,7 @@ export const TasksTable = ({
   return (
     <div className="w-full">
       <Table>
-        <TableHeader className="bg-background sticky top-0 z-10">
+        <TableHeader className="bg-background">
           <TableRow>
             <TableHead className="w-12"></TableHead>
             <TableHead className="text-muted-foreground min-w-[200px] text-xs font-normal">

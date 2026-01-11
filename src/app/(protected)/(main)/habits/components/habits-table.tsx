@@ -56,7 +56,7 @@ export const HabitsTable = ({
     return (
       <div className="w-full">
         <Table>
-          <TableHeader className="bg-background sticky top-0 z-10">
+          <TableHeader className="bg-background">
             <TableRow>
               <TableHead className="text-muted-foreground max-w-[400px] min-w-[250px] text-xs font-normal">
                 Habit
