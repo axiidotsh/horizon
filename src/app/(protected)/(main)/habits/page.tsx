@@ -2,6 +2,7 @@
 
 import { PageHeading } from '@/components/page-heading';
 import { SearchBar } from '@/components/search-bar';
+import { useDebounce } from '@/hooks/use-debounce';
 import { useAtom, useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -24,6 +25,7 @@ export default function HabitsPage() {
   const sortBy = useAtomValue(sortByAtom);
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
   const statusFilter = useAtomValue(statusFilterAtom);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const {
     habits: rawHabits,
@@ -32,7 +34,7 @@ export default function HabitsPage() {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteHabits({
-    search: searchQuery || undefined,
+    search: debouncedSearchQuery || undefined,
     sortBy: sortBy === 'title' ? 'title' : undefined,
     sortOrder: 'asc',
   });

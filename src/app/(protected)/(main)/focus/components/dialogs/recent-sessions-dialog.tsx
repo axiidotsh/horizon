@@ -14,6 +14,7 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { useDebounce } from '@/hooks/use-debounce';
 import { ArrowDownUpIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -31,6 +32,7 @@ export const RecentSessionsDialog = ({
 }: RecentSessionsDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'duration' | 'date'>('date');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const {
     sessions,
@@ -39,7 +41,7 @@ export const RecentSessionsDialog = ({
     hasNextPage,
     fetchNextPage,
   } = useInfiniteRecentSessions({
-    search: searchQuery || undefined,
+    search: debouncedSearchQuery || undefined,
     sortBy,
     sortOrder: 'desc',
   });

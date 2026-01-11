@@ -2,6 +2,7 @@
 
 import { PageHeading } from '@/components/page-heading';
 import { SearchBar } from '@/components/search-bar';
+import { useDebounce } from '@/hooks/use-debounce';
 import { useAtom, useAtomValue } from 'jotai';
 import { useInView } from 'react-intersection-observer';
 import {
@@ -20,10 +21,11 @@ export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
   const selectedTags = useAtomValue(selectedTagsAtom);
   const selectedProjects = useAtomValue(selectedProjectsAtom);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const { tasks, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useInfiniteTasks({
-      search: searchQuery || undefined,
+      search: debouncedSearchQuery || undefined,
       sortBy: sortBy === 'completed' ? 'createdAt' : sortBy,
       sortOrder: sortBy === 'priority' ? 'desc' : 'asc',
       tags: selectedTags.length > 0 ? selectedTags : undefined,
