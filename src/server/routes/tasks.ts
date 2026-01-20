@@ -60,24 +60,40 @@ const PRIORITY_ORDER = { HIGH: 0, MEDIUM: 1, LOW: 2, NO_PRIORITY: 3 };
 
 export const tasksRouter = new Hono()
   .use(authMiddleware)
+  .get('/tags', async (c) => {
+    const user = c.get('user');
+
+    const tasks = await db.task.findMany({
+      where: { userId: user.id },
+      select: { tags: true },
+    });
+
+    const tags = Array.from(new Set(tasks.flatMap((t) => t.tags))).sort();
+
+    return c.json({ tags });
+  })
   .get('/stats', async (c) => {
     const user = c.get('user');
 
     const now = new Date();
-    const startOfWeek = addUTCDays(now, -now.getUTCDay());
 
-    const [total, completed] = await Promise.all([
+    const [total, completed, overdue] = await Promise.all([
       db.task.count({
         where: {
           userId: user.id,
-          createdAt: { gte: startOfWeek },
         },
       }),
       db.task.count({
         where: {
           userId: user.id,
           completed: true,
-          createdAt: { gte: startOfWeek },
+        },
+      }),
+      db.task.count({
+        where: {
+          userId: user.id,
+          completed: false,
+          dueDate: { lt: now },
         },
       }),
     ]);
@@ -92,6 +108,7 @@ export const tasksRouter = new Hono()
         completed,
         pending,
         completionRate,
+        overdue,
       },
     });
   })

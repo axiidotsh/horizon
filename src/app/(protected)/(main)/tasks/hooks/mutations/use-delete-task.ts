@@ -1,9 +1,15 @@
 import { DASHBOARD_QUERY_KEYS } from '@/app/(protected)/(main)/dashboard/hooks/dashboard-query-keys';
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { api } from '@/lib/rpc';
+import type { InfiniteData } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 import { TASK_QUERY_KEYS } from '../task-query-keys';
 import type { Task } from '../types';
+
+interface TasksPage {
+  tasks: Task[];
+  nextOffset: number | null;
+}
 
 export function useDeleteTask() {
   const queryClient = useQueryClient();
@@ -18,15 +24,21 @@ export function useDeleteTask() {
     errorMessage: 'Failed to delete task',
     successMessage: 'Task deleted',
     onSuccess: (_data, variables) => {
-      queryClient.setQueryData(TASK_QUERY_KEYS.tasks, (old: unknown) => {
-        const queryData = old as { tasks: Task[] };
-        return {
-          ...queryData,
-          tasks: queryData.tasks.filter(
-            (task) => task.id !== variables.param.id
-          ),
-        };
-      });
+      const taskId = variables.param.id;
+
+      queryClient.setQueriesData<InfiniteData<TasksPage, number>>(
+        { queryKey: TASK_QUERY_KEYS.infinite },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              tasks: page.tasks.filter((task) => task.id !== taskId),
+            })),
+          };
+        }
+      );
     },
   });
 }

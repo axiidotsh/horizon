@@ -6,9 +6,7 @@ import { TASK_QUERY_KEYS } from '../task-query-keys';
 export function useCreateTask() {
   return useApiMutation(api.tasks.$post, {
     invalidateKeys: [
-      TASK_QUERY_KEYS.tasks,
-      TASK_QUERY_KEYS.stats,
-      TASK_QUERY_KEYS.chart,
+      TASK_QUERY_KEYS.all,
       DASHBOARD_QUERY_KEYS.metrics,
       DASHBOARD_QUERY_KEYS.heatmap,
     ],

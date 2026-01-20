@@ -30,7 +30,7 @@ export function useInfiniteTasks(options: UseInfiniteTasksOptions = {}) {
 
   const query = useApiInfiniteQuery(api.tasks.$get, {
     queryKey: [
-      ...TASK_QUERY_KEYS.tasks,
+      ...TASK_QUERY_KEYS.infinite,
       search,
       projectIds,
       tags,

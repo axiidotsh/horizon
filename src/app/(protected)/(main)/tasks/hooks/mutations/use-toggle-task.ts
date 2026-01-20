@@ -3,7 +3,8 @@ import type { DashboardMetrics } from '@/app/(protected)/(main)/dashboard/hooks/
 import { updateDashboardMetricsForTaskToggle } from '@/app/(protected)/(main)/dashboard/utils/dashboard-calculations';
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { api } from '@/lib/rpc';
-import { useQueryClient, type QueryKey } from '@tanstack/react-query';
+import type { InfiniteData, QueryKey } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   calculateTaskChartData,
   calculateTaskStats,
@@ -11,27 +12,64 @@ import {
 import { TASK_QUERY_KEYS } from '../task-query-keys';
 import type { ChartData, Task, TaskStats } from '../types';
 
+interface TasksPage {
+  tasks: Task[];
+  nextOffset: number | null;
+}
+
+interface ToggleTaskContext {
+  snapshots: Array<{ queryKey: QueryKey; data: unknown }>;
+  previousInfiniteData: [
+    QueryKey,
+    InfiniteData<TasksPage, number> | undefined,
+  ][];
+  previousStats: unknown;
+  previousChartData: [QueryKey, { chartData: ChartData } | undefined][];
+  previousMetrics: { metrics: DashboardMetrics } | undefined;
+}
+
 export function useToggleTask(taskId?: string) {
   const queryClient = useQueryClient();
 
-  const invalidateKeys: QueryKey[] = [
-    TASK_QUERY_KEYS.tasks,
-    TASK_QUERY_KEYS.stats,
-    TASK_QUERY_KEYS.chart,
-    DASHBOARD_QUERY_KEYS.metrics,
-    DASHBOARD_QUERY_KEYS.heatmap,
-  ];
-
-  const updateAllTaskQueries = (updatedTasks: Task[]) => {
-    const queries = queryClient.getQueriesData({
-      queryKey: TASK_QUERY_KEYS.tasks,
+  const getAllTasksFromCache = (): Task[] => {
+    const infiniteQueries = queryClient.getQueriesData<
+      InfiniteData<TasksPage, number>
+    >({
+      queryKey: TASK_QUERY_KEYS.infinite,
     });
 
-    queries.forEach(([queryKey]) => {
-      queryClient.setQueryData(queryKey, { tasks: updatedTasks });
-    });
+    for (const [, data] of infiniteQueries) {
+      if (data?.pages) {
+        return data.pages.flatMap((page) => page.tasks);
+      }
+    }
 
-    const newStats = calculateTaskStats(updatedTasks);
+    return [];
+  };
+
+  const updateInfiniteQueries = (
+    updateFn: (task: Task) => Task,
+    taskId: string
+  ) => {
+    queryClient.setQueriesData<InfiniteData<TasksPage, number>>(
+      { queryKey: TASK_QUERY_KEYS.infinite },
+      (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            tasks: page.tasks.map((task) =>
+              task.id === taskId ? updateFn(task) : task
+            ),
+          })),
+        };
+      }
+    );
+  };
+
+  const updateDerivedCaches = (allTasks: Task[]) => {
+    const newStats = calculateTaskStats(allTasks);
     queryClient.setQueryData<{ stats: TaskStats }>(TASK_QUERY_KEYS.stats, {
       stats: newStats,
     });
@@ -44,81 +82,96 @@ export function useToggleTask(taskId?: string) {
       const days = (
         queryKey as ReturnType<typeof TASK_QUERY_KEYS.chartWithDays>
       )[2];
-      const newChartData = calculateTaskChartData(updatedTasks, days);
+      const newChartData = calculateTaskChartData(allTasks, days);
       queryClient.setQueryData(queryKey, { chartData: newChartData });
     });
   };
 
   return useApiMutation(api.tasks[':id'].toggle.$patch, {
     mutationKey: taskId ? ['toggleTask', taskId] : undefined,
-    invalidateKeys,
+    invalidateKeys: [
+      TASK_QUERY_KEYS.all,
+      DASHBOARD_QUERY_KEYS.metrics,
+      DASHBOARD_QUERY_KEYS.heatmap,
+    ],
     errorMessage: 'Failed to toggle task',
-    onMutate: async (variables) => {
-      const queries = queryClient.getQueriesData<{ tasks: Task[] }>({
-        queryKey: TASK_QUERY_KEYS.tasks,
+    onMutate: async (variables: {
+      param: { id: string };
+    }): Promise<ToggleTaskContext> => {
+      await queryClient.cancelQueries({ queryKey: TASK_QUERY_KEYS.all });
+
+      const previousInfiniteData = queryClient.getQueriesData<
+        InfiniteData<TasksPage, number>
+      >({
+        queryKey: TASK_QUERY_KEYS.infinite,
       });
 
-      const previousData = queries.map(([queryKey, data]) => ({
-        queryKey,
-        data,
-      }));
+      const previousStats = queryClient.getQueryData(TASK_QUERY_KEYS.stats);
 
-      const chartQueries = queryClient.getQueriesData<{ chartData: ChartData }>(
-        {
-          queryKey: TASK_QUERY_KEYS.chart,
-        }
-      );
-
-      const previousChartData = chartQueries.map(([queryKey, data]) => ({
-        queryKey,
-        data,
-      }));
+      const previousChartData = queryClient.getQueriesData<{
+        chartData: ChartData;
+      }>({
+        queryKey: TASK_QUERY_KEYS.chart,
+      });
 
       const previousMetrics = queryClient.getQueryData<{
         metrics: DashboardMetrics;
       }>(DASHBOARD_QUERY_KEYS.metrics);
 
-      if (queries.length > 0 && queries[0][1]) {
-        const data = queries[0][1];
-        const toggledTask = data.tasks.find(
-          (task) => task.id === variables.param.id
-        );
+      const allTasks = getAllTasksFromCache();
+      const toggledTask = allTasks.find(
+        (task) => task.id === variables.param.id
+      );
 
-        const updatedTasks = data.tasks.map((task) =>
-          task.id === variables.param.id
-            ? {
-                ...task,
-                completed: !task.completed,
-                updatedAt: new Date().toISOString(),
-              }
-            : task
-        );
-        updateAllTaskQueries(updatedTasks);
-
-        if (toggledTask && previousMetrics) {
-          const updatedMetrics = updateDashboardMetricsForTaskToggle(
-            previousMetrics.metrics,
-            toggledTask,
-            toggledTask.completed
-          );
-          queryClient.setQueryData(DASHBOARD_QUERY_KEYS.metrics, {
-            metrics: updatedMetrics,
-          });
-        }
+      if (!toggledTask) {
+        return {
+          snapshots: [],
+          previousInfiniteData,
+          previousStats,
+          previousChartData,
+          previousMetrics,
+        };
       }
 
-      const previousStats = queryClient.getQueryData(TASK_QUERY_KEYS.stats);
+      const updateFn = (task: Task): Task => ({
+        ...task,
+        completed: !task.completed,
+        updatedAt: new Date().toISOString(),
+      });
+
+      updateInfiniteQueries(updateFn, variables.param.id);
+
+      const updatedTasks = allTasks.map((task) =>
+        task.id === variables.param.id ? updateFn(task) : task
+      );
+      updateDerivedCaches(updatedTasks);
+
+      if (previousMetrics) {
+        const updatedMetrics = updateDashboardMetricsForTaskToggle(
+          previousMetrics.metrics,
+          toggledTask,
+          toggledTask.completed
+        );
+        queryClient.setQueryData(DASHBOARD_QUERY_KEYS.metrics, {
+          metrics: updatedMetrics,
+        });
+      }
+
       return {
-        previousData,
+        snapshots: [],
+        previousInfiniteData,
         previousStats,
         previousChartData,
         previousMetrics,
-        snapshots: [],
       };
     },
-    onError: (_error, _variables, context) => {
-      if (context?.previousData) {
-        context.previousData.forEach(({ queryKey, data }) => {
+    onError: (
+      _error: Error,
+      _variables: { param: { id: string } },
+      context?: ToggleTaskContext
+    ) => {
+      if (context?.previousInfiniteData) {
+        context.previousInfiniteData.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
       }
@@ -126,7 +179,7 @@ export function useToggleTask(taskId?: string) {
         queryClient.setQueryData(TASK_QUERY_KEYS.stats, context.previousStats);
       }
       if (context?.previousChartData) {
-        context.previousChartData.forEach(({ queryKey, data }) => {
+        context.previousChartData.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
       }

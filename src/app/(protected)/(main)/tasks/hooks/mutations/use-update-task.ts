@@ -1,9 +1,15 @@
 import { DASHBOARD_QUERY_KEYS } from '@/app/(protected)/(main)/dashboard/hooks/dashboard-query-keys';
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { api } from '@/lib/rpc';
+import type { InfiniteData } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 import { TASK_QUERY_KEYS } from '../task-query-keys';
 import type { Task } from '../types';
+
+interface TasksPage {
+  tasks: Task[];
+  nextOffset: number | null;
+}
 
 export function useUpdateTask() {
   const queryClient = useQueryClient();
@@ -18,18 +24,25 @@ export function useUpdateTask() {
     errorMessage: 'Failed to update task',
     successMessage: 'Task updated',
     onSuccess: (data) => {
-      if ('task' in data) {
-        const updatedTask = data.task;
-        queryClient.setQueryData(TASK_QUERY_KEYS.tasks, (old: unknown) => {
-          const queryData = old as { tasks: Task[] };
+      if (!('task' in data)) return;
+
+      const updatedTask = data.task as Task;
+
+      queryClient.setQueriesData<InfiniteData<TasksPage, number>>(
+        { queryKey: TASK_QUERY_KEYS.infinite },
+        (old) => {
+          if (!old) return old;
           return {
-            ...queryData,
-            tasks: queryData.tasks.map((task) =>
-              task.id === updatedTask.id ? updatedTask : task
-            ),
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              tasks: page.tasks.map((task) =>
+                task.id === updatedTask.id ? updatedTask : task
+              ),
+            })),
           };
-        });
-      }
+        }
+      );
     },
   });
 }

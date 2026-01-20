@@ -13,12 +13,16 @@ export function calculateTaskStats(tasks: Task[]): TaskStats {
   const completed = tasksThisWeek.filter((task) => task.completed).length;
   const pending = total - completed;
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const overdue = tasks.filter(
+    (task) => !task.completed && task.dueDate && new Date(task.dueDate) < now
+  ).length;
 
   return {
     total,
     completed,
     pending,
     completionRate,
+    overdue,
   };
 }
 

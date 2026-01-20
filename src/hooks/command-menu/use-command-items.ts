@@ -2,8 +2,8 @@ import { useRecentSessions } from '@/app/(protected)/(main)/focus/hooks/queries/
 import type { FocusSession } from '@/app/(protected)/(main)/focus/hooks/types';
 import { useHabits } from '@/app/(protected)/(main)/habits/hooks/queries/use-habits';
 import type { Habit } from '@/app/(protected)/(main)/habits/hooks/types';
+import { useInfiniteTasks } from '@/app/(protected)/(main)/tasks/hooks/queries/use-infinite-tasks';
 import { useProjects } from '@/app/(protected)/(main)/tasks/hooks/queries/use-projects';
-import { useTasks } from '@/app/(protected)/(main)/tasks/hooks/queries/use-tasks';
 import type { Project, Task } from '@/app/(protected)/(main)/tasks/hooks/types';
 import type { CommandMenuItem } from '@/hooks/command-menu/types';
 import { useMemo } from 'react';
@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 const ITEM_LIMIT = 10;
 
 export function useCommandItems() {
-  const { data: tasks = [] } = useTasks();
+  const { tasks } = useInfiniteTasks({ limit: ITEM_LIMIT });
   const { data: projects = [] } = useProjects();
   const { data: habits = [] } = useHabits();
   const { data: recentSessions = [] } = useRecentSessions(ITEM_LIMIT);
