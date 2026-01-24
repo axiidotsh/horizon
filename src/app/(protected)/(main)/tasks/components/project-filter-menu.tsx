@@ -11,14 +11,13 @@ import { Input } from '@/components/ui/input';
 import { CheckIcon } from 'lucide-react';
 import { DEFAULT_PROJECT_COLOR, FILTER_MENU_MAX_HEIGHT } from '../constants';
 import type { Project } from '../hooks/types';
+import { useSearchableList } from '../hooks/use-searchable-list';
 
 interface ProjectFilterMenuProps {
   projects: Project[];
   selectedProjects: string[];
   onToggleProject: (projectId: string) => void;
   onClearFilters: () => void;
-  searchQuery: string;
-  onSearchQueryChange: (query: string) => void;
 }
 
 export const ProjectFilterMenu = ({
@@ -26,14 +25,14 @@ export const ProjectFilterMenu = ({
   selectedProjects,
   onToggleProject,
   onClearFilters,
-  searchQuery,
-  onSearchQueryChange,
 }: ProjectFilterMenuProps) => {
-  const filteredProjects = searchQuery.trim()
-    ? projects.filter((project) =>
-        project.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : projects;
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredItems: filteredProjects,
+  } = useSearchableList(projects, (project, query) =>
+    project.name.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <DropdownMenuSub>
@@ -51,7 +50,7 @@ export const ProjectFilterMenu = ({
             type="text"
             placeholder="Search projects..."
             value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="h-8 rounded-none border-0 bg-transparent! px-0 shadow-none focus-visible:ring-0"
           />
         </div>

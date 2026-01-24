@@ -2,7 +2,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/utils/utils';
 import { FolderIcon } from 'lucide-react';
 import { PROJECT_COLOR_OPACITY } from '../../constants';
-import { addColorOpacity } from '../../utils/color-utils';
 
 interface ProjectBadgeProps {
   project: {
@@ -12,6 +11,10 @@ interface ProjectBadgeProps {
   };
   showIcon?: boolean;
   className?: string;
+}
+
+function addColorOpacity(color: string, opacity: number): string {
+  return `${color}${opacity.toString(16).padStart(2, '0')}`;
 }
 
 export const ProjectBadge = ({

@@ -11,9 +11,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/utils/utils';
 import { CheckIcon, ChevronsUpDownIcon, SearchIcon } from 'lucide-react';
-import { useState } from 'react';
 import { DEFAULT_PROJECT_COLOR, MAX_DROPDOWN_HEIGHT } from '../constants';
 import type { Project } from '../hooks/types';
+import { useSearchableList } from '../hooks/use-searchable-list';
 
 interface ProjectSelectProps {
   projects: Project[];
@@ -30,17 +30,18 @@ export const ProjectSelect = ({
   placeholder = 'Select project...',
   id,
 }: ProjectSelectProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredItems: filteredProjects,
+    reset,
+  } = useSearchableList(projects, (project, query) =>
+    project.name.toLowerCase().includes(query.toLowerCase())
+  );
   const selectedProject = projects.find((p) => p.id === value);
 
-  const filteredProjects = searchQuery.trim()
-    ? projects.filter((project) =>
-        project.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : projects;
-
   return (
-    <DropdownMenu onOpenChange={(open) => !open && setSearchQuery('')}>
+    <DropdownMenu onOpenChange={(open) => !open && reset()}>
       <DropdownMenuTrigger asChild>
         <Button
           id={id}

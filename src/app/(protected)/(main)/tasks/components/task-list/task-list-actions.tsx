@@ -20,11 +20,9 @@ import {
   PlusIcon,
 } from 'lucide-react';
 import {
-  projectSearchQueryAtom,
   selectedProjectsAtom,
   selectedTagsAtom,
   sortByAtom,
-  tagSearchQueryAtom,
 } from '../../atoms/task-atoms';
 import {
   bulkAddTasksSheetAtom,
@@ -32,25 +30,15 @@ import {
   createTaskDialogAtom,
 } from '../../atoms/task-dialogs';
 import { useProjects } from '../../hooks/queries/use-projects';
+import { useTaskTags } from '../../hooks/queries/use-task-tags';
 import type { Project } from '../../hooks/types';
-import { useExistingTags } from '../../hooks/use-existing-tags';
 import { ProjectFilterMenu } from '../project-filter-menu';
 import { TagFilterMenu } from '../tag-filter-menu';
 
-interface TaskListActionsProps {
-  isDashboard?: boolean;
-}
-
-export const TaskListActions = ({
-  isDashboard = false,
-}: TaskListActionsProps = {}) => {
+export const TaskListActions = () => {
   const [selectedTags, setSelectedTags] = useAtom(selectedTagsAtom);
   const [selectedProjects, setSelectedProjects] = useAtom(selectedProjectsAtom);
   const [sortBy, setSortBy] = useAtom(sortByAtom);
-  const [tagSearchQuery, setTagSearchQuery] = useAtom(tagSearchQueryAtom);
-  const [projectSearchQuery, setProjectSearchQuery] = useAtom(
-    projectSearchQueryAtom
-  );
   const setCreateTaskDialog = useSetAtom(createTaskDialogAtom);
   const setCreateProjectDialog = useSetAtom(createProjectDialogAtom);
   const setBulkAddTasksSheet = useSetAtom(bulkAddTasksSheetAtom);
@@ -58,7 +46,7 @@ export const TaskListActions = ({
   const { data: projects = [] } = useProjects() as {
     data: Project[] | undefined;
   };
-  const allTags = useExistingTags();
+  const { data: allTags = [] } = useTaskTags();
 
   const hasActiveFilters =
     selectedTags.length > 0 || selectedProjects.length > 0;
@@ -92,8 +80,6 @@ export const TaskListActions = ({
                 )
               }
               onClearFilters={() => setSelectedProjects([])}
-              searchQuery={projectSearchQuery}
-              onSearchQueryChange={setProjectSearchQuery}
             />
             <TagFilterMenu
               tags={allTags}
@@ -106,8 +92,6 @@ export const TaskListActions = ({
                 )
               }
               onClearFilters={() => setSelectedTags([])}
-              searchQuery={tagSearchQuery}
-              onSearchQueryChange={setTagSearchQuery}
             />
           </DropdownMenuContent>
         </DropdownMenu>

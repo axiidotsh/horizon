@@ -1,12 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -16,27 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { cn } from '@/utils/utils';
 import { useSetAtom } from 'jotai';
-import {
-  CheckIcon,
-  ClipboardCheckIcon,
-  EllipsisIcon,
-  MinusIcon,
-  PencilIcon,
-  Trash2Icon,
-} from 'lucide-react';
-import {
-  createTaskDialogAtom,
-  deletingTaskAtom,
-  editingTaskAtom,
-} from '../atoms/task-dialogs';
-import { useToggleTask } from '../hooks/mutations/use-toggle-task';
+import { ClipboardCheckIcon } from 'lucide-react';
+import { createTaskDialogAtom } from '../atoms/task-dialogs';
 import type { Task } from '../hooks/types';
-import { formatDueDate, isOverdue } from '../utils/task-filters';
-import { PriorityBadge } from './badges/priority-badge';
-import { ProjectBadge } from './badges/project-badge';
-import { TagBadge } from './badges/tag-badge';
+import { TaskTableRow } from './task-table-row';
 
 interface TasksTableProps {
   tasks: Task[];
@@ -51,8 +29,6 @@ export const TasksTable = ({
   isFetchingNextPage,
   sentinelRef,
 }: TasksTableProps) => {
-  const setEditingTask = useSetAtom(editingTaskAtom);
-  const setDeletingTask = useSetAtom(deletingTaskAtom);
   const setCreateTaskDialog = useSetAtom(createTaskDialogAtom);
 
   if (isLoading) {
@@ -159,12 +135,7 @@ export const TasksTable = ({
         </TableHeader>
         <TableBody>
           {tasks.map((task) => (
-            <TaskTableRow
-              key={task.id}
-              task={task}
-              onEdit={() => setEditingTask(task)}
-              onDelete={() => setDeletingTask(task)}
-            />
+            <TaskTableRow key={task.id} task={task} />
           ))}
           {isFetchingNextPage && (
             <TableRow>
@@ -179,131 +150,5 @@ export const TasksTable = ({
       </Table>
       {sentinelRef && <div ref={sentinelRef} className="h-px" />}
     </div>
-  );
-};
-
-interface TaskTableRowProps {
-  task: Task;
-  onEdit: () => void;
-  onDelete: () => void;
-}
-
-const TaskTableRow = ({ task, onEdit, onDelete }: TaskTableRowProps) => {
-  const toggleTask = useToggleTask(task.id);
-
-  const handleToggle = () => {
-    toggleTask.mutate({ param: { id: task.id } });
-  };
-
-  return (
-    <TableRow className={cn(task.completed && 'opacity-60')}>
-      <TableCell>
-        <button
-          onClick={handleToggle}
-          disabled={toggleTask.isPending}
-          className={cn(
-            'flex size-4 cursor-pointer items-center justify-center rounded-full border transition-all disabled:opacity-50',
-            task.completed
-              ? 'border-primary bg-primary text-primary-foreground'
-              : 'border-muted-foreground/30 hover:border-muted-foreground/50'
-          )}
-          aria-label={`Mark task "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
-        >
-          {task.completed && <CheckIcon className="size-2.5" strokeWidth={3} />}
-        </button>
-      </TableCell>
-      <TableCell
-        className={cn(
-          'min-w-[200px] whitespace-normal',
-          !toggleTask.isPending && 'cursor-pointer'
-        )}
-        onClick={toggleTask.isPending ? undefined : handleToggle}
-      >
-        <span
-          className={cn(
-            'text-sm',
-            task.completed && 'text-muted-foreground line-through'
-          )}
-        >
-          {task.title}
-        </span>
-      </TableCell>
-      <TableCell>
-        {task.dueDate ? (
-          <span
-            className={cn(
-              'text-xs',
-              isOverdue(task.dueDate) && !task.completed
-                ? 'text-destructive'
-                : 'text-muted-foreground'
-            )}
-          >
-            {formatDueDate(task.dueDate, task.completed)}
-          </span>
-        ) : (
-          <span className="text-muted-foreground text-xs">
-            <MinusIcon className="size-2" />
-          </span>
-        )}
-      </TableCell>
-      <TableCell>
-        {task.priority === 'NO_PRIORITY' ? (
-          <span className="text-muted-foreground text-xs">
-            <MinusIcon className="size-2" />
-          </span>
-        ) : (
-          <PriorityBadge priority={task.priority} />
-        )}
-      </TableCell>
-      <TableCell className="max-w-[150px]">
-        {task.project ? (
-          <ProjectBadge
-            project={task.project}
-            className="max-w-full truncate"
-          />
-        ) : (
-          <span className="text-muted-foreground text-xs">
-            <MinusIcon className="size-2" />
-          </span>
-        )}
-      </TableCell>
-      <TableCell className="whitespace-normal">
-        {task.tags && task.tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {task.tags.map((tag) => (
-              <TagBadge key={tag} tag={tag} className="max-w-full truncate" />
-            ))}
-          </div>
-        ) : (
-          <span className="text-muted-foreground text-xs">
-            <MinusIcon className="size-2" />
-          </span>
-        )}
-      </TableCell>
-      <TableCell>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              aria-label="Task options"
-              tooltip="Task options"
-            >
-              <EllipsisIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={onEdit}>
-              <PencilIcon />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onSelect={onDelete}>
-              <Trash2Icon />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
   );
 };

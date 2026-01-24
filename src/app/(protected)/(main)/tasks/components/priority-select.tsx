@@ -8,13 +8,6 @@ import {
 import { cn } from '@/utils/utils';
 import { PRIORITY_OPTIONS } from '../constants';
 
-interface PrioritySelectProps {
-  id?: string;
-  value: string;
-  onValueChange: (value: string) => void;
-  className?: string;
-}
-
 function getPriorityCircleColor(priority: string) {
   switch (priority) {
     case 'LOW':
@@ -30,13 +23,12 @@ function getPriorityCircleColor(priority: string) {
   }
 }
 
-function PriorityOption({
-  priority,
-  label,
-}: {
+interface PriorityOptionProps {
   priority: string;
   label: string;
-}) {
+}
+
+const PriorityOption = ({ priority, label }: PriorityOptionProps) => {
   return (
     <div className="flex items-center gap-2">
       <div
@@ -45,6 +37,13 @@ function PriorityOption({
       <span>{label}</span>
     </div>
   );
+};
+
+interface PrioritySelectProps {
+  id?: string;
+  value: string;
+  onValueChange: (value: string) => void;
+  className?: string;
 }
 
 export const PrioritySelect = ({

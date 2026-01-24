@@ -10,14 +10,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { CheckIcon } from 'lucide-react';
 import { FILTER_MENU_MAX_HEIGHT } from '../constants';
+import { useSearchableList } from '../hooks/use-searchable-list';
 
 interface TagFilterMenuProps {
   tags: string[];
   selectedTags: string[];
   onToggleTag: (tag: string) => void;
   onClearFilters: () => void;
-  searchQuery: string;
-  onSearchQueryChange: (query: string) => void;
 }
 
 export const TagFilterMenu = ({
@@ -25,14 +24,14 @@ export const TagFilterMenu = ({
   selectedTags,
   onToggleTag,
   onClearFilters,
-  searchQuery,
-  onSearchQueryChange,
 }: TagFilterMenuProps) => {
-  const filteredTags = searchQuery.trim()
-    ? tags.filter((tag) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : tags;
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredItems: filteredTags,
+  } = useSearchableList(tags, (tag, query) =>
+    tag.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <DropdownMenuSub>
@@ -50,7 +49,7 @@ export const TagFilterMenu = ({
             type="text"
             placeholder="Search tags..."
             value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="h-8 rounded-none border-0 bg-transparent! px-0 shadow-none focus-visible:ring-0"
           />
         </div>

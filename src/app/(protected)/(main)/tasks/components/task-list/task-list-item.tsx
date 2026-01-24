@@ -1,51 +1,30 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { cn } from '@/utils/utils';
-import { useSetAtom } from 'jotai';
-import { DotIcon, EllipsisIcon, PencilIcon, Trash2Icon } from 'lucide-react';
-import { deletingTaskAtom, editingTaskAtom } from '../../atoms/task-dialogs';
-import { useToggleTask } from '../../hooks/mutations/use-toggle-task';
+import { DotIcon } from 'lucide-react';
 import type { Task } from '../../hooks/types';
+import { useTaskActions } from '../../hooks/use-task-actions';
 import { formatDueDate, isOverdue } from '../../utils/task-filters';
 import { PriorityBadge } from '../badges/priority-badge';
 import { ProjectBadge } from '../badges/project-badge';
 import { TagBadge } from '../badges/tag-badge';
+import { TaskActionsMenu } from '../task-actions-menu';
 
 interface TaskListItemProps {
   task: Task;
 }
 
 export const TaskListItem = ({ task }: TaskListItemProps) => {
-  const setEditingTask = useSetAtom(editingTaskAtom);
-  const setDeletingTask = useSetAtom(deletingTaskAtom);
-  const toggleTask = useToggleTask(task.id);
-
-  const handleToggle = () => {
-    toggleTask.mutate({ param: { id: task.id } });
-  };
-
-  const handleEdit = () => {
-    setEditingTask(task);
-  };
-
-  const handleDelete = () => {
-    setDeletingTask(task);
-  };
+  const { handleToggle, handleEdit, handleDelete, isToggling } =
+    useTaskActions();
 
   return (
     <li className="border-border flex items-start gap-3 border-b pb-3 last:border-0 last:pb-0">
       <Checkbox
         checked={task.completed}
-        onCheckedChange={handleToggle}
-        disabled={toggleTask.isPending}
+        onCheckedChange={() => handleToggle(task.id)}
+        disabled={isToggling}
         className="mt-0.5"
         aria-label={`Mark task "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
       />
@@ -98,29 +77,12 @@ export const TaskListItem = ({ task }: TaskListItemProps) => {
           </div>
         </div>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            size="icon-sm"
-            variant="ghost"
-            className="shrink-0"
-            aria-label="Task options"
-            tooltip="Task options"
-          >
-            <EllipsisIcon />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={handleEdit}>
-            <PencilIcon />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onSelect={handleDelete}>
-            <Trash2Icon />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="shrink-0">
+        <TaskActionsMenu
+          onEdit={() => handleEdit(task)}
+          onDelete={() => handleDelete(task)}
+        />
+      </div>
     </li>
   );
 };

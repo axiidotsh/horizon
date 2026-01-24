@@ -1,11 +1,6 @@
 import { useApiInfiniteQuery } from '@/hooks/use-api-infinite-query';
 import { api } from '@/lib/rpc';
-import type { InferResponseType } from 'hono/client';
-import { useMemo } from 'react';
 import { TASK_QUERY_KEYS } from '../task-query-keys';
-
-type TasksResponse = InferResponseType<typeof api.tasks.$get>;
-type Task = TasksResponse['tasks'][number];
 
 interface UseInfiniteTasksOptions {
   search?: string;
@@ -54,10 +49,7 @@ export function useInfiniteTasks(options: UseInfiniteTasksOptions = {}) {
     errorMessage: 'Failed to fetch tasks',
   });
 
-  const tasks = useMemo<Task[]>(
-    () => query.data?.pages.flatMap((page) => page.tasks) ?? [],
-    [query.data]
-  );
+  const tasks = query.data?.pages.flatMap((page) => page.tasks) ?? [];
 
   return {
     ...query,

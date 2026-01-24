@@ -9,7 +9,6 @@ export function useTaskChart(days: number = 7) {
       queryKey: TASK_QUERY_KEYS.chartWithDays(days),
       select: (data) => data.chartData,
       errorMessage: 'Failed to fetch chart data',
-      placeholderData: (previousData) => previousData,
     }
   );
 }

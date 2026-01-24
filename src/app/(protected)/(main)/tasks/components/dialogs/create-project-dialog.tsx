@@ -19,10 +19,10 @@ import { useCreateProject } from '../../hooks/mutations/use-create-project';
 
 export const CreateProjectDialog = () => {
   const [open, setOpen] = useAtom(createProjectDialogAtom);
-  const createProject = useCreateProject();
-
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>(DEFAULT_BLUE_COLOR);
+
+  const createProject = useCreateProject();
 
   const resetForm = () => {
     setName('');

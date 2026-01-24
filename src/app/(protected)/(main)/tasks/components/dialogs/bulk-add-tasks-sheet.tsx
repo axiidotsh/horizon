@@ -1,6 +1,5 @@
 'use client';
 
-import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
@@ -16,13 +15,13 @@ import {
 } from '@/components/ui/sheet';
 import { useAtom } from 'jotai';
 import { PlusIcon, XIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { bulkAddTasksSheetAtom } from '../../atoms/task-dialogs';
 import { useBulkCreateTasks } from '../../hooks/mutations/use-bulk-create-tasks';
 import { useProjects } from '../../hooks/queries/use-projects';
-import type { Project } from '../../hooks/types';
-import { useExistingTags } from '../../hooks/use-existing-tags';
+import { useTaskTags } from '../../hooks/queries/use-task-tags';
+import { useTaskForm } from '../../hooks/use-task-form';
 import { TagBadge } from '../badges/tag-badge';
 import { PrioritySelect } from '../priority-select';
 import { ProjectSelect } from '../project-select';
@@ -35,53 +34,31 @@ interface PendingTask {
 
 export const BulkAddTasksSheet = () => {
   const [open, setOpen] = useAtom(bulkAddTasksSheetAtom);
-  const { data: settings } = useSettings();
-  const bulkCreateTasks = useBulkCreateTasks();
-  const { data: projects = [] } = useProjects() as {
-    data: Project[] | undefined;
-  };
-  const existingTags = useExistingTags();
-
-  const [title, setTitle] = useState('');
-  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
-  const [priority, setPriority] = useState<string>(
-    settings?.defaultTaskPriority ?? 'NO_PRIORITY'
-  );
-  const [projectId, setProjectId] = useState<string>('');
-  const [tags, setTags] = useState<string[]>([]);
   const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([]);
+
+  const bulkCreateTasks = useBulkCreateTasks();
+  const form = useTaskForm();
+  const { data: projects = [] } = useProjects();
+  const { data: existingTags = [] } = useTaskTags();
+
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      setPriority(settings?.defaultTaskPriority ?? 'NO_PRIORITY');
-    }
-  }, [open, settings]);
-
-  const resetForm = () => {
-    setTitle('');
-    setDueDate(undefined);
-    setPriority(settings?.defaultTaskPriority ?? 'NO_PRIORITY');
-    setProjectId('');
-    setTags([]);
-    setPendingTasks([]);
-  };
 
   const handleClose = () => {
     setOpen(false);
-    resetForm();
+    form.reset();
+    setPendingTasks([]);
   };
 
   const addTask = () => {
-    if (!title.trim()) return;
+    if (!form.title.trim()) return;
 
     const newTask: PendingTask = {
       id: crypto.randomUUID(),
-      title: title.trim(),
+      title: form.title.trim(),
     };
 
     setPendingTasks((prev) => [...prev, newTask]);
-    setTitle('');
+    form.setTitle('');
     inputRef.current?.focus();
   };
 
@@ -105,20 +82,16 @@ export const BulkAddTasksSheet = () => {
   const handleSaveAll = () => {
     if (pendingTasks.length === 0) return;
 
-    const normalizedDueDate = dueDate
-      ? new Date(
-          Date.UTC(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate())
-        ).toISOString()
-      : undefined;
+    const formData = form.getFormData();
 
     bulkCreateTasks.mutate(
       {
         json: {
           tasks: pendingTasks.map((task) => ({ title: task.title })),
-          dueDate: normalizedDueDate,
-          priority: priority as 'NO_PRIORITY' | 'LOW' | 'MEDIUM' | 'HIGH',
-          projectId: projectId || undefined,
-          tags,
+          dueDate: formData.dueDate,
+          priority: formData.priority,
+          projectId: formData.projectId,
+          tags: formData.tags,
         },
       },
       {
@@ -148,15 +121,15 @@ export const BulkAddTasksSheet = () => {
                 id="task-title"
                 ref={inputRef}
                 placeholder="Enter task title..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={form.title}
+                onChange={(e) => form.setTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
             </div>
             <Button
               size="icon"
               onClick={addTask}
-              disabled={!title.trim()}
+              disabled={!form.title.trim()}
               tooltip="Add task"
             >
               <PlusIcon />
@@ -167,8 +140,8 @@ export const BulkAddTasksSheet = () => {
             <div className="space-y-2">
               <Label>Due Date</Label>
               <DatePicker
-                date={dueDate}
-                setDate={setDueDate}
+                date={form.dueDate}
+                setDate={form.setDueDate}
                 triggerClassName="w-full"
               />
             </div>
@@ -176,15 +149,15 @@ export const BulkAddTasksSheet = () => {
               <Label htmlFor="priority">Priority</Label>
               <PrioritySelect
                 id="priority"
-                value={priority}
-                onValueChange={setPriority}
+                value={form.priority}
+                onValueChange={form.setPriority}
               />
             </div>
             <div className="space-y-2">
               <Label>Tags</Label>
               <TagInput
-                tags={tags}
-                onChange={setTags}
+                tags={form.tags}
+                onChange={form.setTags}
                 suggestions={existingTags}
               />
             </div>
@@ -193,8 +166,8 @@ export const BulkAddTasksSheet = () => {
               <ProjectSelect
                 id="project"
                 projects={projects}
-                value={projectId}
-                onValueChange={setProjectId}
+                value={form.projectId}
+                onValueChange={form.setProjectId}
               />
             </div>
           </div>
