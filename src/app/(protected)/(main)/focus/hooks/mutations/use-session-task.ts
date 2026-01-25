@@ -5,8 +5,13 @@ import { useEditSession } from './use-edit-session';
 export function useSessionTask(activeSession: FocusSession | null | undefined) {
   const updateSession = useEditSession();
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const previousSessionIdRef = useRef<string | null>(null);
   const [sessionTask, setSessionTask] = useState(activeSession?.task ?? '');
+  const [prevSessionId, setPrevSessionId] = useState(activeSession?.id);
+
+  if (activeSession?.id !== prevSessionId) {
+    setPrevSessionId(activeSession?.id);
+    setSessionTask(activeSession?.task ?? '');
+  }
 
   useEffect(() => {
     return () => {
@@ -20,12 +25,6 @@ export function useSessionTask(activeSession: FocusSession | null | undefined) {
     setSessionTask(value);
 
     if (!activeSession) return;
-
-    if (activeSession.id !== previousSessionIdRef.current) {
-      setSessionTask(activeSession.task ?? '');
-      previousSessionIdRef.current = activeSession.id;
-      return;
-    }
 
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);

@@ -37,11 +37,20 @@ export const TimerControls = ({
     return (
       <div className="flex flex-col items-center gap-4">
         <div className="flex items-center gap-2">
-          <Button onClick={handlers.onComplete} disabled={isPending.complete}>
+          <Button
+            onClick={handlers.onComplete}
+            disabled={isPending.complete}
+            className="w-28"
+          >
             <CheckIcon />
-            Save Session
+            Save
           </Button>
-          <Button variant="outline" onClick={handlers.onDiscard}>
+          <Button
+            variant="outline"
+            onClick={handlers.onDiscard}
+            className="w-28"
+          >
+            <XIcon />
             Discard
           </Button>
         </div>
