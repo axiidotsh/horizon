@@ -22,18 +22,19 @@ import { createDialogOpenAtom } from '../atoms/dialog-atoms';
 import {
   searchQueryAtom,
   sortByAtom,
+  sortOrderAtom,
   statusFilterAtom,
 } from '../atoms/habit-atoms';
 import { useInfiniteHabits } from '../hooks/queries/use-infinite-habits';
 import {
   enrichHabitsWithMetrics,
   filterHabits,
-  sortHabits,
 } from '../utils/habit-calculations';
 import { HabitTableRow } from './habit-table-row';
 
 export const HabitsTable = () => {
   const sortBy = useAtomValue(sortByAtom);
+  const sortOrder = useAtomValue(sortOrderAtom);
   const searchQuery = useAtomValue(searchQueryAtom);
   const statusFilter = useAtomValue(statusFilterAtom);
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -48,8 +49,8 @@ export const HabitsTable = () => {
     fetchNextPage,
   } = useInfiniteHabits({
     search: debouncedSearchQuery || undefined,
-    sortBy: sortBy === 'title' ? 'title' : undefined,
-    sortOrder: 'asc',
+    sortBy,
+    sortOrder,
   });
 
   const { ref: sentinelRef } = useInView({
@@ -67,13 +68,6 @@ export const HabitsTable = () => {
     () => filterHabits(habits, '', statusFilter),
     [habits, statusFilter]
   );
-
-  const sortedHabits = useMemo(() => {
-    if (sortBy === 'streak') {
-      return sortHabits(filteredHabits, sortBy);
-    }
-    return filteredHabits;
-  }, [filteredHabits, sortBy]);
 
   const days = getLast7DaysUTC();
 
@@ -134,7 +128,7 @@ export const HabitsTable = () => {
     );
   }
 
-  if (sortedHabits.length === 0) {
+  if (filteredHabits.length === 0) {
     return (
       <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-32 text-center sm:py-48">
         <TargetIcon className="mb-2 size-12 stroke-1 opacity-50" />
@@ -184,7 +178,7 @@ export const HabitsTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedHabits.map((habit) => (
+          {filteredHabits.map((habit) => (
             <HabitTableRow key={habit.id} habit={habit} />
           ))}
           {isFetchingNextPage && (

@@ -6,7 +6,7 @@ interface UseInfiniteHabitsOptions {
   search?: string;
   days?: number;
   limit?: number;
-  sortBy?: 'title' | 'createdAt';
+  sortBy?: 'title' | 'createdAt' | 'currentStreak' | 'bestStreak';
   sortOrder?: 'asc' | 'desc';
 }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { SortingMenu } from '@/components/sorting-menu';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import {
@@ -34,7 +35,6 @@ import { useTaskTags } from '../../hooks/queries/use-task-tags';
 import type { Project } from '../../hooks/types';
 import { ProjectFilterMenu } from '../project-filter-menu';
 import { TagFilterMenu } from '../tag-filter-menu';
-import { TaskSortingMenu } from './task-sorting-menu';
 
 export const TaskListActions = () => {
   const [selectedTags, setSelectedTags] = useAtom(selectedTagsAtom);
@@ -104,7 +104,7 @@ export const TaskListActions = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
-            <TaskSortingMenu
+            <SortingMenu
               title="Due date"
               sortKey="dueDate"
               currentSortBy={sortBy}
@@ -118,7 +118,7 @@ export const TaskListActions = () => {
                 { label: 'Latest → Earliest', order: 'desc' },
               ]}
             />
-            <TaskSortingMenu
+            <SortingMenu
               title="Priority"
               sortKey="priority"
               currentSortBy={sortBy}
@@ -132,7 +132,7 @@ export const TaskListActions = () => {
                 { label: 'Low → High', order: 'desc' },
               ]}
             />
-            <TaskSortingMenu
+            <SortingMenu
               title="Created"
               sortKey="createdAt"
               currentSortBy={sortBy}
@@ -146,7 +146,7 @@ export const TaskListActions = () => {
                 { label: 'Oldest → Newest', order: 'asc' },
               ]}
             />
-            <TaskSortingMenu
+            <SortingMenu
               title="Status"
               sortKey="completed"
               currentSortBy={sortBy}
@@ -160,7 +160,7 @@ export const TaskListActions = () => {
                 { label: 'Complete first', order: 'desc' },
               ]}
             />
-            <TaskSortingMenu
+            <SortingMenu
               title="Title"
               sortKey="title"
               currentSortBy={sortBy}

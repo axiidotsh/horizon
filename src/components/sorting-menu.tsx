@@ -6,7 +6,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/utils/utils';
 import { CheckIcon } from 'lucide-react';
-import { SortOption } from '../../atoms/task-atoms';
 
 type SortOrder = 'asc' | 'desc';
 
@@ -15,23 +14,23 @@ interface OptionProps {
   order: SortOrder;
 }
 
-interface TaskSortingMenuProps {
+interface SortingMenuProps<T extends string> {
   title: string;
-  sortKey: SortOption;
-  currentSortBy: SortOption;
+  sortKey: T;
+  currentSortBy: T;
   currentSortOrder: SortOrder;
   options: OptionProps[];
-  onChange: (sortBy: SortOption, order: SortOrder) => void;
+  onChange: (sortBy: T, order: SortOrder) => void;
 }
 
-export const TaskSortingMenu = ({
+export const SortingMenu = <T extends string>({
   title,
   sortKey,
   currentSortBy,
   currentSortOrder,
   options,
   onChange,
-}: TaskSortingMenuProps) => {
+}: SortingMenuProps<T>) => {
   const isParentChecked = currentSortBy === sortKey;
 
   return (
