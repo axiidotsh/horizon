@@ -2,7 +2,7 @@ import {
   calculateBestStreak,
   calculateCurrentStreak,
 } from '@/app/(protected)/(main)/habits/utils/habit-calculations';
-import { addUTCDays } from '@/utils/date-utc';
+import { addUTCDays, getUTCStartOfDaysAgo } from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -48,17 +48,7 @@ export const habitsRouter = new Hono()
     const todayKey = new Date(
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
     );
-    const cutoffDate = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate() - days,
-        0,
-        0,
-        0,
-        0
-      )
-    );
+    const cutoffDate = getUTCStartOfDaysAgo(days);
 
     const where: {
       userId: string;

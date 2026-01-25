@@ -63,3 +63,18 @@ export function getLast7DaysUTC(): Date[] {
 
   return days;
 }
+
+export function getUTCStartOfDaysAgo(days: number): Date {
+  const now = new Date();
+  return new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() - days,
+      0,
+      0,
+      0,
+      0
+    )
+  );
+}
