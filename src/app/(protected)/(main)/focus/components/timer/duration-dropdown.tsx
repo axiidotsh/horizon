@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useAtom } from 'jotai';
 import { CheckIcon, ChevronDownIcon } from 'lucide-react';
+import { useState } from 'react';
 import {
   customMinutesAtom,
   isCustomDurationAtom,
@@ -41,6 +42,7 @@ export const DurationDropdown = ({
   const [selectedMinutes, setSelectedMinutes] = useAtom(selectedMinutesAtom);
   const [customMinutes, setCustomMinutes] = useAtom(customMinutesAtom);
   const [isCustomDuration, setIsCustomDuration] = useAtom(isCustomDurationAtom);
+  const [open, setOpen] = useState(false);
 
   const handleSelectPreset = (minutes: number) => {
     setSelectedMinutes(minutes);
@@ -68,26 +70,29 @@ export const DurationDropdown = ({
       );
       setSelectedMinutes(mins);
       setCustomMinutes(mins.toString());
+      setOpen(false);
     }
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
           <span>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="gap-2"
+                className="w-60 justify-between gap-2"
                 disabled={hasActiveSession}
               >
-                <span className="text-muted-foreground text-sm">
-                  Selected duration:
-                </span>
-                <span className="font-medium">
-                  {formatDurationLabel(selectedMinutes)}
-                </span>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground text-sm">
+                    Selected duration:
+                  </span>
+                  <span className="font-medium">
+                    {formatDurationLabel(selectedMinutes)}
+                  </span>
+                </div>
                 <ChevronDownIcon className="size-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -97,7 +102,10 @@ export const DurationDropdown = ({
           <TooltipContent>A session is active</TooltipContent>
         )}
       </Tooltip>
-      <DropdownMenuContent align="end" className="w-50">
+      <DropdownMenuContent
+        align="end"
+        className="w-(--radix-dropdown-menu-trigger-width)"
+      >
         <DropdownMenuLabel>Duration</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {DURATION_PRESETS.map((minutes) => (
@@ -118,10 +126,14 @@ export const DurationDropdown = ({
             value={customMinutes}
             onChange={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               setIsCustomDuration(true);
               handleCustomMinutesChange(e.target.value);
             }}
-            onKeyDown={handleCustomMinutesSubmit}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+              handleCustomMinutesSubmit(e);
+            }}
             className="h-8 border-0 bg-transparent! ring-0!"
             type="text"
             inputMode="numeric"
