@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatSessionDateTime } from '@/utils/date-format';
 import { useSetAtom } from 'jotai';
 import { EllipsisIcon, PencilIcon, TimerIcon, Trash2Icon } from 'lucide-react';
 import {
@@ -23,7 +24,6 @@ import {
   editingSessionAtom,
 } from '../atoms/session-dialogs';
 import type { FocusSession } from '../hooks/types';
-import { formatSessionDateTime } from '../utils/session-metrics';
 
 interface SessionsTableProps {
   sessions: FocusSession[];

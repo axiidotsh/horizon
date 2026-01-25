@@ -11,27 +11,28 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
 import { useAtom } from 'jotai';
-import { showCancelDialogAtom } from '../../atoms/session-dialogs';
+import { cancelingSessionAtom } from '../../atoms/session-dialogs';
 import { useFocusSession } from '../../hooks/mutations/use-focus-session';
-import { useActiveSession } from '../../hooks/queries/use-active-session';
 
 export const FocusSessionCancelDialog = () => {
-  const [open, setOpen] = useAtom(showCancelDialogAtom);
-  const { data: activeSession } = useActiveSession();
-  const { cancel } = useFocusSession(activeSession?.id);
+  const [session, setSession] = useAtom(cancelingSessionAtom);
+  const { cancel } = useFocusSession();
 
   const handleCancel = () => {
-    if (!activeSession) return;
+    if (!session) return;
     cancel.mutate(
-      { param: { id: activeSession.id } },
+      { param: { id: session.id } },
       {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => setSession(null),
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={setOpen}>
+    <ResponsiveDialog
+      open={!!session}
+      onOpenChange={(open) => !open && setSession(null)}
+    >
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Cancel Focus Session?</ResponsiveDialogTitle>

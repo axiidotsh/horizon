@@ -1,9 +1,14 @@
+import { addUTCDays } from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { getStatsWithDaysAgo, recalculateStats } from '../services/focus-stats';
+import { getFocusStats, recalculateStats } from '../services/focus-stats';
+
+const chartQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(365).default(7),
+});
 
 export const focusRouter = new Hono()
   .use(authMiddleware)
@@ -96,8 +101,48 @@ export const focusRouter = new Hono()
   )
   .get('/stats', async (c) => {
     const user = c.get('user');
-    const stats = await getStatsWithDaysAgo(user.id);
+    const stats = await getFocusStats(user.id);
     return c.json({ stats });
+  })
+  .get('/chart', zValidator('query', chartQuerySchema), async (c) => {
+    const user = c.get('user');
+    const { days } = c.req.valid('query');
+
+    const now = new Date();
+
+    const chartData = await Promise.all(
+      Array.from({ length: days }, (_, i) => {
+        const date = addUTCDays(now, -(days - 1 - i));
+        const nextDate = addUTCDays(date, 1);
+
+        return db.focusSession
+          .aggregate({
+            where: {
+              userId: user.id,
+              status: 'COMPLETED',
+              startedAt: { gte: date, lt: nextDate },
+            },
+            _sum: { durationMinutes: true },
+            _count: true,
+          })
+          .then((result) => {
+            const dateLabel =
+              days <= 7
+                ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][
+                    date.getDay()
+                  ]
+                : `${date.getMonth() + 1}/${date.getDate()}`;
+
+            return {
+              date: dateLabel,
+              totalMinutes: result._sum.durationMinutes ?? 0,
+              sessionCount: result._count,
+            };
+          });
+      })
+    );
+
+    return c.json({ chartData });
   })
   .post(
     '/sessions',

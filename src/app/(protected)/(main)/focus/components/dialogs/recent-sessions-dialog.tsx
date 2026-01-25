@@ -15,21 +15,16 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useAtom } from 'jotai';
 import { ArrowDownUpIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { showSessionsDialogAtom } from '../../atoms/session-dialogs';
 import { useInfiniteRecentSessions } from '../../hooks/queries/use-infinite-recent-sessions';
 import { SessionsTable } from '../sessions-table';
 
-interface RecentSessionsDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export const RecentSessionsDialog = ({
-  open,
-  onOpenChange,
-}: RecentSessionsDialogProps) => {
+export const RecentSessionsDialog = () => {
+  const [open, setOpen] = useAtom(showSessionsDialogAtom);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'duration' | 'date'>('date');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -56,7 +51,7 @@ export const RecentSessionsDialog = ({
   });
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogContent className="sm:max-w-3xl!">
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Recent Sessions</ResponsiveDialogTitle>

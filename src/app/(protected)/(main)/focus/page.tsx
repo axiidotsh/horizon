@@ -2,14 +2,15 @@
 
 import { PageHeading } from '@/components/page-heading';
 import { Button } from '@/components/ui/button';
+import { useSetAtom } from 'jotai';
 import { HistoryIcon } from 'lucide-react';
-import { useState } from 'react';
+import { showSessionsDialogAtom } from './atoms/session-dialogs';
 import { RecentSessionsDialog } from './components/dialogs/recent-sessions-dialog';
 import { FocusMetricsBadges } from './components/sections/focus-metrics-badges';
-import { FocusTimerSection } from './components/sections/focus-timer-section';
+import { FocusTimer } from './components/timer/focus-timer';
 
 export default function FocusPage() {
-  const [showSessionsDialog, setShowSessionsDialog] = useState(false);
+  const setShowSessionsDialog = useSetAtom(showSessionsDialogAtom);
 
   return (
     <div className="flex min-h-[calc(100vh-8rem)] flex-col overflow-y-auto">
@@ -30,12 +31,9 @@ export default function FocusPage() {
         </div>
       </div>
       <div className="flex flex-1 items-center">
-        <FocusTimerSection />
+        <FocusTimer />
       </div>
-      <RecentSessionsDialog
-        open={showSessionsDialog}
-        onOpenChange={setShowSessionsDialog}
-      />
+      <RecentSessionsDialog />
     </div>
   );
 }

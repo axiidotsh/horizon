@@ -1,7 +1,7 @@
 import {
-  showCancelDialogAtom,
-  showDiscardDialogAtom,
-  showEndEarlyDialogAtom,
+  cancelingSessionAtom,
+  discardingSessionAtom,
+  endingEarlySessionAtom,
 } from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
 import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-focus-session';
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
@@ -40,9 +40,9 @@ export function useCommandRegistry() {
   const setCreateProjectDialogOpen = useSetAtom(createProjectDialogAtom);
   const setCreateHabitDialogOpen = useSetAtom(createDialogOpenAtom);
   const setLogoutDialogOpen = useSetAtom(logoutDialogOpenAtom);
-  const setShowCancel = useSetAtom(showCancelDialogAtom);
-  const setShowEndEarly = useSetAtom(showEndEarlyDialogAtom);
-  const setShowDiscard = useSetAtom(showDiscardDialogAtom);
+  const setCancelingSession = useSetAtom(cancelingSessionAtom);
+  const setEndingEarlySession = useSetAtom(endingEarlySessionAtom);
+  const setDiscardingSession = useSetAtom(discardingSessionAtom);
 
   const focusCommands = useMemo(() => {
     const commands: CommandDefinition[] = [];
@@ -74,7 +74,7 @@ export function useCommandRegistry() {
           keywords: ['cancel', 'delete', 'remove'],
           destructive: true,
           category: 'focus',
-          handler: () => setShowDiscard(true),
+          handler: () => setDiscardingSession(activeSession),
         }
       );
     } else if (activeSession.status === 'ACTIVE') {
@@ -93,7 +93,7 @@ export function useCommandRegistry() {
           icon: SquareIcon,
           keywords: ['stop', 'finish', 'save'],
           category: 'focus',
-          handler: () => setShowEndEarly(true),
+          handler: () => setEndingEarlySession(activeSession),
         },
         {
           id: 'focus-cancel',
@@ -102,7 +102,7 @@ export function useCommandRegistry() {
           keywords: ['discard', 'delete', 'remove', 'abort'],
           destructive: true,
           category: 'focus',
-          handler: () => setShowCancel(true),
+          handler: () => setCancelingSession(activeSession),
         }
       );
     } else if (activeSession.status === 'PAUSED') {
@@ -121,7 +121,7 @@ export function useCommandRegistry() {
           icon: SquareIcon,
           keywords: ['stop', 'finish', 'save'],
           category: 'focus',
-          handler: () => setShowEndEarly(true),
+          handler: () => setEndingEarlySession(activeSession),
         },
         {
           id: 'focus-cancel',
@@ -130,7 +130,7 @@ export function useCommandRegistry() {
           keywords: ['discard', 'delete', 'remove', 'abort'],
           destructive: true,
           category: 'focus',
-          handler: () => setShowCancel(true),
+          handler: () => setCancelingSession(activeSession),
         }
       );
     }
@@ -141,9 +141,9 @@ export function useCommandRegistry() {
     pause,
     resume,
     complete,
-    setShowCancel,
-    setShowEndEarly,
-    setShowDiscard,
+    setCancelingSession,
+    setEndingEarlySession,
+    setDiscardingSession,
   ]);
 
   return useMemo<CommandDefinition[]>(

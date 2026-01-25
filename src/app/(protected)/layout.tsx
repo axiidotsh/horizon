@@ -1,10 +1,10 @@
-import { CustomDurationSettingsDialog } from '@/app/(protected)/(main)/focus/components/sessions/custom-duration-settings-dialog';
-import { FocusSessionCancelDialog } from '@/app/(protected)/(main)/focus/components/sessions/focus-session-cancel-dialog';
-import { FocusSessionCreateDialog } from '@/app/(protected)/(main)/focus/components/sessions/focus-session-create-dialog';
-import { FocusSessionDeleteDialog } from '@/app/(protected)/(main)/focus/components/sessions/focus-session-delete-dialog';
-import { FocusSessionDiscardDialog } from '@/app/(protected)/(main)/focus/components/sessions/focus-session-discard-dialog';
-import { FocusSessionEditDialog } from '@/app/(protected)/(main)/focus/components/sessions/focus-session-edit-dialog';
-import { FocusSessionEndEarlyDialog } from '@/app/(protected)/(main)/focus/components/sessions/focus-session-end-early-dialog';
+import { CustomDurationSettingsDialog } from '@/app/(protected)/(main)/focus/components/dialogs/custom-duration-settings-dialog';
+import { FocusSessionCancelDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-cancel-dialog';
+import { FocusSessionCreateDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-create-dialog';
+import { FocusSessionDeleteDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-delete-dialog';
+import { FocusSessionDiscardDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-discard-dialog';
+import { FocusSessionEditDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-edit-dialog';
+import { FocusSessionEndEarlyDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-end-early-dialog';
 import { CreateHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/create-habit-dialog';
 import { DeleteHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/delete-habit-dialog';
 import { EditHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/edit-habit-dialog';

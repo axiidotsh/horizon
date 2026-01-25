@@ -5,8 +5,7 @@ import { ErrorState } from '@/components/error-state';
 import type { ChartConfig } from '@/components/ui/chart';
 import { chartFormatters, createGradientId } from '@/utils/chart';
 import { useState } from 'react';
-import { useChartSessions } from '../../hooks/queries/use-chart-sessions';
-import { generateChartData } from '../../utils/session-metrics';
+import { useFocusChart } from '../../hooks/queries/use-focus-chart';
 
 const chartConfig = {
   duration: {
@@ -19,13 +18,16 @@ export const FocusChartSection = () => {
   const [chartPeriod, setChartPeriod] = useState(7);
 
   const {
-    data: chartSessions = [],
+    data: rawChartData = [],
     isLoading,
     isError,
     refetch,
-  } = useChartSessions(chartPeriod);
+  } = useFocusChart(chartPeriod);
 
-  const chartData = generateChartData(chartSessions, chartPeriod);
+  const chartData = rawChartData.map((item) => ({
+    date: item.date,
+    duration: item.totalMinutes,
+  }));
 
   if (isError) {
     return (

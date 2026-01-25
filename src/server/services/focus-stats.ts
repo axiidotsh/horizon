@@ -149,3 +149,44 @@ export async function getStatsWithDaysAgo(userId: string) {
     bestSessionsInDay: stats.bestSessionsInDay,
   };
 }
+
+export async function getFocusStats(userId: string) {
+  const now = new Date();
+  const todayStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0)
+  );
+
+  const [totalMinutesTodayResult, allTimeBestMinutes, totalSessions, stats] =
+    await Promise.all([
+      db.focusSession.aggregate({
+        where: {
+          userId,
+          status: 'COMPLETED',
+          startedAt: { gte: todayStart },
+        },
+        _sum: { durationMinutes: true },
+      }),
+      db.focusSession.findFirst({
+        where: {
+          userId,
+          status: 'COMPLETED',
+        },
+        orderBy: { durationMinutes: 'desc' },
+        select: { durationMinutes: true },
+      }),
+      db.focusSession.count({
+        where: {
+          userId,
+          status: 'COMPLETED',
+        },
+      }),
+      getOrCreateStats(userId),
+    ]);
+
+  return {
+    totalMinutesToday: totalMinutesTodayResult._sum.durationMinutes ?? 0,
+    allTimeBestMinutes: allTimeBestMinutes?.durationMinutes ?? 0,
+    currentStreak: stats.currentStreak,
+    totalSessions,
+  };
+}

@@ -1,7 +1,9 @@
 'use client';
 
 import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
+import { ErrorState } from '@/components/error-state';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   calculateRemainingSeconds,
   formatTime,
@@ -9,50 +11,45 @@ import {
 } from '@/utils/timer';
 import { cn } from '@/utils/utils';
 import { useAtom, useSetAtom } from 'jotai';
-import { useEffect } from 'react';
 import {
   customMinutesAtom,
   isCustomDurationAtom,
   selectedMinutesAtom,
 } from '../../atoms/duration';
 import {
-  showCancelDialogAtom,
-  showDiscardDialogAtom,
-  showEndEarlyDialogAtom,
+  cancelingSessionAtom,
+  discardingSessionAtom,
+  endingEarlySessionAtom,
 } from '../../atoms/session-dialogs';
 import { useFocusSession } from '../../hooks/mutations/use-focus-session';
 import { useSessionTask } from '../../hooks/mutations/use-session-task';
+import { useActiveSession } from '../../hooks/queries/use-active-session';
 import { useTimerLogic } from '../../hooks/timer/use-timer-logic';
-import type { FocusSession } from '../../hooks/types';
 import { DurationDropdown } from './duration-dropdown';
 import { TimerControls } from './timer-controls';
 import { TimerDisplay } from './timer-display';
 
-interface FocusTimerProps {
-  activeSession: FocusSession | null | undefined;
-}
-
-export const FocusTimer = ({ activeSession }: FocusTimerProps) => {
-  const { start, pause, resume, complete } = useFocusSession(activeSession?.id);
+export const FocusTimer = () => {
+  const {
+    data: activeSession,
+    isLoading,
+    isError,
+    refetch,
+  } = useActiveSession();
+  const { start, pause, resume, complete } = useFocusSession();
   const { data: settings } = useSettings();
 
   const [selectedMinutes, setSelectedMinutes] = useAtom(selectedMinutesAtom);
   const setCustomMinutes = useSetAtom(customMinutesAtom);
   const setIsCustomDuration = useSetAtom(isCustomDurationAtom);
 
-  const setShowCancelDialog = useSetAtom(showCancelDialogAtom);
-  const setShowEndEarlyDialog = useSetAtom(showEndEarlyDialogAtom);
-  const setShowDiscardDialog = useSetAtom(showDiscardDialogAtom);
+  const setCancelingSession = useSetAtom(cancelingSessionAtom);
+  const setEndingEarlySession = useSetAtom(endingEarlySessionAtom);
+  const setDiscardingSession = useSetAtom(discardingSessionAtom);
 
   const { sessionTask, handleTaskChange } = useSessionTask(activeSession);
   const { remainingSeconds, isCompleted, setIsCompleted } =
     useTimerLogic(activeSession);
-
-  useEffect(() => {
-    if (settings?.defaultFocusDuration && !activeSession) {
-      setSelectedMinutes(settings.defaultFocusDuration);
-    }
-  }, [settings, activeSession, setSelectedMinutes]);
 
   const handleStart = () => {
     start.mutate({
@@ -121,57 +118,89 @@ export const FocusTimer = ({ activeSession }: FocusTimerProps) => {
         : 'active'
       : 'idle';
 
-  return (
-    <div className="flex min-h-[600px] flex-col items-center justify-center gap-8 py-8">
-      <div className="flex flex-col items-center gap-6">
-        {hasActiveSession ? (
-          <div className="flex items-baseline gap-2 text-sm">
-            <span
-              className={cn(
-                'font-mono font-semibold tabular-nums',
-                isPaused && !showCompletedUI && 'animate-pulse'
-              )}
-            >
-              {displayTime}
-            </span>
-            <span className="text-muted-foreground">
-              of {activeSession!.durationMinutes}{' '}
-              {activeSession!.durationMinutes === 1 ? 'minute' : 'minutes'}
-            </span>
+  if (isError) {
+    return (
+      <div className="w-full">
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load session"
+          description="Unable to fetch active session. Please try again."
+        />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full">
+        <div className="flex flex-col items-center justify-center gap-8 py-8">
+          <div className="flex flex-col items-center gap-10">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="size-60 rounded-full sm:size-72" />
+            <Skeleton className="h-10 w-full max-w-sm sm:w-96" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-12 rounded-full" />
+              <Skeleton className="size-16 rounded-full" />
+              <Skeleton className="size-12 rounded-full" />
+            </div>
           </div>
-        ) : (
-          <DurationDropdown hasActiveSession={hasActiveSession} />
-        )}
-        <TimerDisplay
-          progress={progress}
-          isPaused={!!isPaused}
-          isCompleted={!!showCompletedUI}
-        />
-        <Input
-          placeholder="What are you focusing on?"
-          value={sessionTask}
-          onChange={(e) => handleTaskChange(e.target.value)}
-          className="mb-4 text-center shadow-none sm:w-96"
-        />
-        <TimerControls
-          state={controlState}
-          handlers={{
-            onStart: handleStart,
-            onPause: handlePauseResume,
-            onResume: handlePauseResume,
-            onComplete: handleComplete,
-            onEndEarly: () => setShowEndEarlyDialog(true),
-            onCancel: () => setShowCancelDialog(true),
-            onDiscard: () => setShowDiscardDialog(true),
-            onReset: handleReset,
-          }}
-          isPending={{
-            start: start.isPending,
-            pause: pause.isPending,
-            resume: resume.isPending,
-            complete: complete.isPending,
-          }}
-        />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      <div className="flex min-h-[600px] flex-col items-center justify-center gap-8 py-8">
+        <div className="flex flex-col items-center gap-6">
+          {hasActiveSession ? (
+            <div className="flex items-baseline gap-2 text-sm">
+              <span
+                className={cn(
+                  'font-mono font-semibold tabular-nums',
+                  isPaused && !showCompletedUI && 'animate-pulse'
+                )}
+              >
+                {displayTime}
+              </span>
+              <span className="text-muted-foreground">
+                of {activeSession!.durationMinutes}{' '}
+                {activeSession!.durationMinutes === 1 ? 'minute' : 'minutes'}
+              </span>
+            </div>
+          ) : (
+            <DurationDropdown hasActiveSession={hasActiveSession} />
+          )}
+          <TimerDisplay progress={progress} isPaused={!!isPaused} />
+          <Input
+            placeholder="What are you focusing on?"
+            value={sessionTask}
+            onChange={(e) => handleTaskChange(e.target.value)}
+            className="mb-4 text-center shadow-none sm:w-96"
+          />
+          <TimerControls
+            state={controlState}
+            handlers={{
+              onStart: handleStart,
+              onPause: handlePauseResume,
+              onResume: handlePauseResume,
+              onComplete: handleComplete,
+              onEndEarly: () =>
+                activeSession && setEndingEarlySession(activeSession),
+              onCancel: () =>
+                activeSession && setCancelingSession(activeSession),
+              onDiscard: () =>
+                activeSession && setDiscardingSession(activeSession),
+              onReset: handleReset,
+            }}
+            isPending={{
+              start: start.isPending,
+              pause: pause.isPending,
+              resume: resume.isPending,
+              complete: complete.isPending,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

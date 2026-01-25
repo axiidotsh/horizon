@@ -4,14 +4,9 @@ import { cn } from '@/utils/utils';
 interface TimerDisplayProps {
   progress: number;
   isPaused: boolean;
-  isCompleted: boolean;
 }
 
-export const TimerDisplay = ({
-  progress,
-  isPaused,
-  isCompleted,
-}: TimerDisplayProps) => {
+export const TimerDisplay = ({ progress, isPaused }: TimerDisplayProps) => {
   const isMobile = useIsMobile();
   const size = isMobile ? 280 : 340;
   const center = size / 2;

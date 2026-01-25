@@ -1,9 +1,9 @@
 'use client';
 
 import {
-  showCancelDialogAtom,
-  showDiscardDialogAtom,
-  showEndEarlyDialogAtom,
+  cancelingSessionAtom,
+  discardingSessionAtom,
+  endingEarlySessionAtom,
 } from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
 import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-focus-session';
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
@@ -51,13 +51,13 @@ const ProgressBar = ({ progress, isPaused, isCompleted }: ProgressBarProps) => {
 
 export function FocusTimerWidget() {
   const { data: session } = useActiveSession();
-  const { pause, resume, complete } = useFocusSession(session?.id);
+  const { pause, resume, complete } = useFocusSession();
   const { remainingSeconds, isCompleted } = useTimerLogic(session);
   const isMobile = useIsMobile();
 
-  const setShowCancelDialog = useSetAtom(showCancelDialogAtom);
-  const setShowDiscardDialog = useSetAtom(showDiscardDialogAtom);
-  const setShowEndEarlyDialog = useSetAtom(showEndEarlyDialogAtom);
+  const setCancelingSession = useSetAtom(cancelingSessionAtom);
+  const setDiscardingSession = useSetAtom(discardingSessionAtom);
+  const setEndingEarlySession = useSetAtom(endingEarlySessionAtom);
 
   if (!session) {
     return null;
@@ -171,7 +171,7 @@ export function FocusTimerWidget() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
-                onClick={() => setShowDiscardDialog(true)}
+                onClick={() => session && setDiscardingSession(session)}
               >
                 <XIcon />
                 Discard Session
@@ -195,13 +195,15 @@ export function FocusTimerWidget() {
                   </>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowEndEarlyDialog(true)}>
+              <DropdownMenuItem
+                onClick={() => session && setEndingEarlySession(session)}
+              >
                 <SquareIcon />
                 End Session
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
-                onClick={() => setShowCancelDialog(true)}
+                onClick={() => session && setCancelingSession(session)}
               >
                 <XIcon />
                 Cancel Session

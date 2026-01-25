@@ -2,14 +2,6 @@ import { useApiQuery } from '@/hooks/use-api-query';
 import { api } from '@/lib/rpc';
 import { FOCUS_QUERY_KEYS } from '../focus-query-keys';
 
-export interface FocusStats {
-  currentStreak: number;
-  bestStreak: number;
-  highestDailyMinutes: number;
-  highestDailyDaysAgo: number | null;
-  bestSessionsInDay: number;
-}
-
 export function useFocusStats() {
   return useApiQuery(api.focus.stats.$get, {
     queryKey: FOCUS_QUERY_KEYS.stats,

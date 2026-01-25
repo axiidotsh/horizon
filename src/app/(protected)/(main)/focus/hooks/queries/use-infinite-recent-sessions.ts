@@ -1,11 +1,6 @@
 import { useApiInfiniteQuery } from '@/hooks/use-api-infinite-query';
 import { api } from '@/lib/rpc';
-import type { InferResponseType } from 'hono/client';
-import { useMemo } from 'react';
 import { FOCUS_QUERY_KEYS } from '../focus-query-keys';
-
-type SessionsResponse = InferResponseType<typeof api.focus.sessions.$get>;
-type FocusSession = SessionsResponse['sessions'][number];
 
 interface UseInfiniteRecentSessionsOptions {
   search?: string;
@@ -20,7 +15,14 @@ export function useInfiniteRecentSessions(
   const { search, sortBy, sortOrder = 'desc', limit = 50 } = options;
 
   const query = useApiInfiniteQuery(api.focus.sessions.$get, {
-    queryKey: [...FOCUS_QUERY_KEYS.sessions, search, sortBy, sortOrder, limit],
+    queryKey: [
+      ...FOCUS_QUERY_KEYS.sessions,
+      'infinite',
+      search,
+      sortBy,
+      sortOrder,
+      limit,
+    ],
     getInput: (offset) => ({
       query: {
         offset: offset.toString(),
@@ -33,10 +35,7 @@ export function useInfiniteRecentSessions(
     errorMessage: 'Failed to fetch sessions',
   });
 
-  const sessions = useMemo<FocusSession[]>(
-    () => query.data?.pages.flatMap((page) => page.sessions) ?? [],
-    [query.data]
-  );
+  const sessions = query.data?.pages.flatMap((page) => page.sessions) ?? [];
 
   return {
     ...query,

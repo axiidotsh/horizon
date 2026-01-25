@@ -13,37 +13,32 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
 import { useAtom } from 'jotai';
-import { useEffect, useState } from 'react';
 import { editingSessionAtom } from '../../atoms/session-dialogs';
 import { MAX_DURATION, MIN_DURATION } from '../../constants';
 import { useEditSession } from '../../hooks/mutations/use-edit-session';
+import { useSessionForm } from '../../hooks/use-session-form';
 
 export const FocusSessionEditDialog = () => {
   const [session, setSession] = useAtom(editingSessionAtom);
   const editSession = useEditSession();
-  const [task, setTask] = useState('');
-  const [durationMinutes, setDurationMinutes] = useState('');
-
-  useEffect(() => {
-    if (session) {
-      setTask(session.task || '');
-      setDurationMinutes(session.durationMinutes.toString());
-    }
-  }, [session]);
+  const { task, setTask, durationMinutes, setDurationMinutes, getFormData } =
+    useSessionForm({
+      task: session?.task ?? '',
+      durationMinutes: session?.durationMinutes.toString() ?? '',
+    });
 
   const handleSave = () => {
     if (!session) return;
 
-    const duration = parseInt(durationMinutes, 10);
-    if (isNaN(duration) || duration < MIN_DURATION || duration > MAX_DURATION)
-      return;
+    const formData = getFormData();
+    if (!formData.durationMinutes) return;
 
     editSession.mutate(
       {
         param: { id: session.id },
         json: {
-          task: task || undefined,
-          durationMinutes: duration,
+          task: formData.task,
+          durationMinutes: formData.durationMinutes,
         },
       },
       {

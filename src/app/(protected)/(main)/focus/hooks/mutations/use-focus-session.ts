@@ -1,13 +1,9 @@
 import { DASHBOARD_QUERY_KEYS } from '@/app/(protected)/(main)/dashboard/hooks/dashboard-query-keys';
 import { useApiMutation } from '@/hooks/use-api-mutation';
 import { api } from '@/lib/rpc';
-import { useQueryClient } from '@tanstack/react-query';
 import { FOCUS_QUERY_KEYS } from '../focus-query-keys';
-import type { FocusSession } from '../types';
 
-export function useFocusSession(sessionId?: string) {
-  const queryClient = useQueryClient();
-
+export function useFocusSession() {
   const start = useApiMutation(api.focus.sessions.$post, {
     invalidateKeys: [
       FOCUS_QUERY_KEYS.activeSession,
@@ -18,83 +14,23 @@ export function useFocusSession(sessionId?: string) {
   });
 
   const pause = useApiMutation(api.focus.sessions[':id'].pause.$patch, {
-    mutationKey: sessionId ? ['focusSession', 'pause', sessionId] : undefined,
-    errorMessage: 'Failed to pause focus session',
-    onMutate: async () => {
-      await queryClient.cancelQueries({
-        queryKey: FOCUS_QUERY_KEYS.activeSession,
-      });
-
-      const previousData = queryClient.getQueryData(
-        FOCUS_QUERY_KEYS.activeSession
-      );
-
-      queryClient.setQueryData(
-        FOCUS_QUERY_KEYS.activeSession,
-        (old: unknown) => {
-          const data = old as { session: FocusSession | null };
-          if (!data.session) return data;
-          return {
-            ...data,
-            session: { ...data.session, status: 'PAUSED' as const },
-          };
-        }
-      );
-
-      return { previousData, snapshots: [] };
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          FOCUS_QUERY_KEYS.activeSession,
-          context.previousData
-        );
-      }
-    },
     invalidateKeys: [
       FOCUS_QUERY_KEYS.activeSession,
+      FOCUS_QUERY_KEYS.sessions,
       DASHBOARD_QUERY_KEYS.metrics,
     ],
+    errorMessage: 'Failed to pause focus session',
+    successMessage: 'Session paused',
   });
 
   const resume = useApiMutation(api.focus.sessions[':id'].resume.$patch, {
-    mutationKey: sessionId ? ['focusSession', 'resume', sessionId] : undefined,
-    errorMessage: 'Failed to resume focus session',
-    onMutate: async () => {
-      await queryClient.cancelQueries({
-        queryKey: FOCUS_QUERY_KEYS.activeSession,
-      });
-
-      const previousData = queryClient.getQueryData(
-        FOCUS_QUERY_KEYS.activeSession
-      );
-
-      queryClient.setQueryData(
-        FOCUS_QUERY_KEYS.activeSession,
-        (old: unknown) => {
-          const data = old as { session: FocusSession | null };
-          if (!data.session) return data;
-          return {
-            ...data,
-            session: { ...data.session, status: 'ACTIVE' as const },
-          };
-        }
-      );
-
-      return { previousData, snapshots: [] };
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          FOCUS_QUERY_KEYS.activeSession,
-          context.previousData
-        );
-      }
-    },
     invalidateKeys: [
       FOCUS_QUERY_KEYS.activeSession,
+      FOCUS_QUERY_KEYS.sessions,
       DASHBOARD_QUERY_KEYS.metrics,
     ],
+    errorMessage: 'Failed to resume focus session',
+    successMessage: 'Session resumed',
   });
 
   const complete = useApiMutation(api.focus.sessions[':id'].complete.$patch, {

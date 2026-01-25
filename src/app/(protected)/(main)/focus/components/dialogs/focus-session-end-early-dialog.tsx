@@ -11,27 +11,28 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
 import { useAtom } from 'jotai';
-import { showEndEarlyDialogAtom } from '../../atoms/session-dialogs';
+import { endingEarlySessionAtom } from '../../atoms/session-dialogs';
 import { useFocusSession } from '../../hooks/mutations/use-focus-session';
-import { useActiveSession } from '../../hooks/queries/use-active-session';
 
 export const FocusSessionEndEarlyDialog = () => {
-  const [open, setOpen] = useAtom(showEndEarlyDialogAtom);
-  const { data: activeSession } = useActiveSession();
-  const { endEarly } = useFocusSession(activeSession?.id);
+  const [session, setSession] = useAtom(endingEarlySessionAtom);
+  const { endEarly } = useFocusSession();
 
   const handleEndEarly = () => {
-    if (!activeSession) return;
+    if (!session) return;
     endEarly.mutate(
-      { param: { id: activeSession.id } },
+      { param: { id: session.id } },
       {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => setSession(null),
       }
     );
   };
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={setOpen}>
+    <ResponsiveDialog
+      open={!!session}
+      onOpenChange={(open) => !open && setSession(null)}
+    >
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>End Session Early?</ResponsiveDialogTitle>
