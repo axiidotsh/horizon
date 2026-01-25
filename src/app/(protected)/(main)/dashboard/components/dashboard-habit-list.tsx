@@ -1,69 +1,45 @@
 'use client';
 
+import { ErrorState } from '@/components/error-state';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSetAtom } from 'jotai';
 import { PartyPopperIcon, PlusIcon } from 'lucide-react';
 import { ContentCard } from '../../components/content-card';
 import { createDialogOpenAtom } from '../../habits/atoms/dialog-atoms';
-import { HabitRow } from '../../habits/components/habit-row';
-import { WeekDayHeader } from '../../habits/components/week-day-header';
-import { useDashboardHabits } from '../hooks/use-dashboard-habits';
-
-function DashboardHabitListSkeleton() {
-  return (
-    <div className="my-4 space-y-3 pr-4">
-      <div className="border-border mb-2 flex items-center gap-3 border-b pb-2">
-        <div className="flex-1" />
-        <div className="flex gap-1">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <Skeleton key={i} className="size-3.5" />
-          ))}
-        </div>
-        <div className="w-8 shrink-0" />
-      </div>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className="border-border flex items-center gap-3 border-b pb-3"
-        >
-          <div className="min-w-0 flex-1 space-y-2">
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-3 w-20" />
-          </div>
-          <div className="flex gap-1">
-            {Array.from({ length: 7 }).map((_, j) => (
-              <Skeleton key={j} className="size-3.5 rounded-full" />
-            ))}
-          </div>
-          <Skeleton className="size-8 shrink-0" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const DashboardHabitListActions = () => {
-  const setCreateDialogOpen = useSetAtom(createDialogOpenAtom);
-
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={() => setCreateDialogOpen(true)}
-    >
-      <PlusIcon />
-      New
-    </Button>
-  );
-};
+import { useDashboardHabits } from '../hooks/queries/use-dashboard-habits';
+import { DashboardHabitItem } from './dashboard-habit-item';
 
 export const DashboardHabitList = () => {
-  const { data: habits = [], isLoading } = useDashboardHabits();
+  const { data: habits = [], isLoading, error, refetch } = useDashboardHabits();
+  const setCreateDialogOpen = useSetAtom(createDialogOpenAtom);
 
   const renderContent = () => {
+    if (error) {
+      return (
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load habits"
+          description="Unable to fetch habits. Please try again."
+        />
+      );
+    }
+
     if (isLoading) {
-      return <DashboardHabitListSkeleton />;
+      return (
+        <div className="my-4 space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-start gap-3 pb-3">
+              <Skeleton className="mt-0.5 size-4 rounded-sm" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="size-8" />
+            </div>
+          ))}
+        </div>
+      );
     }
 
     if (habits.length === 0) {
@@ -77,25 +53,27 @@ export const DashboardHabitList = () => {
     }
 
     return (
-      <div className="mt-6 pr-4">
-        <div className="border-border mb-2 flex items-center gap-3 border-b pb-2">
-          <div className="flex-1" />
-          <WeekDayHeader />
-          <div className="w-8 shrink-0" />
-        </div>
-        <ul className="space-y-3">
-          {habits.map((habit) => (
-            <HabitRow key={habit.id} habit={habit} />
-          ))}
-        </ul>
-      </div>
+      <ul className="mt-6 space-y-3">
+        {habits.map((habit) => (
+          <DashboardHabitItem key={habit.id} habit={habit} />
+        ))}
+      </ul>
     );
   };
 
   return (
     <ContentCard
       title="Keep the Streak"
-      action={<DashboardHabitListActions />}
+      action={
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setCreateDialogOpen(true)}
+        >
+          <PlusIcon />
+          New
+        </Button>
+      }
       isDashboard
     >
       {renderContent()}

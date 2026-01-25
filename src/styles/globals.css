@@ -86,7 +86,7 @@
   --sidebar-ring: oklch(0.705 0.015 286.067);
 
   /* custom */
-  --dashboard-card: oklch(0.9761 0 0);
+  --dashboard-card: oklch(0.985 0 0);
 }
 
 .dark {

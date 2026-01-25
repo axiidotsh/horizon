@@ -1,84 +1,42 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { ErrorState } from '@/components/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useSetAtom } from 'jotai';
-import {
-  CircleIcon,
-  FolderIcon,
-  ListPlusIcon,
-  PartyPopperIcon,
-  PlusIcon,
-} from 'lucide-react';
+import { PartyPopperIcon } from 'lucide-react';
 import { ContentCard } from '../../components/content-card';
-import {
-  bulkAddTasksSheetAtom,
-  createProjectDialogAtom,
-  createTaskDialogAtom,
-} from '../../tasks/atoms/task-dialogs';
 import { TaskListItem } from '../../tasks/components/task-list/task-list-item';
-import { useDashboardTasks } from '../hooks/use-dashboard-tasks';
-
-function DashboardTaskListSkeleton() {
-  return (
-    <div className="my-4 space-y-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-start gap-3 pb-3">
-          <Skeleton className="mt-0.5 size-4 rounded-sm" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
-          </div>
-          <Skeleton className="size-8" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const DashboardTaskListActions = () => {
-  const setCreateTaskDialog = useSetAtom(createTaskDialogAtom);
-  const setCreateProjectDialog = useSetAtom(createProjectDialogAtom);
-  const setBulkAddTasksSheet = useSetAtom(bulkAddTasksSheetAtom);
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button size="sm" variant="outline">
-          <PlusIcon />
-          New
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => setCreateTaskDialog(true)}>
-          <CircleIcon />
-          Task
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setBulkAddTasksSheet(true)}>
-          <ListPlusIcon />
-          Bulk Tasks
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setCreateProjectDialog(true)}>
-          <FolderIcon />
-          Project
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
+import { useDashboardTasks } from '../hooks/queries/use-dashboard-tasks';
+import { DashboardTaskListActions } from './dashboard-task-list-actions';
 
 export const DashboardTaskList = () => {
-  const { data: tasks = [], isLoading } = useDashboardTasks();
+  const { data: tasks = [], isLoading, error, refetch } = useDashboardTasks();
 
   const renderContent = () => {
+    if (error) {
+      return (
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load tasks"
+          description="Unable to fetch tasks. Please try again."
+        />
+      );
+    }
+
     if (isLoading) {
-      return <DashboardTaskListSkeleton />;
+      return (
+        <div className="my-4 space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-start gap-3 pb-3">
+              <Skeleton className="mt-0.5 size-4 rounded-sm" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+              <Skeleton className="size-8" />
+            </div>
+          ))}
+        </div>
+      );
     }
 
     if (tasks.length === 0) {

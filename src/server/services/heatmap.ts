@@ -11,6 +11,8 @@ interface DayData {
   focusMinutes: number;
   tasksCompleted: number;
   habitsCompleted: number;
+  level: number;
+  totalActivity: number;
 }
 
 export async function getHeatmapData(
@@ -60,6 +62,8 @@ export async function getHeatmapData(
       focusMinutes: 0,
       tasksCompleted: 0,
       habitsCompleted: 0,
+      level: 0,
+      totalActivity: 0,
     });
     currentDate = addUTCDays(currentDate, 1);
   }
@@ -88,7 +92,11 @@ export async function getHeatmapData(
     }
   });
 
-  return Array.from(dataMap.values());
+  return Array.from(dataMap.values()).map((day) => ({
+    ...day,
+    level: calculateLevel(day),
+    totalActivity: day.focusMinutes + day.tasksCompleted + day.habitsCompleted,
+  }));
 }
 
 export function calculateLevel(data: DayData): number {

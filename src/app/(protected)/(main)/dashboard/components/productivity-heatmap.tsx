@@ -1,6 +1,7 @@
 'use client';
 
 import { ContentCard } from '@/app/(protected)/(main)/components/content-card';
+import { ErrorState } from '@/components/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
@@ -18,15 +19,17 @@ import {
 import { cn } from '@/utils/utils';
 import { useHeatmapData } from '../hooks/queries/use-heatmap-data';
 
-export function ProductivityHeatmap() {
-  const { data, isLoading, error } = useHeatmapData(52);
+export const ProductivityHeatmap = () => {
+  const { data, isLoading, error, refetch } = useHeatmapData(52);
 
   if (error) {
     return (
       <ContentCard title="Productivity" contentClassName="mt-6">
-        <div className="flex items-center justify-center py-8">
-          <p className="text-destructive text-sm">Failed to load heatmap</p>
-        </div>
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load heatmap"
+          description="Unable to fetch productivity data. Please try again."
+        />
       </ContentCard>
     );
   }
@@ -120,9 +123,9 @@ export function ProductivityHeatmap() {
       </div>
     </ContentCard>
   );
-}
+};
 
-function HeatmapCell({ day }: { day: HeatmapDay | null }) {
+const HeatmapCell = ({ day }: { day: HeatmapDay | null }) => {
   if (!day) {
     return <div className="h-3 w-3" />;
   }
@@ -147,4 +150,4 @@ function HeatmapCell({ day }: { day: HeatmapDay | null }) {
       </Tooltip>
     </TooltipProvider>
   );
-}
+};

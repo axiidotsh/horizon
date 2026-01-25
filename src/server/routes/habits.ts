@@ -8,6 +8,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db';
 import { authMiddleware } from '../middleware/auth';
+import { updateStats } from '../services/dashboard-stats';
 
 const createHabitSchema = z.object({
   title: z.string().min(1).max(100).trim(),
@@ -216,67 +217,73 @@ export const habitsRouter = new Hono()
       },
     });
 
-    let updatedCompletions = habit.completions;
+    const result = await db.$transaction(async (tx) => {
+      let updatedCompletions = habit.completions;
 
-    if (existing) {
-      await db.habitCompletion.delete({
-        where: { id: existing.id },
-      });
-      updatedCompletions = habit.completions.filter(
-        (c) => c.date.getTime() !== dateKey.getTime()
-      );
-    } else {
-      await db.habitCompletion.create({
+      if (existing) {
+        await tx.habitCompletion.delete({
+          where: { id: existing.id },
+        });
+        updatedCompletions = habit.completions.filter(
+          (c) => c.date.getTime() !== dateKey.getTime()
+        );
+      } else {
+        await tx.habitCompletion.create({
+          data: {
+            habitId: id,
+            userId: user.id,
+            date: dateKey,
+          },
+        });
+        updatedCompletions = [{ date: dateKey }, ...habit.completions];
+      }
+
+      const newCurrentStreak = calculateCurrentStreak(updatedCompletions);
+      const newBestStreak = calculateBestStreak(updatedCompletions);
+
+      await tx.habit.update({
+        where: { id },
         data: {
-          habitId: id,
-          userId: user.id,
-          date: dateKey,
+          currentStreak: newCurrentStreak,
+          bestStreak: newBestStreak,
         },
       });
-      updatedCompletions = [{ date: dateKey }, ...habit.completions];
-    }
 
-    const newCurrentStreak = calculateCurrentStreak(updatedCompletions);
-    const newBestStreak = calculateBestStreak(updatedCompletions);
+      const allUserCompletions = await tx.habitCompletion.findMany({
+        where: { userId: user.id },
+        select: { date: true },
+        orderBy: { date: 'desc' },
+      });
 
-    await db.habit.update({
-      where: { id },
-      data: {
-        currentStreak: newCurrentStreak,
-        bestStreak: newBestStreak,
-      },
+      const uniqueDates = [
+        ...new Set(allUserCompletions.map((c) => c.date.getTime())),
+      ]
+        .map((t) => new Date(t))
+        .sort((a, b) => b.getTime() - a.getTime());
+
+      const userLongestStreak = calculateBestStreak(
+        uniqueDates.map((date) => ({ date }))
+      );
+
+      await tx.habitStats.upsert({
+        where: { userId: user.id },
+        update: { longestStreak: userLongestStreak },
+        create: {
+          userId: user.id,
+          longestStreak: userLongestStreak,
+          totalHabits: 0,
+        },
+      });
+
+      await updateStats(user.id, dateKey, existing !== null, tx);
+
+      return {
+        completed: !existing,
+        completion: existing ? null : { date: dateKey },
+      };
     });
 
-    const allUserCompletions = await db.habitCompletion.findMany({
-      where: { userId: user.id },
-      select: { date: true },
-      orderBy: { date: 'desc' },
-    });
-
-    const uniqueDates = [
-      ...new Set(allUserCompletions.map((c) => c.date.getTime())),
-    ]
-      .map((t) => new Date(t))
-      .sort((a, b) => b.getTime() - a.getTime());
-
-    const userLongestStreak = calculateBestStreak(
-      uniqueDates.map((date) => ({ date }))
-    );
-
-    await db.habitStats.upsert({
-      where: { userId: user.id },
-      update: { longestStreak: userLongestStreak },
-      create: {
-        userId: user.id,
-        longestStreak: userLongestStreak,
-        totalHabits: 0,
-      },
-    });
-
-    return c.json({
-      completed: !existing,
-      completion: existing ? null : { date: dateKey },
-    });
+    return c.json(result);
   })
   .post('/:id/toggle-date', zValidator('json', toggleDateSchema), async (c) => {
     const user = c.get('user');
@@ -319,67 +326,73 @@ export const habitsRouter = new Hono()
       },
     });
 
-    let updatedCompletions = habit.completions;
+    const result = await db.$transaction(async (tx) => {
+      let updatedCompletions = habit.completions;
 
-    if (existing) {
-      await db.habitCompletion.delete({
-        where: { id: existing.id },
-      });
-      updatedCompletions = habit.completions.filter(
-        (c) => c.date.getTime() !== dateKey.getTime()
-      );
-    } else {
-      await db.habitCompletion.create({
+      if (existing) {
+        await tx.habitCompletion.delete({
+          where: { id: existing.id },
+        });
+        updatedCompletions = habit.completions.filter(
+          (c) => c.date.getTime() !== dateKey.getTime()
+        );
+      } else {
+        await tx.habitCompletion.create({
+          data: {
+            habitId: id,
+            userId: user.id,
+            date: dateKey,
+          },
+        });
+        updatedCompletions = [{ date: dateKey }, ...habit.completions];
+      }
+
+      const newCurrentStreak = calculateCurrentStreak(updatedCompletions);
+      const newBestStreak = calculateBestStreak(updatedCompletions);
+
+      await tx.habit.update({
+        where: { id },
         data: {
-          habitId: id,
-          userId: user.id,
-          date: dateKey,
+          currentStreak: newCurrentStreak,
+          bestStreak: newBestStreak,
         },
       });
-      updatedCompletions = [{ date: dateKey }, ...habit.completions];
-    }
 
-    const newCurrentStreak = calculateCurrentStreak(updatedCompletions);
-    const newBestStreak = calculateBestStreak(updatedCompletions);
+      const allUserCompletions = await tx.habitCompletion.findMany({
+        where: { userId: user.id },
+        select: { date: true },
+        orderBy: { date: 'desc' },
+      });
 
-    await db.habit.update({
-      where: { id },
-      data: {
-        currentStreak: newCurrentStreak,
-        bestStreak: newBestStreak,
-      },
+      const uniqueDates = [
+        ...new Set(allUserCompletions.map((c) => c.date.getTime())),
+      ]
+        .map((t) => new Date(t))
+        .sort((a, b) => b.getTime() - a.getTime());
+
+      const userLongestStreak = calculateBestStreak(
+        uniqueDates.map((date) => ({ date }))
+      );
+
+      await tx.habitStats.upsert({
+        where: { userId: user.id },
+        update: { longestStreak: userLongestStreak },
+        create: {
+          userId: user.id,
+          longestStreak: userLongestStreak,
+          totalHabits: 0,
+        },
+      });
+
+      await updateStats(user.id, dateKey, existing !== null, tx);
+
+      return {
+        completed: !existing,
+        completion: existing ? null : { date: dateKey },
+      };
     });
 
-    const allUserCompletions = await db.habitCompletion.findMany({
-      where: { userId: user.id },
-      select: { date: true },
-      orderBy: { date: 'desc' },
-    });
-
-    const uniqueDates = [
-      ...new Set(allUserCompletions.map((c) => c.date.getTime())),
-    ]
-      .map((t) => new Date(t))
-      .sort((a, b) => b.getTime() - a.getTime());
-
-    const userLongestStreak = calculateBestStreak(
-      uniqueDates.map((date) => ({ date }))
-    );
-
-    await db.habitStats.upsert({
-      where: { userId: user.id },
-      update: { longestStreak: userLongestStreak },
-      create: {
-        userId: user.id,
-        longestStreak: userLongestStreak,
-        totalHabits: 0,
-      },
-    });
-
-    return c.json({
-      completed: !existing,
-      completion: existing ? null : { date: dateKey },
-    });
+    return c.json(result);
   })
   .get(
     '/chart',

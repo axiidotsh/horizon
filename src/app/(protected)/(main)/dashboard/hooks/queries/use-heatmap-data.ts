@@ -8,6 +8,5 @@ export function useHeatmapData(weeks = 52) {
     input: { query: { weeks: weeks.toString() } },
     select: (data) => data.heatmap,
     errorMessage: 'Failed to fetch heatmap data',
-    staleTime: 1000 * 60 * 30,
   });
 }

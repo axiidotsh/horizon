@@ -39,6 +39,7 @@ model User {
   habits           Habit[]
   habitCompletions HabitCompletion[]
   habitStats       HabitStats?
+  dashboardStats   DashboardStats?
   tags             Tag[]
 
   @@map("users")
@@ -124,7 +125,7 @@ model FocusSession {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, status])
+  @@index([userId, status, startedAt])
   @@map("focus_sessions")
 }
 
@@ -176,6 +177,7 @@ model Task {
 
   @@index([userId, completed])
   @@index([userId, dueDate])
+  @@index([userId, completed, dueDate])
   @@map("tasks")
 }
 
@@ -208,6 +210,7 @@ model Habit {
   completions HabitCompletion[]
 
   @@index([userId])
+  @@index([userId, archived, currentStreak])
   @@map("habits")
 }
 
@@ -236,4 +239,17 @@ model HabitStats {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("habit_stats")
+}
+
+model DashboardStats {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  currentStreak    Int       @default(0)
+  bestStreak       Int       @default(0)
+  lastActivityDate DateTime?
+  updatedAt        DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("dashboard_stats")
 }

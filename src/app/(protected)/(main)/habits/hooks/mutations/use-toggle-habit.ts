@@ -8,6 +8,7 @@ export function useToggleHabit(habitId?: string) {
   const invalidateKeys: QueryKey[] = [
     HABITS_QUERY_KEYS.list,
     HABITS_QUERY_KEYS.stats,
+    DASHBOARD_QUERY_KEYS.dashboardHabits,
     DASHBOARD_QUERY_KEYS.metrics,
     DASHBOARD_QUERY_KEYS.heatmap,
     DASHBOARD_QUERY_KEYS.habitChart,

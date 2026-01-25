@@ -7,6 +7,7 @@ export function useToggleTask() {
   return useApiMutation(api.tasks[':id'].toggle.$patch, {
     invalidateKeys: [
       TASK_QUERY_KEYS.all,
+      DASHBOARD_QUERY_KEYS.dashboardTasks,
       DASHBOARD_QUERY_KEYS.metrics,
       DASHBOARD_QUERY_KEYS.heatmap,
     ],

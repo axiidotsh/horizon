@@ -1,9 +1,10 @@
 import { MetricCard } from '@/app/(protected)/(main)/components/metric-card';
 import { ErrorState } from '@/components/error-state';
+import { formatMinutesToTime } from '@/utils/date-format';
 import { CheckCircle2, Clock, Flame, Target } from 'lucide-react';
 import { useDashboardMetrics } from '../hooks/queries/use-dashboard-metrics';
 
-export function DashboardMetrics() {
+export const DashboardMetrics = () => {
   const { data, isLoading, error, refetch } = useDashboardMetrics();
 
   if (error) {
@@ -52,13 +53,4 @@ export function DashboardMetrics() {
       />
     </div>
   );
-}
-
-function formatMinutesToTime(minutes: number): string {
-  if (minutes === 0) return '0m';
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  if (hours === 0) return `${mins}m`;
-  if (mins === 0) return `${hours}h`;
-  return `${hours}h ${mins}m`;
-}
+};

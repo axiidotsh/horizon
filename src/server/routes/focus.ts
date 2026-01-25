@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db';
 import { authMiddleware } from '../middleware/auth';
+import { updateStats } from '../services/dashboard-stats';
 import { getFocusStats, recalculateStats } from '../services/focus-stats';
 
 const chartQuerySchema = z.object({
@@ -249,6 +250,7 @@ export const focusRouter = new Hono()
 
       if (wasCompleted) {
         await recalculateStats(user.id, tx);
+        await updateStats(user.id, focusSession.startedAt, true, tx);
       }
     });
 
@@ -361,6 +363,7 @@ export const focusRouter = new Hono()
       });
 
       await recalculateStats(user.id, tx);
+      await updateStats(user.id, session.startedAt, false, tx);
 
       return session;
     });
@@ -431,6 +434,7 @@ export const focusRouter = new Hono()
       });
 
       await recalculateStats(user.id, tx);
+      await updateStats(user.id, session.startedAt, false, tx);
 
       return session;
     });

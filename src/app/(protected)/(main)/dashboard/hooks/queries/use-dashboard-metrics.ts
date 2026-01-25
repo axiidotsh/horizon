@@ -7,6 +7,5 @@ export function useDashboardMetrics() {
     queryKey: DASHBOARD_QUERY_KEYS.metrics,
     select: (data) => data.metrics,
     errorMessage: 'Failed to fetch dashboard metrics',
-    staleTime: 1000 * 60 * 5,
   });
 }

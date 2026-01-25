@@ -1,5 +1,6 @@
 import { calculateFocusStats } from '@/app/(protected)/(main)/focus/utils/focus-stats-calculations';
 import { getUTCDateKey } from '@/utils/date-utc';
+import { DAY_IN_MS } from '../constants';
 import { db } from '../db';
 import type { PrismaClient } from '../db/generated/client';
 
@@ -96,9 +97,7 @@ export async function recalculateStats(
 
   const highestDailyDate =
     stats.highestDailyDaysAgo !== null
-      ? new Date(
-          now.getTime() - stats.highestDailyDaysAgo * 24 * 60 * 60 * 1000
-        )
+      ? new Date(now.getTime() - stats.highestDailyDaysAgo * DAY_IN_MS)
       : null;
 
   return client.focusStats.upsert({

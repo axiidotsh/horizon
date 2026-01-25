@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { db } from '../db';
 import { Prisma, TaskPriority } from '../db/generated/client';
 import { authMiddleware } from '../middleware/auth';
+import { updateStats } from '../services/dashboard-stats';
 
 const createTaskSchema = z.object({
   title: z.string().min(1).max(500),
@@ -406,14 +407,20 @@ export const tasksRouter = new Hono()
       return c.json({ error: 'Task not found' }, 404);
     }
 
-    const task = await db.task.update({
-      where: { id },
-      data: { completed: !existing.completed },
-      include: {
-        project: {
-          select: { id: true, name: true, color: true },
+    const task = await db.$transaction(async (tx) => {
+      const updated = await tx.task.update({
+        where: { id },
+        data: { completed: !existing.completed },
+        include: {
+          project: {
+            select: { id: true, name: true, color: true },
+          },
         },
-      },
+      });
+
+      await updateStats(user.id, updated.updatedAt, !updated.completed, tx);
+
+      return updated;
     });
 
     return c.json({ task });

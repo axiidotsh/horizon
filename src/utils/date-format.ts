@@ -35,13 +35,13 @@ export function formatSessionDateTime(dateString: string): string {
   return `${dateStr} at ${time}`;
 }
 
-export function formatMinutesToTime(totalMinutes: number): string {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
+export function formatMinutesToTime(minutes: number): string {
+  if (minutes === 0) return '0m';
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours === 0) return `${mins}m`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}m`;
 }
 
 export function formatDayLabel(date: Date): string {

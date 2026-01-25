@@ -4,51 +4,32 @@ import {
   getStreakComparisonLabel,
   getTaskComparisonLabel,
 } from '@/app/(protected)/(main)/dashboard/utils/dashboard-calculations';
-import {
-  calculateBestStreak,
-  calculateCurrentStreak,
-} from '@/app/(protected)/(main)/habits/utils/habit-calculations';
-import { getUTCMidnight } from '@/utils/date-utc';
+import { addUTCDays, getUTCMidnight } from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
+import { DASHBOARD_TASK_LIMIT } from '../constants';
 import { db } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { calculateLevel, getHeatmapData } from '../services/heatmap';
-import { calculateOverallStreak } from '../services/overall-streak';
+import { getOrCreateStats } from '../services/dashboard-stats';
+import { getHeatmapData } from '../services/heatmap';
 
 const heatmapQuerySchema = z.object({
   weeks: z.coerce.number().min(1).max(52).default(52),
 });
 
-const DASHBOARD_TASK_LIMIT = 5;
-const PRIORITY_ORDER = { HIGH: 0, MEDIUM: 1, LOW: 2, NO_PRIORITY: 3 } as const;
-
-function calculateUrgencyScore(
-  task: { dueDate: Date | null; priority: string },
-  today: Date
-): number {
-  const priorityScore =
-    PRIORITY_ORDER[task.priority as keyof typeof PRIORITY_ORDER] ?? 3;
-
-  if (!task.dueDate) {
-    return 1000 + priorityScore;
-  }
-
-  const dueDate = getUTCMidnight(task.dueDate);
-  const diffDays = Math.ceil(
-    (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  if (diffDays < 0) {
-    return -100 + diffDays + priorityScore * 0.1;
-  }
-
-  if (diffDays === 0) {
-    return priorityScore;
-  }
-
-  return 10 + diffDays + priorityScore * 0.1;
+interface TaskWithProject {
+  id: string;
+  userId: string;
+  projectId: string | null;
+  title: string;
+  completed: boolean;
+  dueDate: Date | null;
+  priority: 'NO_PRIORITY' | 'LOW' | 'MEDIUM' | 'HIGH';
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  project: { id: string; name: string; color: string | null } | null;
 }
 
 export const dashboardRouter = new Hono()
@@ -56,56 +37,44 @@ export const dashboardRouter = new Hono()
   .get('/tasks', async (c) => {
     const user = c.get('user');
     const today = getUTCMidnight(new Date());
-    const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const nextWeek = addUTCDays(today, 7);
 
-    const [urgentTasks, noDueDateTasks] = await Promise.all([
-      db.task.findMany({
-        where: {
-          userId: user.id,
-          completed: false,
-          dueDate: { lte: nextWeek },
-        },
-        orderBy: [{ dueDate: 'asc' }, { priority: 'asc' }],
-        take: DASHBOARD_TASK_LIMIT * 2,
-        include: {
-          project: { select: { id: true, name: true, color: true } },
-        },
-      }),
-      db.task.findMany({
-        where: {
-          userId: user.id,
-          completed: false,
-          dueDate: null,
-        },
-        orderBy: { createdAt: 'desc' },
-        take: DASHBOARD_TASK_LIMIT,
-        include: {
-          project: { select: { id: true, name: true, color: true } },
-        },
-      }),
-    ]);
+    const tasks = await db.$queryRaw<TaskWithProject[]>`
+      SELECT
+        t.*,
+        CASE
+          WHEN t."dueDate" IS NULL THEN 1000 +
+            CASE t.priority
+              WHEN 'HIGH' THEN 0 WHEN 'MEDIUM' THEN 1 WHEN 'LOW' THEN 2 ELSE 3
+            END
+          WHEN t."dueDate" < ${today} THEN -100 +
+            EXTRACT(EPOCH FROM (t."dueDate" - ${today})) / 86400 +
+            CASE t.priority WHEN 'HIGH' THEN 0.0 WHEN 'MEDIUM' THEN 0.1 WHEN 'LOW' THEN 0.2 ELSE 0.3 END
+          WHEN DATE(t."dueDate") = DATE(${today}) THEN
+            CASE t.priority WHEN 'HIGH' THEN 0 WHEN 'MEDIUM' THEN 1 WHEN 'LOW' THEN 2 ELSE 3 END
+          ELSE 10 + EXTRACT(EPOCH FROM (t."dueDate" - ${today})) / 86400 +
+            CASE t.priority WHEN 'HIGH' THEN 0.0 WHEN 'MEDIUM' THEN 0.1 WHEN 'LOW' THEN 0.2 ELSE 0.3 END
+        END as urgency_score,
+        CASE WHEN p.id IS NOT NULL THEN
+          json_build_object('id', p.id, 'name', p.name, 'color', p.color)
+        ELSE NULL END as project
+      FROM tasks t
+      LEFT JOIN projects p ON t."projectId" = p.id
+      WHERE t."userId" = ${user.id}
+        AND t.completed = false
+        AND (t."dueDate" IS NULL OR t."dueDate" <= ${nextWeek})
+      ORDER BY urgency_score ASC
+      LIMIT ${DASHBOARD_TASK_LIMIT}
+    `;
 
-    const allTasks = [...urgentTasks, ...noDueDateTasks];
-
-    const sorted = allTasks
-      .map((task) => ({
-        ...task,
-        urgencyScore: calculateUrgencyScore(task, today),
-      }))
-      .sort((a, b) => a.urgencyScore - b.urgencyScore)
-      .slice(0, DASHBOARD_TASK_LIMIT)
-      .map(({ urgencyScore: _, ...task }) => task);
-
-    return c.json({ tasks: sorted });
+    return c.json({ tasks });
   })
   .get('/habits', async (c) => {
     const user = c.get('user');
 
     const now = new Date();
-    const todayKey = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-    );
-    const weekAgo = new Date(todayKey.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const todayKey = getUTCMidnight(now);
+    const weekAgo = addUTCDays(todayKey, -7);
 
     const incompleteHabits = await db.habit.findMany({
       where: {
@@ -118,64 +87,44 @@ export const dashboardRouter = new Hono()
       include: {
         completions: {
           select: { date: true },
+          where: { date: { gte: weekAgo } },
           orderBy: { date: 'desc' },
         },
       },
+      orderBy: { currentStreak: 'desc' },
+      take: DASHBOARD_TASK_LIMIT,
     });
 
-    const habitsWithMetrics = incompleteHabits.map((habit) => {
-      const allCompletions = habit.completions;
-      const currentStreak = calculateCurrentStreak(allCompletions);
-      const bestStreak = calculateBestStreak(allCompletions);
-
-      const recentCompletions = allCompletions.filter(
-        (c) => c.date.getTime() >= weekAgo.getTime()
-      );
-
-      const completionHistory = recentCompletions.map((c) => ({
+    const habits = incompleteHabits.map((habit) => ({
+      ...habit,
+      totalCompletions: habit.completions.length,
+      completed: false,
+      completionHistory: habit.completions.map((c) => ({
         date: c.date,
         completed: true,
-      }));
+      })),
+    }));
 
-      return {
-        ...habit,
-        completions: recentCompletions,
-        currentStreak,
-        bestStreak,
-        totalCompletions: allCompletions.length,
-        completed: false,
-        completionHistory,
-      };
-    });
-
-    const atRiskHabits = habitsWithMetrics
-      .sort((a, b) => b.currentStreak - a.currentStreak)
-      .slice(0, DASHBOARD_TASK_LIMIT);
-
-    return c.json({ habits: atRiskHabits });
+    return c.json({ habits });
   })
   .get('/metrics', async (c) => {
     const user = c.get('user');
 
     const today = new Date();
-    const todayKey = new Date(
-      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
-    );
-    const yesterday = new Date(todayKey.getTime() - 24 * 60 * 60 * 1000);
+    const todayKey = getUTCMidnight(today);
+    const yesterday = addUTCDays(todayKey, -1);
 
-    const tomorrowKey = new Date(todayKey.getTime() + 24 * 60 * 60 * 1000);
+    const tomorrowKey = addUTCDays(todayKey, 1);
+
+    const weekAgoKey = addUTCDays(todayKey, -7);
 
     const [
       focusToday,
       focusYesterday,
       activeSession,
-      tasksCompletedToday,
-      tasksDueToday,
-      overdueTasks,
-      totalActiveHabits,
-      habitsCompletedToday,
-      last7DaysHabitCompletions,
-      overallStreak,
+      taskCounts,
+      habitCounts,
+      dashboardStats,
     ] = await Promise.all([
       db.focusSession.aggregate({
         where: {
@@ -200,58 +149,50 @@ export const dashboardRouter = new Hono()
         },
         orderBy: { startedAt: 'desc' },
       }),
-      db.task.count({
-        where: {
-          userId: user.id,
-          completed: true,
-          dueDate: {
-            gte: todayKey,
-            lt: tomorrowKey,
+      db.$queryRaw<
+        [
+          {
+            completed_today: bigint;
+            due_today: bigint;
+            overdue: bigint;
           },
-        },
-      }),
-      db.task.count({
-        where: {
-          userId: user.id,
-          dueDate: {
-            gte: todayKey,
-            lt: tomorrowKey,
+        ]
+      >`
+        SELECT
+          COUNT(*) FILTER (WHERE completed = true AND "dueDate" >= ${todayKey} AND "dueDate" < ${tomorrowKey}) as completed_today,
+          COUNT(*) FILTER (WHERE "dueDate" >= ${todayKey} AND "dueDate" < ${tomorrowKey}) as due_today,
+          COUNT(*) FILTER (WHERE completed = false AND "dueDate" < ${todayKey}) as overdue
+        FROM tasks
+        WHERE "userId" = ${user.id}
+      `,
+      db.$queryRaw<
+        [
+          {
+            total_active: bigint;
+            completed_today: bigint;
+            last_7_days: bigint;
           },
-        },
-      }),
-      db.task.count({
-        where: {
-          userId: user.id,
-          completed: false,
-          dueDate: { lt: todayKey },
-        },
-      }),
-      db.habit.count({
-        where: {
-          userId: user.id,
-          archived: false,
-        },
-      }),
-      db.habitCompletion.count({
-        where: {
-          userId: user.id,
-          date: todayKey,
-          habit: {
-            archived: false,
-          },
-        },
-      }),
-      db.habitCompletion.count({
-        where: {
-          userId: user.id,
-          date: { gte: new Date(todayKey.getTime() - 7 * 24 * 60 * 60 * 1000) },
-          habit: {
-            archived: false,
-          },
-        },
-      }),
-      calculateOverallStreak(user.id, db),
+        ]
+      >`
+        SELECT
+          COUNT(DISTINCT h.id) as total_active,
+          COUNT(DISTINCT hc1.id) as completed_today,
+          COUNT(DISTINCT hc2.id) as last_7_days
+        FROM habits h
+        LEFT JOIN habit_completions hc1 ON h.id = hc1."habitId" AND hc1.date = ${todayKey}
+        LEFT JOIN habit_completions hc2 ON h.id = hc2."habitId" AND hc2.date >= ${weekAgoKey}
+        WHERE h."userId" = ${user.id} AND h.archived = false
+      `,
+      getOrCreateStats(user.id),
     ]);
+
+    const tasksCompletedToday = Number(taskCounts[0].completed_today);
+    const tasksDueToday = Number(taskCounts[0].due_today);
+    const overdueTasks = Number(taskCounts[0].overdue);
+
+    const totalActiveHabits = Number(habitCounts[0].total_active);
+    const habitsCompletedToday = Number(habitCounts[0].completed_today);
+    const last7DaysHabitCompletions = Number(habitCounts[0].last_7_days);
 
     const todayMinutes = focusToday._sum.durationMinutes || 0;
     const yesterdayMinutes = focusYesterday._sum.durationMinutes || 0;
@@ -276,7 +217,7 @@ export const dashboardRouter = new Hono()
 
     const daysUntilRecord = Math.max(
       0,
-      overallStreak.bestStreak - overallStreak.currentStreak
+      dashboardStats.bestStreak - dashboardStats.currentStreak
     );
 
     return c.json({
@@ -307,12 +248,12 @@ export const dashboardRouter = new Hono()
           comparisonLabel: getHabitComparisonLabel(weeklyAverage),
         },
         streak: {
-          currentStreak: overallStreak.currentStreak,
-          bestStreak: overallStreak.bestStreak,
+          currentStreak: dashboardStats.currentStreak,
+          bestStreak: dashboardStats.bestStreak,
           daysUntilRecord,
           comparisonLabel: getStreakComparisonLabel(
-            overallStreak.currentStreak,
-            overallStreak.bestStreak
+            dashboardStats.currentStreak,
+            dashboardStats.bestStreak
           ),
         },
       },
@@ -322,14 +263,7 @@ export const dashboardRouter = new Hono()
     const user = c.get('user');
     const { weeks } = c.req.valid('query');
 
-    const rawData = await getHeatmapData(user.id, weeks, db);
-
-    const heatmap = rawData.map((day) => ({
-      ...day,
-      level: calculateLevel(day),
-      totalActivity:
-        day.focusMinutes + day.tasksCompleted + day.habitsCompleted,
-    }));
+    const heatmap = await getHeatmapData(user.id, weeks, db);
 
     return c.json({ heatmap });
   });

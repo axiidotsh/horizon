@@ -1,3 +1,5 @@
+import { getUTCDateKey } from '@/utils/date-utc';
+import { DAY_IN_MS } from '../constants';
 import type { PrismaClient } from '../db/generated/client';
 
 type TransactionClient = Omit<
@@ -9,13 +11,6 @@ interface DailyActivity {
   hasFocus: boolean;
   hasTasks: boolean;
   hasHabits: boolean;
-}
-
-function getDateKey(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }
 
 export async function calculateOverallStreak(
@@ -45,7 +40,7 @@ export async function calculateOverallStreak(
   const activityMap = new Map<string, DailyActivity>();
 
   focusSessions.forEach((session) => {
-    const key = getDateKey(session.startedAt);
+    const key = getUTCDateKey(session.startedAt);
     const activity = activityMap.get(key) || {
       hasFocus: false,
       hasTasks: false,
@@ -56,7 +51,7 @@ export async function calculateOverallStreak(
   });
 
   completedTasks.forEach((task) => {
-    const key = getDateKey(task.updatedAt);
+    const key = getUTCDateKey(task.updatedAt);
     const activity = activityMap.get(key) || {
       hasFocus: false,
       hasTasks: false,
@@ -67,7 +62,7 @@ export async function calculateOverallStreak(
   });
 
   habitCompletions.forEach((completion) => {
-    const key = getDateKey(completion.date);
+    const key = getUTCDateKey(completion.date);
     const activity = activityMap.get(key) || {
       hasFocus: false,
       hasTasks: false,
@@ -77,8 +72,8 @@ export async function calculateOverallStreak(
     activityMap.set(key, activity);
   });
 
-  const today = getDateKey(new Date());
-  const yesterday = getDateKey(new Date(Date.now() - 24 * 60 * 60 * 1000));
+  const today = getUTCDateKey(new Date());
+  const yesterday = getUTCDateKey(new Date(Date.now() - DAY_IN_MS));
 
   let currentStreak = 0;
 
@@ -87,13 +82,13 @@ export async function calculateOverallStreak(
   } else {
     let currentDate = activityMap.has(today)
       ? new Date()
-      : new Date(Date.now() - 24 * 60 * 60 * 1000);
+      : new Date(Date.now() - DAY_IN_MS);
 
     while (true) {
-      const dateKey = getDateKey(currentDate);
+      const dateKey = getUTCDateKey(currentDate);
       if (activityMap.has(dateKey)) {
         currentStreak++;
-        currentDate = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
+        currentDate = new Date(currentDate.getTime() - DAY_IN_MS);
       } else {
         break;
       }
@@ -111,7 +106,7 @@ export async function calculateOverallStreak(
       tempStreak = 1;
     } else {
       const diffDays = Math.round(
-        (currentDate.getTime() - lastDate.getTime()) / (24 * 60 * 60 * 1000)
+        (currentDate.getTime() - lastDate.getTime()) / DAY_IN_MS
       );
       if (diffDays === 1) {
         tempStreak++;
