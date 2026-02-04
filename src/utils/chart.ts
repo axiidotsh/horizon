@@ -20,3 +20,9 @@ export const chartDomains = {
 export function createGradientId(prefix: string): string {
   return `fill${prefix.charAt(0).toUpperCase() + prefix.slice(1)}`;
 }
+
+export function formatChartDateLabel(date: Date, daysRange: number): string {
+  return daysRange <= 7
+    ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
+    : `${date.getMonth() + 1}/${date.getDate()}`;
+}

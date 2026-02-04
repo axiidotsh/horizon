@@ -38,7 +38,7 @@ export function getUTCDaysDifference(date1: Date, date2: Date): number {
 
 export function normalizeToUTCMidnight(date: Date): string {
   return new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
   ).toISOString();
 }
 

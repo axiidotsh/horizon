@@ -1,4 +1,9 @@
-import { addUTCDays, getUTCStartOfDaysAgo } from '@/utils/date-utc';
+import { formatChartDateLabel } from '@/utils/chart';
+import {
+  addUTCDays,
+  getUTCMidnight,
+  getUTCStartOfDaysAgo,
+} from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -228,9 +233,7 @@ export const habitsRouter = new Hono()
     }
 
     const today = new Date();
-    const dateKey = new Date(
-      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
-    );
+    const dateKey = getUTCMidnight(today);
 
     const existing = await db.habitCompletion.findUnique({
       where: {
@@ -275,13 +278,7 @@ export const habitsRouter = new Hono()
     }
 
     const inputDate = new Date(dateString);
-    const dateKey = new Date(
-      Date.UTC(
-        inputDate.getUTCFullYear(),
-        inputDate.getUTCMonth(),
-        inputDate.getUTCDate()
-      )
-    );
+    const dateKey = getUTCMidnight(inputDate);
 
     const existing = await db.habitCompletion.findUnique({
       where: {
@@ -345,10 +342,7 @@ export const habitsRouter = new Hono()
               ? Math.round((completedCount / totalHabits) * 100)
               : 0;
 
-          const dateLabel =
-            days <= 7
-              ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
-              : `${date.getMonth() + 1}/${date.getDate()}`;
+          const dateLabel = formatChartDateLabel(date, days);
 
           return {
             date: dateLabel,

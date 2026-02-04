@@ -8,6 +8,7 @@ export function useDeleteSession() {
     invalidateKeys: [
       FOCUS_QUERY_KEYS.sessions,
       FOCUS_QUERY_KEYS.stats,
+      FOCUS_QUERY_KEYS.chart,
       DASHBOARD_QUERY_KEYS.metrics,
       DASHBOARD_QUERY_KEYS.heatmap,
     ],

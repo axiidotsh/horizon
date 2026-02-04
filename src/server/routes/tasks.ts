@@ -1,3 +1,4 @@
+import { formatChartDateLabel } from '@/utils/chart';
 import { addUTCDays, getUTCStartOfDaysAgo } from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
@@ -138,10 +139,7 @@ export const tasksRouter = new Hono()
             },
           }),
         ]).then(([totalTasks, completedTasks]) => {
-          const dateLabel =
-            days <= 7
-              ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
-              : `${date.getMonth() + 1}/${date.getDate()}`;
+          const dateLabel = formatChartDateLabel(date, days);
 
           return {
             date: dateLabel,

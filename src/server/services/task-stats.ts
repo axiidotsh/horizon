@@ -23,7 +23,7 @@ export async function getTaskStats(
 ): Promise<TaskStats> {
   const completedTasks = await client.task.findMany({
     where: { userId, completed: true },
-    select: { updatedAt: true },
+    select: { completedAt: true },
   });
 
   if (completedTasks.length === 0) {
@@ -31,11 +31,11 @@ export async function getTaskStats(
   }
 
   const dates = getActivityDates(
-    completedTasks.map((t) => ({ date: t.updatedAt }))
+    completedTasks.map((t) => ({ date: t.completedAt! }))
   );
   const { currentStreak, bestStreak } = calculateStreakFromDates(dates);
 
-  const dailyCounts = getDailyAggregates(completedTasks, (t) => t.updatedAt);
+  const dailyCounts = getDailyAggregates(completedTasks, (t) => t.completedAt!);
   const mostTasksInDay = Math.max(...dailyCounts.values());
 
   return { currentStreak, bestStreak, mostTasksInDay };
