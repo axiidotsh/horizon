@@ -116,7 +116,7 @@ export const dashboardRouter = new Hono()
       focusToday,
       focusYesterday,
       activeSession,
-      taskCounts,
+      tasks,
       habitCounts,
       overallStats,
     ] = await Promise.all([
@@ -143,22 +143,28 @@ export const dashboardRouter = new Hono()
         },
         orderBy: { startedAt: 'desc' },
       }),
-      db.$queryRaw<
-        [
-          {
-            completed_today: bigint;
-            due_today: bigint;
-            overdue: bigint;
+      db.task.findMany({
+        where: {
+          userId: user.id,
+          dueDate: {
+            not: null,
+            lt: tomorrowKey,
           },
-        ]
-      >`
-        SELECT
-          COUNT(*) FILTER (WHERE completed = true AND "dueDate" >= ${todayKey} AND "dueDate" < ${tomorrowKey}) as completed_today,
-          COUNT(*) FILTER (WHERE "dueDate" >= ${todayKey} AND "dueDate" < ${tomorrowKey}) as due_today,
-          COUNT(*) FILTER (WHERE completed = false AND "dueDate" < ${todayKey}) as overdue
-        FROM tasks
-        WHERE "userId" = ${user.id}
-      `,
+        },
+        include: {
+          project: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
+        },
+        orderBy: {
+          dueDate: 'asc',
+        },
+        take: DASHBOARD_TASK_LIMIT,
+      }),
       db.$queryRaw<
         [
           {
@@ -180,9 +186,9 @@ export const dashboardRouter = new Hono()
       getOverallStats(user.id),
     ]);
 
-    const tasksCompletedToday = Number(taskCounts[0].completed_today);
-    const tasksDueToday = Number(taskCounts[0].due_today);
-    const overdueTasks = Number(taskCounts[0].overdue);
+    const tasksCompletedToday = tasks.filter((t) => t.completed).length;
+    const totalPendingTasks = tasks.filter((t) => !t.completed).length;
+    const totalTasks = tasks.length;
 
     const totalActiveHabits = Number(habitCounts[0].total_active);
     const habitsCompletedToday = Number(habitCounts[0].completed_today);
@@ -193,9 +199,7 @@ export const dashboardRouter = new Hono()
     const timeDiff = todayMinutes - yesterdayMinutes;
 
     const tasksPercentComplete =
-      tasksDueToday > 0
-        ? Math.round((tasksCompletedToday / tasksDueToday) * 100)
-        : 0;
+      totalTasks > 0 ? Math.round((tasksCompletedToday / totalTasks) * 100) : 0;
 
     const habitsPercentComplete =
       totalActiveHabits > 0
@@ -225,14 +229,12 @@ export const dashboardRouter = new Hono()
         },
         tasks: {
           completedToday: tasksCompletedToday,
-          totalToday: tasksDueToday,
+          totalToday: totalTasks,
           percentComplete: tasksPercentComplete,
           comparisonLabel: getTaskComparisonLabel(
             tasksCompletedToday,
-            tasksDueToday,
-            overdueTasks
+            totalTasks
           ),
-          overdue: overdueTasks,
         },
         habits: {
           completedToday: habitsCompletedToday,

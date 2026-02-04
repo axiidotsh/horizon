@@ -30,11 +30,7 @@ export const DashboardMetrics = () => {
         title="Tasks"
         icon={CheckCircle2}
         content={`${data?.tasks.completedToday}/${data?.tasks.totalToday}`}
-        footer={
-          data?.tasks.overdue && data?.tasks.overdue > 0
-            ? `${data?.tasks.overdue} overdue`
-            : data?.tasks.comparisonLabel
-        }
+        footer={data?.tasks.comparisonLabel}
         isLoading={isLoading}
       />
       <MetricCard

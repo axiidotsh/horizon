@@ -31,18 +31,13 @@ export function calculateUrgencyScore(
 
 export function getTaskComparisonLabel(
   completedToday: number,
-  totalToday: number,
-  overdue: number
+  totalPending: number
 ): string {
-  if (overdue > 0) {
-    return `${overdue} overdue`;
+  if (totalPending === 0) {
+    return 'All caught up!';
   }
 
-  if (totalToday === 0) {
-    return 'No tasks for today';
-  }
-
-  const completionPercentage = (completedToday / totalToday) * 100;
+  const completionPercentage = (completedToday / totalPending) * 100;
 
   const now = new Date();
   const startOfDayUTC = getUTCMidnight(now);
