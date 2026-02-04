@@ -1,14 +1,14 @@
-import {
-  calculateBestStreak,
-  calculateCurrentStreak,
-} from '@/app/(protected)/(main)/habits/utils/habit-calculations';
 import { addUTCDays, getUTCStartOfDaysAgo } from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { updateStats } from '../services/dashboard-stats';
+import { getHabitStats, getHabitsWithStreaks } from '../services/habit-stats';
+import {
+  calculateStreakFromDates,
+  getActivityDates,
+} from '../services/streak-utils';
 
 const createHabitSchema = z.object({
   title: z.string().min(1).max(100).trim(),
@@ -53,7 +53,6 @@ export const habitsRouter = new Hono()
 
     const where: {
       userId: string;
-      archived: boolean;
       OR?: Array<{
         title?: { contains: string; mode: 'insensitive' };
         category?: { contains: string; mode: 'insensitive' };
@@ -64,7 +63,6 @@ export const habitsRouter = new Hono()
       };
     } = {
       userId: user.id,
-      archived: false,
     };
 
     if (search) {
@@ -80,10 +78,12 @@ export const habitsRouter = new Hono()
       where.completions = { none: { date: todayKey } };
     }
 
-    const orderBy: Record<string, 'asc' | 'desc'>[] = [
-      { [sortBy]: sortOrder },
-      { id: sortOrder },
-    ];
+    const shouldSortByStreak =
+      sortBy === 'currentStreak' || sortBy === 'bestStreak';
+
+    const orderBy: Record<string, 'asc' | 'desc'>[] = shouldSortByStreak
+      ? [{ createdAt: 'desc' }, { id: 'desc' }]
+      : [{ [sortBy]: sortOrder }, { id: sortOrder }];
 
     const [habits, totalCount] = await Promise.all([
       db.habit.findMany({
@@ -99,23 +99,55 @@ export const habitsRouter = new Hono()
           },
         },
         orderBy,
-        take: limit,
-        skip: offset,
+        take: shouldSortByStreak ? undefined : limit,
+        skip: shouldSortByStreak ? undefined : offset,
       }),
       db.habit.count({ where }),
     ]);
 
-    const habitsWithStatus = habits.map((habit) => ({
-      ...habit,
-      completed: habit.completions.some(
-        (c) => c.date.getTime() === todayKey.getTime()
-      ),
-    }));
+    const habitIds = habits.map((h) => h.id);
+    const allCompletions = await db.habitCompletion.findMany({
+      where: { habitId: { in: habitIds } },
+      select: { habitId: true, date: true },
+      orderBy: { date: 'desc' },
+    });
+
+    const completionsByHabit = new Map<string, { date: Date }[]>();
+    for (const completion of allCompletions) {
+      const existing = completionsByHabit.get(completion.habitId) || [];
+      existing.push({ date: completion.date });
+      completionsByHabit.set(completion.habitId, existing);
+    }
+
+    const habitsWithStreaks = habits.map((habit) => {
+      const habitCompletions = completionsByHabit.get(habit.id) || [];
+      const dates = getActivityDates(habitCompletions);
+      const { currentStreak, bestStreak } = calculateStreakFromDates(dates);
+      return {
+        ...habit,
+        currentStreak,
+        bestStreak,
+        completed: habit.completions.some(
+          (c) => c.date.getTime() === todayKey.getTime()
+        ),
+      };
+    });
+
+    let sortedHabits = habitsWithStreaks;
+    if (shouldSortByStreak) {
+      const streakField = sortBy as 'currentStreak' | 'bestStreak';
+      sortedHabits = habitsWithStreaks.sort((a, b) =>
+        sortOrder === 'desc'
+          ? b[streakField] - a[streakField]
+          : a[streakField] - b[streakField]
+      );
+      sortedHabits = sortedHabits.slice(offset, offset + limit);
+    }
 
     const hasMore = offset + limit < totalCount;
     const nextOffset = hasMore ? offset + limit : null;
 
-    return c.json({ habits: habitsWithStatus, nextOffset });
+    return c.json({ habits: sortedHabits, nextOffset });
   })
   .post('/', zValidator('json', createHabitSchema), async (c) => {
     const user = c.get('user');
@@ -174,9 +206,8 @@ export const habitsRouter = new Hono()
       return c.json({ error: 'Habit not found' }, 404);
     }
 
-    await db.habit.update({
+    await db.habit.delete({
       where: { id },
-      data: { archived: true },
     });
 
     return c.json({ success: true });
@@ -189,13 +220,6 @@ export const habitsRouter = new Hono()
       where: {
         id,
         userId: user.id,
-        archived: false,
-      },
-      include: {
-        completions: {
-          orderBy: { date: 'desc' },
-          select: { date: true },
-        },
       },
     });
 
@@ -217,73 +241,22 @@ export const habitsRouter = new Hono()
       },
     });
 
-    const result = await db.$transaction(async (tx) => {
-      let updatedCompletions = habit.completions;
-
-      if (existing) {
-        await tx.habitCompletion.delete({
-          where: { id: existing.id },
-        });
-        updatedCompletions = habit.completions.filter(
-          (c) => c.date.getTime() !== dateKey.getTime()
-        );
-      } else {
-        await tx.habitCompletion.create({
-          data: {
-            habitId: id,
-            userId: user.id,
-            date: dateKey,
-          },
-        });
-        updatedCompletions = [{ date: dateKey }, ...habit.completions];
-      }
-
-      const newCurrentStreak = calculateCurrentStreak(updatedCompletions);
-      const newBestStreak = calculateBestStreak(updatedCompletions);
-
-      await tx.habit.update({
-        where: { id },
-        data: {
-          currentStreak: newCurrentStreak,
-          bestStreak: newBestStreak,
-        },
+    if (existing) {
+      await db.habitCompletion.delete({
+        where: { id: existing.id },
       });
+      return c.json({ completed: false, completion: null });
+    }
 
-      const allUserCompletions = await tx.habitCompletion.findMany({
-        where: { userId: user.id },
-        select: { date: true },
-        orderBy: { date: 'desc' },
-      });
-
-      const uniqueDates = [
-        ...new Set(allUserCompletions.map((c) => c.date.getTime())),
-      ]
-        .map((t) => new Date(t))
-        .sort((a, b) => b.getTime() - a.getTime());
-
-      const userLongestStreak = calculateBestStreak(
-        uniqueDates.map((date) => ({ date }))
-      );
-
-      await tx.habitStats.upsert({
-        where: { userId: user.id },
-        update: { longestStreak: userLongestStreak },
-        create: {
-          userId: user.id,
-          longestStreak: userLongestStreak,
-          totalHabits: 0,
-        },
-      });
-
-      await updateStats(user.id, dateKey, existing !== null, tx);
-
-      return {
-        completed: !existing,
-        completion: existing ? null : { date: dateKey },
-      };
+    const completion = await db.habitCompletion.create({
+      data: {
+        habitId: id,
+        userId: user.id,
+        date: dateKey,
+      },
     });
 
-    return c.json(result);
+    return c.json({ completed: true, completion: { date: dateKey } });
   })
   .post('/:id/toggle-date', zValidator('json', toggleDateSchema), async (c) => {
     const user = c.get('user');
@@ -294,13 +267,6 @@ export const habitsRouter = new Hono()
       where: {
         id,
         userId: user.id,
-        archived: false,
-      },
-      include: {
-        completions: {
-          orderBy: { date: 'desc' },
-          select: { date: true },
-        },
       },
     });
 
@@ -326,73 +292,22 @@ export const habitsRouter = new Hono()
       },
     });
 
-    const result = await db.$transaction(async (tx) => {
-      let updatedCompletions = habit.completions;
-
-      if (existing) {
-        await tx.habitCompletion.delete({
-          where: { id: existing.id },
-        });
-        updatedCompletions = habit.completions.filter(
-          (c) => c.date.getTime() !== dateKey.getTime()
-        );
-      } else {
-        await tx.habitCompletion.create({
-          data: {
-            habitId: id,
-            userId: user.id,
-            date: dateKey,
-          },
-        });
-        updatedCompletions = [{ date: dateKey }, ...habit.completions];
-      }
-
-      const newCurrentStreak = calculateCurrentStreak(updatedCompletions);
-      const newBestStreak = calculateBestStreak(updatedCompletions);
-
-      await tx.habit.update({
-        where: { id },
-        data: {
-          currentStreak: newCurrentStreak,
-          bestStreak: newBestStreak,
-        },
+    if (existing) {
+      await db.habitCompletion.delete({
+        where: { id: existing.id },
       });
+      return c.json({ completed: false, completion: null });
+    }
 
-      const allUserCompletions = await tx.habitCompletion.findMany({
-        where: { userId: user.id },
-        select: { date: true },
-        orderBy: { date: 'desc' },
-      });
-
-      const uniqueDates = [
-        ...new Set(allUserCompletions.map((c) => c.date.getTime())),
-      ]
-        .map((t) => new Date(t))
-        .sort((a, b) => b.getTime() - a.getTime());
-
-      const userLongestStreak = calculateBestStreak(
-        uniqueDates.map((date) => ({ date }))
-      );
-
-      await tx.habitStats.upsert({
-        where: { userId: user.id },
-        update: { longestStreak: userLongestStreak },
-        create: {
-          userId: user.id,
-          longestStreak: userLongestStreak,
-          totalHabits: 0,
-        },
-      });
-
-      await updateStats(user.id, dateKey, existing !== null, tx);
-
-      return {
-        completed: !existing,
-        completion: existing ? null : { date: dateKey },
-      };
+    const completion = await db.habitCompletion.create({
+      data: {
+        habitId: id,
+        userId: user.id,
+        date: dateKey,
+      },
     });
 
-    return c.json(result);
+    return c.json({ completed: true, completion: { date: dateKey } });
   })
   .get(
     '/chart',
@@ -406,25 +321,24 @@ export const habitsRouter = new Hono()
       const user = c.get('user');
       const { days } = c.req.valid('query');
 
-      const endDate = new Date();
+      const now = new Date();
 
       const chartData = await Promise.all(
-        Array.from({ length: days }, async (_, index) => {
-          const i = days - 1 - index;
-          const dateKey = addUTCDays(endDate, -i);
+        Array.from({ length: days }, async (_, i) => {
+          const date = addUTCDays(now, -(days - 1 - i));
+          const nextDate = addUTCDays(date, 1);
 
           const [totalHabits, completedCount] = await Promise.all([
             db.habit.count({
               where: {
                 userId: user.id,
-                archived: false,
-                createdAt: { lte: dateKey },
+                createdAt: { lt: nextDate },
               },
             }),
             db.habitCompletion.count({
               where: {
                 userId: user.id,
-                date: dateKey,
+                date: { gte: date, lt: nextDate },
               },
             }),
           ]);
@@ -436,8 +350,8 @@ export const habitsRouter = new Hono()
 
           const dateLabel =
             days <= 7
-              ? dateKey.toLocaleDateString('en-US', { weekday: 'short' })
-              : `${dateKey.getUTCMonth() + 1}/${dateKey.getUTCDate()}`;
+              ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
+              : `${date.getMonth() + 1}/${date.getDate()}`;
 
           return {
             date: dateLabel,
@@ -457,36 +371,26 @@ export const habitsRouter = new Hono()
       Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
     );
 
-    const habits = await db.habit.findMany({
-      where: {
-        userId: user.id,
-        archived: false,
-      },
-      select: {
-        currentStreak: true,
-        bestStreak: true,
-        completions: {
-          where: { date: todayKey },
-          select: { date: true },
-        },
-      },
-    });
+    const [stats, totalHabits, completedToday, habitsWithStreaks] =
+      await Promise.all([
+        getHabitStats(user.id),
+        db.habit.count({ where: { userId: user.id } }),
+        db.habitCompletion.count({
+          where: {
+            userId: user.id,
+            date: todayKey,
+          },
+        }),
+        getHabitsWithStreaks(user.id),
+      ]);
 
-    const habitStats = await db.habitStats.findUnique({
-      where: { userId: user.id },
-      select: { longestStreak: true },
-    });
-
-    const totalHabits = habits.length;
-    const completedToday = habits.filter(
-      (h) => h.completions.length > 0
+    const activeStreakCount = habitsWithStreaks.filter(
+      (h) => h.currentStreak > 0
     ).length;
-    const activeStreakCount = habits.filter((h) => h.currentStreak > 0).length;
     const longestCurrentStreak = Math.max(
-      ...habits.map((h) => h.currentStreak),
+      ...habitsWithStreaks.map((h) => h.currentStreak),
       0
     );
-    const bestStreak = Math.max(...habits.map((h) => h.bestStreak), 0);
 
     return c.json({
       stats: {
@@ -494,8 +398,8 @@ export const habitsRouter = new Hono()
         completedToday,
         activeStreakCount,
         longestCurrentStreak,
-        bestStreak,
-        longestStreak: habitStats?.longestStreak ?? 0,
+        bestStreak: stats.bestStreak,
+        longestStreak: stats.bestStreak,
       },
     });
   });

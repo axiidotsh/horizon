@@ -34,7 +34,7 @@ export const EditHabitDialog = () => {
       form.setDescription(habit.description || '');
       form.setCategory(habit.category || '');
     }
-  }, [habit, form]);
+  }, [habit?.id]);
 
   const handleSave = () => {
     if (!habit || !form.title.trim()) return;

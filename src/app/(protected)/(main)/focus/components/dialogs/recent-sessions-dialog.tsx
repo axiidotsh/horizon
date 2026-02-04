@@ -14,7 +14,9 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useAtom } from 'jotai';
 import { ArrowDownUpIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -29,6 +31,7 @@ export const RecentSessionsDialog = () => {
   const [sortBy, setSortBy] = useState<'name' | 'duration' | 'date'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const isMobile = useIsMobile();
 
   const {
     sessions,
@@ -53,7 +56,7 @@ export const RecentSessionsDialog = () => {
 
   return (
     <ResponsiveDialog open={open} onOpenChange={setOpen}>
-      <ResponsiveDialogContent className="sm:max-w-3xl!">
+      <ResponsiveDialogContent className="px-6 md:max-w-3xl">
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Recent Sessions</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
@@ -121,14 +124,14 @@ export const RecentSessionsDialog = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <div className="h-[60vh] overflow-y-auto">
+          <ScrollArea className="h-[60vh]">
             <SessionsTable
               sessions={sessions}
               isLoading={isLoading}
               isFetchingNextPage={isFetchingNextPage}
               sentinelRef={sentinelRef}
             />
-          </div>
+          </ScrollArea>
         </div>
       </ResponsiveDialogContent>
     </ResponsiveDialog>

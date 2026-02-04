@@ -13,6 +13,7 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
 import { useAtom } from 'jotai';
+import { useEffect } from 'react';
 import { editingSessionAtom } from '../../atoms/session-dialogs';
 import { MAX_DURATION, MIN_DURATION } from '../../constants';
 import { useEditSession } from '../../hooks/mutations/use-edit-session';
@@ -22,10 +23,14 @@ export const FocusSessionEditDialog = () => {
   const [session, setSession] = useAtom(editingSessionAtom);
   const editSession = useEditSession();
   const { task, setTask, durationMinutes, setDurationMinutes, getFormData } =
-    useSessionForm({
-      task: session?.task ?? '',
-      durationMinutes: session?.durationMinutes.toString() ?? '',
-    });
+    useSessionForm();
+
+  useEffect(() => {
+    if (session) {
+      setTask(session.task ?? '');
+      setDurationMinutes(session.durationMinutes.toString());
+    }
+  }, [session?.id]);
 
   const handleSave = () => {
     if (!session) return;

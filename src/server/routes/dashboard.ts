@@ -11,8 +11,12 @@ import { z } from 'zod';
 import { DASHBOARD_TASK_LIMIT } from '../constants';
 import { db } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { getOrCreateStats } from '../services/dashboard-stats';
 import { getHeatmapData } from '../services/heatmap';
+import { getOverallStats } from '../services/overall-stats';
+import {
+  calculateStreakFromDates,
+  getActivityDates,
+} from '../services/streak-utils';
 
 const heatmapQuerySchema = z.object({
   weeks: z.coerce.number().min(1).max(52).default(52),
@@ -79,7 +83,6 @@ export const dashboardRouter = new Hono()
     const incompleteHabits = await db.habit.findMany({
       where: {
         userId: user.id,
-        archived: false,
         completions: {
           none: { date: todayKey },
         },
@@ -87,25 +90,35 @@ export const dashboardRouter = new Hono()
       include: {
         completions: {
           select: { date: true },
-          where: { date: { gte: weekAgo } },
           orderBy: { date: 'desc' },
         },
       },
-      orderBy: { currentStreak: 'desc' },
-      take: DASHBOARD_TASK_LIMIT,
     });
 
-    const habits = incompleteHabits.map((habit) => ({
-      ...habit,
-      totalCompletions: habit.completions.length,
-      completed: false,
-      completionHistory: habit.completions.map((c) => ({
-        date: c.date,
-        completed: true,
-      })),
-    }));
+    const habitsWithStreaks = incompleteHabits.map((habit) => {
+      const dates = getActivityDates(habit.completions);
+      const { currentStreak, bestStreak } = calculateStreakFromDates(dates);
+      return {
+        ...habit,
+        currentStreak,
+        bestStreak,
+        totalCompletions: habit.completions.filter((c) => c.date >= weekAgo)
+          .length,
+        completed: false,
+        completionHistory: habit.completions
+          .filter((c) => c.date >= weekAgo)
+          .map((c) => ({
+            date: c.date,
+            completed: true,
+          })),
+      };
+    });
 
-    return c.json({ habits });
+    const sortedHabits = habitsWithStreaks
+      .sort((a, b) => b.currentStreak - a.currentStreak)
+      .slice(0, DASHBOARD_TASK_LIMIT);
+
+    return c.json({ habits: sortedHabits });
   })
   .get('/metrics', async (c) => {
     const user = c.get('user');
@@ -124,7 +137,7 @@ export const dashboardRouter = new Hono()
       activeSession,
       taskCounts,
       habitCounts,
-      dashboardStats,
+      overallStats,
     ] = await Promise.all([
       db.focusSession.aggregate({
         where: {
@@ -181,9 +194,9 @@ export const dashboardRouter = new Hono()
         FROM habits h
         LEFT JOIN habit_completions hc1 ON h.id = hc1."habitId" AND hc1.date = ${todayKey}
         LEFT JOIN habit_completions hc2 ON h.id = hc2."habitId" AND hc2.date >= ${weekAgoKey}
-        WHERE h."userId" = ${user.id} AND h.archived = false
+        WHERE h."userId" = ${user.id}
       `,
-      getOrCreateStats(user.id),
+      getOverallStats(user.id),
     ]);
 
     const tasksCompletedToday = Number(taskCounts[0].completed_today);
@@ -217,7 +230,7 @@ export const dashboardRouter = new Hono()
 
     const daysUntilRecord = Math.max(
       0,
-      dashboardStats.bestStreak - dashboardStats.currentStreak
+      overallStats.bestStreak - overallStats.currentStreak
     );
 
     return c.json({
@@ -248,12 +261,12 @@ export const dashboardRouter = new Hono()
           comparisonLabel: getHabitComparisonLabel(weeklyAverage),
         },
         streak: {
-          currentStreak: dashboardStats.currentStreak,
-          bestStreak: dashboardStats.bestStreak,
+          currentStreak: overallStats.currentStreak,
+          bestStreak: overallStats.bestStreak,
           daysUntilRecord,
           comparisonLabel: getStreakComparisonLabel(
-            dashboardStats.currentStreak,
-            dashboardStats.bestStreak
+            overallStats.currentStreak,
+            overallStats.bestStreak
           ),
         },
       },

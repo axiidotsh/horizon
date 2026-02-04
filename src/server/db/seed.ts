@@ -27,10 +27,8 @@ async function clearDatabase() {
   console.log('🗑️  Clearing database...');
 
   await db.habitCompletion.deleteMany({});
-  await db.habitStats.deleteMany({});
   await db.habit.deleteMany({});
   await db.focusSession.deleteMany({});
-  await db.focusStats.deleteMany({});
   await db.task.deleteMany({});
   await db.project.deleteMany({});
   await db.verification.deleteMany({});
@@ -202,9 +200,38 @@ async function createHabits() {
       });
     }
 
-    await db.habit.createMany({ data: habits });
+    const createdHabits = await db.habit.createManyAndReturn({ data: habits });
 
-    console.log(`   ✅ Created 75 habits for ${user.name || user.email}`);
+    const completions = [];
+    for (const habit of createdHabits) {
+      const habitIndex = createdHabits.indexOf(habit);
+      const daysBack = 30;
+
+      for (let day = 0; day < daysBack; day++) {
+        if (day % ((habitIndex % 3) + 2) === 0) {
+          const now = new Date();
+          const date = new Date(
+            Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate() - day
+            )
+          );
+
+          completions.push({
+            habitId: habit.id,
+            userId: user.id,
+            date,
+          });
+        }
+      }
+    }
+
+    await db.habitCompletion.createMany({ data: completions });
+
+    console.log(
+      `   ✅ Created 75 habits and ${completions.length} completions for ${user.name || user.email}`
+    );
   }
 
   console.log('✅ Habits created');

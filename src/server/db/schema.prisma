@@ -26,20 +26,17 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  commandMenuPosition   String        @default("top")
-  defaultFocusDuration  Int           @default(45)
-  defaultTaskPriority   TaskPriority  @default(NO_PRIORITY)
+  commandMenuPosition  String       @default("top")
+  defaultFocusDuration Int          @default(45)
+  defaultTaskPriority  TaskPriority @default(NO_PRIORITY)
 
   sessions         Session[]
   accounts         Account[]
   focusSessions    FocusSession[]
-  focusStats       FocusStats?
   tasks            Task[]
   projects         Project[]
   habits           Habit[]
   habitCompletions HabitCompletion[]
-  habitStats       HabitStats?
-  dashboardStats   DashboardStats?
   tags             Tag[]
 
   @@map("users")
@@ -110,67 +107,17 @@ model Verification {
   @@map("verifications")
 }
 
-model FocusSession {
-  id                 String             @id @default(cuid())
-  userId             String
-  durationMinutes    Int
-  task               String?
-  startedAt          DateTime           @default(now())
-  pausedAt           DateTime?
-  totalPausedSeconds Int                @default(0)
-  completedAt        DateTime?
-  status             FocusSessionStatus @default(ACTIVE)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, status, startedAt])
-  @@map("focus_sessions")
-}
-
-model FocusStats {
-  id                  String    @id @default(cuid())
-  userId              String    @unique
-  currentStreak       Int       @default(0)
-  bestStreak          Int       @default(0)
-  lastStreakDate      DateTime?
-  highestDailyMinutes Int       @default(0)
-  highestDailyDate    DateTime?
-  bestSessionsInDay   Int       @default(0)
-  updatedAt           DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("focus_stats")
-}
-
-model Project {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  color     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks Task[]
-
-  @@index([userId])
-  @@map("projects")
-}
-
 model Task {
-  id        String        @id @default(cuid())
+  id        String       @id @default(cuid())
   userId    String
   projectId String?
   title     String
-  completed Boolean       @default(false)
+  completed Boolean      @default(false)
   dueDate   DateTime?
-  priority  TaskPriority  @default(NO_PRIORITY)
-  tags      String[]      @default([])
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  priority  TaskPriority @default(NO_PRIORITY)
+  tags      String[]     @default([])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
@@ -194,23 +141,34 @@ model Tag {
   @@map("tags")
 }
 
-model Habit {
-  id            String   @id @default(cuid())
-  userId        String
-  title         String
-  description   String?
-  category      String?
-  archived      Boolean  @default(false)
-  currentStreak Int      @default(0)
-  bestStreak    Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+model Project {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model Habit {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   completions HabitCompletion[]
 
   @@index([userId])
-  @@index([userId, archived, currentStreak])
   @@map("habits")
 }
 
@@ -229,27 +187,21 @@ model HabitCompletion {
   @@map("habit_completions")
 }
 
-model HabitStats {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  totalHabits   Int      @default(0)
-  longestStreak Int      @default(0)
-  updatedAt     DateTime @updatedAt
+model FocusSession {
+  id                 String             @id @default(cuid())
+  userId             String
+  durationMinutes    Int
+  task               String?
+  startedAt          DateTime           @default(now())
+  pausedAt           DateTime?
+  totalPausedSeconds Int                @default(0)
+  completedAt        DateTime?
+  status             FocusSessionStatus @default(ACTIVE)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("habit_stats")
-}
-
-model DashboardStats {
-  id               String    @id @default(cuid())
-  userId           String    @unique
-  currentStreak    Int       @default(0)
-  bestStreak       Int       @default(0)
-  lastActivityDate DateTime?
-  updatedAt        DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("dashboard_stats")
+  @@index([userId, status, startedAt])
+  @@map("focus_sessions")
 }

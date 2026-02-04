@@ -12,6 +12,7 @@ import {
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
 import { useAtom } from 'jotai';
+import { useEffect } from 'react';
 import { editingTaskAtom } from '../../atoms/task-dialogs';
 import { useUpdateTask } from '../../hooks/mutations/use-update-task';
 import { useProjects } from '../../hooks/queries/use-projects';
@@ -23,21 +24,21 @@ import { TagInput } from './tag-input';
 
 export const EditTaskDialog = () => {
   const [task, setTask] = useAtom(editingTaskAtom);
+  const form = useTaskForm();
 
   const updateTask = useUpdateTask();
-  const form = useTaskForm(
-    task
-      ? {
-          title: task.title,
-          dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-          priority: task.priority,
-          projectId: task.projectId ?? '',
-          tags: task.tags ?? [],
-        }
-      : undefined
-  );
   const { data: projects = [] } = useProjects();
   const { data: existingTags = [] } = useTaskTags();
+
+  useEffect(() => {
+    if (task) {
+      form.setTitle(task.title);
+      form.setDueDate(task.dueDate ? new Date(task.dueDate) : undefined);
+      form.setPriority(task.priority);
+      form.setProjectId(task.projectId ?? '');
+      form.setTags(task.tags ?? []);
+    }
+  }, [task?.id]);
 
   const handleClose = () => {
     setTask(null);

@@ -14,10 +14,9 @@ export function useHabitActions(habitId?: string) {
   }
 
   function handleToggleDate(id: string, date: Date) {
-    const localYear = date.getFullYear();
-    const localMonth = date.getMonth();
-    const localDay = date.getDate();
-    const utcDate = new Date(Date.UTC(localYear, localMonth, localDay));
+    const utcDate = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+    );
     toggleDate.mutate({
       param: { id },
       json: { date: utcDate.toISOString() },
