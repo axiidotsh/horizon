@@ -9,9 +9,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/utils/utils';
 import { CheckIcon, ChevronsUpDownIcon, SearchIcon } from 'lucide-react';
-import { DEFAULT_PROJECT_COLOR, MAX_DROPDOWN_HEIGHT } from '../constants';
+import { DEFAULT_PROJECT_COLOR } from '../constants';
 import type { Project } from '../hooks/types';
 import { useSearchableList } from '../hooks/use-searchable-list';
 
@@ -74,37 +75,37 @@ export const ProjectSelect = ({
           />
         </div>
         <DropdownMenuSeparator />
-        <div
-          style={{ maxHeight: MAX_DROPDOWN_HEIGHT }}
-          className="overflow-y-auto"
-        >
-          {filteredProjects.length === 0 ? (
-            <div className="text-muted-foreground px-2 py-6 text-center text-sm">
-              No projects found
+        {filteredProjects.length === 0 ? (
+          <div className="text-muted-foreground px-2 py-6 text-center text-sm">
+            No projects found
+          </div>
+        ) : (
+          <ScrollArea>
+            <div className="max-h-64">
+              {filteredProjects.map((project) => (
+                <DropdownMenuItem
+                  key={project.id}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    onValueChange(value === project.id ? '' : project.id);
+                  }}
+                  className="justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="size-2 shrink-0 rounded-full"
+                      style={{
+                        backgroundColor: project.color || DEFAULT_PROJECT_COLOR,
+                      }}
+                    />
+                    <span>{project.name}</span>
+                  </div>
+                  {value === project.id && <CheckIcon className="size-4" />}
+                </DropdownMenuItem>
+              ))}
             </div>
-          ) : (
-            filteredProjects.map((project) => (
-              <DropdownMenuItem
-                key={project.id}
-                onSelect={() =>
-                  onValueChange(value === project.id ? '' : project.id)
-                }
-                className="justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className="size-2 shrink-0 rounded-full"
-                    style={{
-                      backgroundColor: project.color || DEFAULT_PROJECT_COLOR,
-                    }}
-                  />
-                  <span>{project.name}</span>
-                </div>
-                {value === project.id && <CheckIcon className="size-4" />}
-              </DropdownMenuItem>
-            ))
-          )}
-        </div>
+          </ScrollArea>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

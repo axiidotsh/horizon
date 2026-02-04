@@ -3,19 +3,19 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/utils/utils';
 import { DotIcon } from 'lucide-react';
-import type { Task } from '../../hooks/types';
-import { useTaskActions } from '../../hooks/use-task-actions';
-import { formatDueDate, isOverdue } from '../../utils/task-filters';
-import { PriorityBadge } from '../badges/priority-badge';
-import { ProjectBadge } from '../badges/project-badge';
-import { TagBadge } from '../badges/tag-badge';
-import { TaskActionsMenu } from '../task-actions-menu';
+import { PriorityBadge } from '../../tasks/components/badges/priority-badge';
+import { ProjectBadge } from '../../tasks/components/badges/project-badge';
+import { TagBadge } from '../../tasks/components/badges/tag-badge';
+import { TaskActionsMenu } from '../../tasks/components/task-actions-menu';
+import { Task } from '../../tasks/hooks/types';
+import { useTaskActions } from '../../tasks/hooks/use-task-actions';
+import { formatDueDate, isOverdue } from '../../tasks/utils/task-filters';
 
-interface TaskListItemProps {
+interface DashboardTaskItemProps {
   task: Task;
 }
 
-export const TaskListItem = ({ task }: TaskListItemProps) => {
+export const DashboardTaskItem = ({ task }: DashboardTaskItemProps) => {
   const { handleToggle, handleEdit, handleDelete, isToggling } =
     useTaskActions();
 

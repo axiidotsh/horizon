@@ -1,16 +1,20 @@
 'use client';
 
 import { ErrorState } from '@/components/error-state';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PartyPopperIcon } from 'lucide-react';
+import { useSetAtom } from 'jotai';
+import { PartyPopperIcon, PlusIcon } from 'lucide-react';
 import { ContentCard } from '../../components/content-card';
-import { TaskListItem } from '../../tasks/components/task-list/task-list-item';
+import { createTaskDialogAtom } from '../../tasks/atoms/task-dialogs';
+
 import { useDashboardTasks } from '../hooks/queries/use-dashboard-tasks';
-import { DashboardTaskListActions } from './dashboard-task-list-actions';
+import { DashboardTaskItem } from './dashboard-task-item';
 
 export const DashboardTaskList = () => {
   const { data: tasks = [], isLoading, error, refetch } = useDashboardTasks();
+  const setCreateTaskDialog = useSetAtom(createTaskDialogAtom);
 
   const renderContent = () => {
     if (error) {
@@ -54,7 +58,7 @@ export const DashboardTaskList = () => {
       <ScrollArea className="mt-6 h-80">
         <ul className="space-y-3 pr-4">
           {tasks.map((task) => (
-            <TaskListItem key={task.id} task={task} />
+            <DashboardTaskItem key={task.id} task={task} />
           ))}
         </ul>
       </ScrollArea>
@@ -64,7 +68,16 @@ export const DashboardTaskList = () => {
   return (
     <ContentCard
       title="Up Next"
-      action={<DashboardTaskListActions />}
+      action={
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setCreateTaskDialog(true)}
+        >
+          <PlusIcon />
+          New
+        </Button>
+      }
       isDashboard
     >
       {renderContent()}

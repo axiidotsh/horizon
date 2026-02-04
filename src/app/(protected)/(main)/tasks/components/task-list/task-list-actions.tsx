@@ -52,6 +52,7 @@ export const TaskListActions = () => {
 
   const hasActiveFilters =
     selectedTags.length > 0 || selectedProjects.length > 0;
+  const hasActiveSorting = sortBy !== 'dueDate' || sortOrder !== 'asc';
 
   return (
     <>
@@ -63,14 +64,14 @@ export const TaskListActions = () => {
               variant="outline"
               tooltip="Filter tasks"
               className={cn(
-                'relative',
-                hasActiveFilters && 'bg-foreground/20! text-foreground'
+                hasActiveFilters &&
+                  'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
               )}
             >
               <FilterIcon />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end">
             <ProjectFilterMenu
               projects={projects}
               selectedProjects={selectedProjects}
@@ -99,7 +100,15 @@ export const TaskListActions = () => {
         </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon-sm" variant="outline" tooltip="Sort tasks">
+            <Button
+              size="icon-sm"
+              variant="outline"
+              tooltip="Sort tasks"
+              className={cn(
+                hasActiveSorting &&
+                  'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
+              )}
+            >
               <ArrowDownUpIcon />
             </Button>
           </DropdownMenuTrigger>

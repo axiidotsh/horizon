@@ -17,6 +17,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/utils/utils';
 import { useAtom } from 'jotai';
 import { ArrowDownUpIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -32,6 +33,8 @@ export const RecentSessionsDialog = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const isMobile = useIsMobile();
+
+  const hasActiveSorting = sortBy !== 'date' || sortOrder !== 'desc';
 
   const {
     sessions,
@@ -74,6 +77,10 @@ export const RecentSessionsDialog = () => {
                   size="icon-sm"
                   variant="outline"
                   tooltip="Sort sessions"
+                  className={cn(
+                    hasActiveSorting &&
+                      'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
+                  )}
                 >
                   <ArrowDownUpIcon />
                 </Button>

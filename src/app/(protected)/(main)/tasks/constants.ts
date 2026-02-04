@@ -5,9 +5,7 @@ export const PRIORITY_OPTIONS = [
   { label: 'High', value: 'HIGH' },
 ] as const;
 
-export const LIST_HEIGHT = 600;
 export const MAX_DROPDOWN_HEIGHT = 200;
-export const FILTER_MENU_MAX_HEIGHT = 200;
 export const DAYS_IN_WEEK = 7;
 
 export const DEFAULT_PROJECT_COLOR = '#808080';

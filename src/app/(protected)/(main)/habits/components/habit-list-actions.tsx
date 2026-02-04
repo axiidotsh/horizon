@@ -26,6 +26,7 @@ export const HabitListActions = () => {
   const setCreateDialogOpen = useSetAtom(createDialogOpenAtom);
 
   const hasActiveFilters = statusFilter !== 'all';
+  const hasActiveSorting = sortBy !== 'currentStreak' || sortOrder !== 'desc';
 
   return (
     <>
@@ -37,8 +38,8 @@ export const HabitListActions = () => {
               variant="outline"
               tooltip="Filter habits"
               className={cn(
-                'relative',
-                hasActiveFilters && 'bg-foreground/20! text-foreground'
+                hasActiveFilters &&
+                  'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
               )}
             >
               <FilterIcon />
@@ -67,7 +68,15 @@ export const HabitListActions = () => {
         </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon-sm" variant="outline" tooltip="Sort habits">
+            <Button
+              size="icon-sm"
+              variant="outline"
+              tooltip="Sort habits"
+              className={cn(
+                hasActiveSorting &&
+                  'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary'
+              )}
+            >
               <ArrowDownUpIcon />
             </Button>
           </DropdownMenuTrigger>
