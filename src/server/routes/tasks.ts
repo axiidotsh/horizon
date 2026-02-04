@@ -1,4 +1,4 @@
-import { addUTCDays } from '@/utils/date-utc';
+import { addUTCDays, getUTCStartOfDaysAgo } from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -120,7 +120,8 @@ export const tasksRouter = new Hono()
 
     const chartData = await Promise.all(
       Array.from({ length: days }, (_, i) => {
-        const date = addUTCDays(now, -(days - 1 - i));
+        const daysAgo = days - 1 - i;
+        const date = getUTCStartOfDaysAgo(daysAgo);
         const nextDate = addUTCDays(date, 1);
 
         return Promise.all([
@@ -133,8 +134,7 @@ export const tasksRouter = new Hono()
           db.task.count({
             where: {
               userId: user.id,
-              completed: true,
-              updatedAt: { gte: date, lt: nextDate },
+              completedAt: { gte: date, lt: nextDate },
             },
           }),
         ]).then(([totalTasks, completedTasks]) => {
@@ -381,7 +381,10 @@ export const tasksRouter = new Hono()
           }),
           ...(data.priority !== undefined && { priority: data.priority }),
           ...(data.tags !== undefined && { tags: data.tags }),
-          ...(data.completed !== undefined && { completed: data.completed }),
+          ...(data.completed !== undefined && {
+            completed: data.completed,
+            completedAt: data.completed ? new Date() : null,
+          }),
         },
         include: {
           project: {
@@ -406,9 +409,13 @@ export const tasksRouter = new Hono()
       return c.json({ error: 'Task not found' }, 404);
     }
 
+    const newCompleted = !existing.completed;
     const task = await db.task.update({
       where: { id },
-      data: { completed: !existing.completed },
+      data: {
+        completed: newCompleted,
+        completedAt: newCompleted ? new Date() : null,
+      },
       include: {
         project: {
           select: { id: true, name: true, color: true },

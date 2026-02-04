@@ -149,6 +149,7 @@ async function createTasks() {
     });
 
     const tasks = [];
+    const now = new Date();
     for (let i = 1; i <= 75; i++) {
       const numTags = i % 4;
       const taskTags: string[] = [];
@@ -157,13 +158,35 @@ async function createTasks() {
         taskTags.push(...shuffled.slice(0, numTags));
       }
 
+      const isCompleted = i % 5 === 0;
+      const daysAgoCompleted = i % 7;
+      const completedAt = isCompleted
+        ? new Date(
+            Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate() - daysAgoCompleted
+            )
+          )
+        : null;
+
+      const createdAt = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() - (daysAgoCompleted + (i % 10))
+        )
+      );
+
       tasks.push({
         userId: user.id,
         title: `Task ${i}`,
         projectId: projects[i % 3].id,
         priority: priorities[i % 4],
-        completed: i % 5 === 0,
+        completed: isCompleted,
+        completedAt,
         tags: taskTags,
+        createdAt,
         dueDate:
           i % 4 === 0
             ? new Date(Date.now() + (i % 2 === 0 ? 1 : -1) * i * 86400000)
