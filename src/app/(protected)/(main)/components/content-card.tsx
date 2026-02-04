@@ -44,8 +44,6 @@ export const ContentCard = ({
       <CardHeader
         className={cn(
           'flex items-center justify-between gap-2',
-          isDashboard &&
-            'lg:flex-col! lg:items-start! lg:justify-start! xl:flex-row! xl:items-center! xl:justify-between!',
           headerClassName
         )}
       >
@@ -56,8 +54,7 @@ export const ContentCard = ({
           <div
             className={cn(
               'flex items-center gap-2',
-              action && 'justify-end max-sm:w-full',
-              isDashboard && action && 'lg:w-full xl:w-auto'
+              action && 'justify-end max-sm:w-full'
             )}
           >
             {action}
