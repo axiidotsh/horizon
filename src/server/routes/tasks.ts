@@ -1,5 +1,9 @@
 import { formatChartDateLabel } from '@/utils/chart';
-import { addUTCDays, getUTCStartOfDaysAgo } from '@/utils/date-utc';
+import {
+  addUTCDays,
+  getUTCMidnight,
+  getUTCStartOfDaysAgo,
+} from '@/utils/date-utc';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -76,7 +80,7 @@ export const tasksRouter = new Hono()
   .get('/stats', async (c) => {
     const user = c.get('user');
 
-    const now = new Date();
+    const startOfToday = getUTCMidnight(new Date());
 
     const [total, completed, overdue] = await Promise.all([
       db.task.count({
@@ -94,7 +98,7 @@ export const tasksRouter = new Hono()
         where: {
           userId: user.id,
           completed: false,
-          dueDate: { lt: now },
+          dueDate: { lt: startOfToday },
         },
       }),
     ]);
