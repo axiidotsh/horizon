@@ -1,8 +1,7 @@
-import { env as serverEnv } from '@/lib/config/env/server';
 import { config } from 'dotenv';
 import { defineConfig, env } from 'prisma/config';
 
-if (serverEnv.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production') {
   config({ path: '.env.local' });
 }
 
