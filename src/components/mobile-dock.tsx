@@ -66,7 +66,7 @@ export const MobileDock = () => {
       <LayoutGroup>
         <div
           data-mobile-dock
-          className="fixed inset-x-0 bottom-3 z-80 flex items-center justify-center gap-2 px-5 md:hidden"
+          className="fixed inset-x-0 bottom-3 z-60 flex items-center justify-center gap-2 px-5 md:hidden"
         >
           <motion.div
             layout

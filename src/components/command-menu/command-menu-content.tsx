@@ -31,7 +31,7 @@ export const CommandMenuContent = ({
       <Dialog modal={false} open={open} onOpenChange={onOpenChange}>
         <DialogContent
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="inset-0 z-70 max-h-none min-h-dvh w-full max-w-none! translate-x-0 translate-y-0 rounded-none border-0 p-0"
+          className="inset-0 z-50 max-h-none min-h-dvh w-full max-w-none! translate-x-0 translate-y-0 rounded-none border-0 p-0"
           onEscapeKeyDown={onEscapeKeyDown}
           showCloseButton={false}
           overlayClassName="bg-background opacity-100"
