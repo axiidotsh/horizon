@@ -178,13 +178,9 @@ export const CommandMenu = () => {
               placeholder="Search for items and commands..."
               value={state.searchValue}
               onValueChange={actions.setSearchValue}
-              containerClassName="h-10!"
+              containerClassName={isMobile ? 'hidden h-0!' : 'h-10!'}
               className="h-10!"
-              showBackButton={isMobile && !!state.selectedItem}
-              onBackClick={() => {
-                actions.setSelectedItem(null);
-                actions.setSelectedValue('');
-              }}
+              showBackButton={false}
             />
             <CommandList
               className={isMobile ? 'max-h-none flex-1' : 'max-h-80'}
