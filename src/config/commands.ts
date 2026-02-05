@@ -20,6 +20,7 @@ import {
   SquareDashedIcon,
   SunIcon,
   TimerIcon,
+  TrashIcon,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 
@@ -92,6 +93,12 @@ export const PAGES: PageItem[] = [
     href: '/settings',
     icon: SettingsIcon,
     searchWords: ['preferences', 'config', 'options', 'customize'],
+  },
+  {
+    name: 'Trash',
+    href: '/trash',
+    icon: TrashIcon,
+    searchWords: ['deleted', 'purge', 'recycle', 'bin', 'trash'],
   },
 ];
 
