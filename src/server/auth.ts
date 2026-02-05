@@ -57,6 +57,12 @@ export const auth = betterAuth({
         defaultValue: 'MEDIUM',
         input: true,
       },
+      showFocusTimerInTab: {
+        type: 'boolean',
+        required: true,
+        defaultValue: false,
+        input: true,
+      },
     },
   },
   emailAndPassword: {
