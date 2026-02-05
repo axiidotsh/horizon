@@ -10,7 +10,7 @@ import {
   ClockPlusIcon,
   GoalIcon,
   LayoutListIcon,
-  Trash2Icon,
+  TrashIcon,
 } from 'lucide-react';
 import { EmptyTrashDialog } from './components/empty-trash-dialog';
 import { TrashHabitsTab } from './components/trash-habits-tab';
@@ -62,7 +62,7 @@ export default function TrashPage() {
             isPending={emptyAll.isPending}
           >
             <Button variant="outline" size="sm">
-              <Trash2Icon className="size-4" />
+              <TrashIcon className="size-4" />
               Empty trash
             </Button>
           </EmptyTrashDialog>

@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { EllipsisIcon, PencilIcon, Trash2Icon } from 'lucide-react';
+import { EllipsisIcon, PencilIcon, TrashIcon } from 'lucide-react';
 
 interface TaskActionsMenuProps {
   onEdit: () => void;
@@ -32,7 +32,7 @@ export const TaskActionsMenu = ({ onEdit, onDelete }: TaskActionsMenuProps) => (
         Edit
       </DropdownMenuItem>
       <DropdownMenuItem variant="destructive" onSelect={onDelete}>
-        <Trash2Icon />
+        <TrashIcon />
         Delete
       </DropdownMenuItem>
     </DropdownMenuContent>

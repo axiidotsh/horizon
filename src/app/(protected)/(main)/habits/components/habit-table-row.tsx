@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/utils/utils';
-import { EllipsisIcon, FlameIcon, PencilIcon, Trash2Icon } from 'lucide-react';
+import { EllipsisIcon, FlameIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import type { Habit } from '../hooks/types';
 import { useHabitActions } from '../hooks/use-habit-actions';
 import { getStreakColor } from '../utils/streak-helpers';
@@ -86,7 +86,7 @@ export const HabitTableRow = ({ habit }: HabitTableRowProps) => {
               variant="destructive"
               onSelect={() => handleDelete(habit)}
             >
-              <Trash2Icon />
+              <TrashIcon />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

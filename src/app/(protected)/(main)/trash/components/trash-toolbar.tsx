@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RotateCcwIcon, Trash2Icon } from 'lucide-react';
+import { RotateCcwIcon, TrashIcon } from 'lucide-react';
 import { EmptyTrashDialog } from './empty-trash-dialog';
 
 interface TrashToolbarProps {
@@ -66,7 +66,7 @@ export const TrashToolbar = ({
               className="text-destructive"
               disabled={isDeleting}
             >
-              <Trash2Icon className="size-4" />
+              <TrashIcon className="size-4" />
               Delete
             </Button>
           </EmptyTrashDialog>

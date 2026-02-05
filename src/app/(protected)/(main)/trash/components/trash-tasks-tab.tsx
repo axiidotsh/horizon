@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { useAtom } from 'jotai';
-import { InboxIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react';
+import { InboxIcon, RotateCcwIcon, TrashIcon } from 'lucide-react';
 import { selectedTrashTasksAtom } from '../atoms/trash-atoms';
 import {
   useBulkDelete,
@@ -209,7 +209,7 @@ export const TrashTasksTab = () => {
                           size="icon"
                           className="text-destructive size-8"
                         >
-                          <Trash2Icon className="size-4" />
+                          <TrashIcon className="size-4" />
                         </Button>
                       </TooltipTrigger>
                     </EmptyTrashDialog>

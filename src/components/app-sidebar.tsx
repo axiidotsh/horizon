@@ -37,7 +37,7 @@ import {
   MoonIcon,
   SettingsIcon,
   SunIcon,
-  Trash2Icon,
+  TrashIcon,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
@@ -118,7 +118,7 @@ export function AppSidebar() {
                   tooltip="Trash"
                 >
                   <Link href="/trash">
-                    <Trash2Icon />
+                    <TrashIcon />
                     <span>Trash</span>
                   </Link>
                 </SidebarMenuButton>

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/utils/utils';
-import { EllipsisIcon, FlameIcon, PencilIcon, Trash2Icon } from 'lucide-react';
+import { EllipsisIcon, FlameIcon, PencilIcon, TrashIcon } from 'lucide-react';
 import type { Habit } from '../hooks/types';
 import { useHabitActions } from '../hooks/use-habit-actions';
 import { getStreakColor } from '../utils/streak-helpers';
@@ -76,7 +76,7 @@ export const HabitRow = ({ habit }: HabitRowProps) => {
             variant="destructive"
             onClick={() => handleDelete(habit)}
           >
-            <Trash2Icon />
+            <TrashIcon />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/table';
 import { formatSessionDateTime } from '@/utils/date-format';
 import { useSetAtom } from 'jotai';
-import { EllipsisIcon, PencilIcon, TimerIcon, Trash2Icon } from 'lucide-react';
+import { EllipsisIcon, PencilIcon, TimerIcon, TrashIcon } from 'lucide-react';
 import {
   deletingSessionAtom,
   editingSessionAtom,
@@ -171,7 +171,7 @@ const SessionTableRow = ({ session }: SessionTableRowProps) => {
               variant="destructive"
               onSelect={() => setDeletingSession(session)}
             >
-              <Trash2Icon />
+              <TrashIcon />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
