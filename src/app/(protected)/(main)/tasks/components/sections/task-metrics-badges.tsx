@@ -24,8 +24,8 @@ export const TaskMetricsBadges = () => {
       </Badge>
       {stats.overdue > 0 && (
         <Badge
-          variant="outline"
-          className="gap-1.5 border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400"
+          variant="secondary"
+          className="gap-1.5 border-0 border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-600/50 dark:bg-rose-500/20 dark:text-rose-400"
         >
           {stats.overdue} overdue
         </Badge>
