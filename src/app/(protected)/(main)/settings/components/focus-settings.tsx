@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/utils/utils';
 import { useEffect, useState } from 'react';
 import { useUpdateSettings } from '../hooks/mutations/use-update-settings';
@@ -26,7 +28,7 @@ const MAX_DURATION_MINUTES = 480;
 
 export const FocusSettings = () => {
   const { data: settings } = useSettings();
-  const { mutate: updateSettings } = useUpdateSettings();
+  const { mutate: updateSettings, isPending } = useUpdateSettings();
 
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [customValue, setCustomValue] = useState('');
@@ -94,54 +96,76 @@ export const FocusSettings = () => {
     updateSettings({ json: { defaultFocusDuration: numValue } });
   }
 
-  return (
-    <SettingSection
-      title="Default Session Duration"
-      description="Set the default duration for new focus sessions"
-    >
-      <div className="max-w-xs space-y-2">
-        <Label htmlFor="default-duration">Duration</Label>
-        <Select value={selectValue} onValueChange={handleFocusDurationChange}>
-          <SelectTrigger id="default-duration" className="w-full">
-            <SelectValue>
-              {isCustomMode || isCustomDuration
-                ? 'Custom'
-                : DURATION_OPTIONS.find(
-                    (opt) => opt.value === settings.defaultFocusDuration
-                  )?.label}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {DURATION_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value.toString()}>
-                {option.label}
-              </SelectItem>
-            ))}
-            <SelectItem value="custom">Custom</SelectItem>
-          </SelectContent>
-        </Select>
+  function handleShowTimerInTabChange(value: boolean) {
+    updateSettings({ json: { showFocusTimerInTab: value } });
+  }
 
-        {selectValue === 'custom' && (
-          <div className="mt-4 space-y-1.5">
-            <Label htmlFor="custom-duration">Custom duration (minutes)</Label>
-            <Input
-              id="custom-duration"
-              type="number"
-              min={1}
-              max={MAX_DURATION_MINUTES}
-              value={customValue}
-              onChange={(e) => handleCustomDurationChange(e.target.value)}
-              placeholder="Enter duration in minutes"
-              className={cn(error && 'border-destructive')}
-            />
-            {error && <p className="text-destructive text-sm">{error}</p>}
-            <p className="text-muted-foreground text-xs">
-              Maximum: {MAX_DURATION_MINUTES / 60} hours ({MAX_DURATION_MINUTES}{' '}
-              minutes)
-            </p>
-          </div>
-        )}
-      </div>
-    </SettingSection>
+  return (
+    <div className="space-y-6">
+      <SettingSection
+        title="Default Session Duration"
+        description="Set the default duration for new focus sessions"
+      >
+        <div className="max-w-xs space-y-2">
+          <Label htmlFor="default-duration">Duration</Label>
+          <Select value={selectValue} onValueChange={handleFocusDurationChange}>
+            <SelectTrigger id="default-duration" className="w-full">
+              <SelectValue>
+                {isCustomMode || isCustomDuration
+                  ? 'Custom'
+                  : DURATION_OPTIONS.find(
+                      (opt) => opt.value === settings.defaultFocusDuration
+                    )?.label}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {DURATION_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value.toString()}>
+                  {option.label}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom">Custom</SelectItem>
+            </SelectContent>
+          </Select>
+          {selectValue === 'custom' && (
+            <div className="mt-4 space-y-1.5">
+              <Label htmlFor="custom-duration">Custom duration (minutes)</Label>
+              <Input
+                id="custom-duration"
+                type="number"
+                min={1}
+                max={MAX_DURATION_MINUTES}
+                value={customValue}
+                onChange={(e) => handleCustomDurationChange(e.target.value)}
+                placeholder="Enter duration in minutes"
+                className={cn(error && 'border-destructive')}
+              />
+              {error && <p className="text-destructive text-sm">{error}</p>}
+              <p className="text-muted-foreground text-xs">
+                Maximum: {MAX_DURATION_MINUTES / 60} hours (
+                {MAX_DURATION_MINUTES} minutes)
+              </p>
+            </div>
+          )}
+        </div>
+      </SettingSection>
+      <Separator />
+      <SettingSection
+        title="Timer in Tab Title"
+        description="Show the countdown timer in your browser tab when on other pages"
+      >
+        <div className="flex items-center justify-between">
+          <Label htmlFor="show-timer-in-tab" className="cursor-pointer">
+            Show timer in tab title when away
+          </Label>
+          <Switch
+            id="show-timer-in-tab"
+            checked={settings.showFocusTimerInTab}
+            onCheckedChange={handleShowTimerInTabChange}
+            disabled={isPending}
+          />
+        </div>
+      </SettingSection>
+    </div>
   );
 };

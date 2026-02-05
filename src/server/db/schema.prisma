@@ -29,6 +29,7 @@ model User {
   commandMenuPosition  String       @default("top")
   defaultFocusDuration Int          @default(45)
   defaultTaskPriority  TaskPriority @default(NO_PRIORITY)
+  showFocusTimerInTab  Boolean      @default(false)
 
   sessions         Session[]
   accounts         Account[]

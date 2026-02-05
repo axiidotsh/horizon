@@ -5,6 +5,7 @@ import { FocusSessionDeleteDialog } from '@/app/(protected)/(main)/focus/compone
 import { FocusSessionDiscardDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-discard-dialog';
 import { FocusSessionEditDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-edit-dialog';
 import { FocusSessionEndEarlyDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-end-early-dialog';
+import { FocusSessionTabTitle } from '@/app/(protected)/(main)/focus/components/focus-session-tab-title';
 import { CreateHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/create-habit-dialog';
 import { DeleteHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/delete-habit-dialog';
 import { EditHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/edit-habit-dialog';
@@ -75,6 +76,8 @@ export default async function ProtectedLayout({
       <CreateHabitDialog />
       <EditHabitDialog />
       <DeleteHabitDialog />
+
+      <FocusSessionTabTitle />
     </>
   );
 }

@@ -9,6 +9,7 @@ const updateSettingsSchema = z.object({
   commandMenuPosition: z.enum(['top', 'center']).optional(),
   defaultFocusDuration: z.number().int().min(1).max(480).optional(),
   defaultTaskPriority: z.nativeEnum(TaskPriority).optional(),
+  showFocusTimerInTab: z.boolean().optional(),
 });
 
 export const settingsRouter = new Hono()
@@ -22,6 +23,7 @@ export const settingsRouter = new Hono()
         commandMenuPosition: true,
         defaultFocusDuration: true,
         defaultTaskPriority: true,
+        showFocusTimerInTab: true,
       },
     });
 
@@ -29,6 +31,7 @@ export const settingsRouter = new Hono()
       commandMenuPosition: settings?.commandMenuPosition,
       defaultFocusDuration: settings?.defaultFocusDuration,
       defaultTaskPriority: settings?.defaultTaskPriority,
+      showFocusTimerInTab: settings?.showFocusTimerInTab,
     });
   })
   .patch('/', zValidator('json', updateSettingsSchema), async (c) => {
@@ -42,6 +45,7 @@ export const settingsRouter = new Hono()
         commandMenuPosition: true,
         defaultFocusDuration: true,
         defaultTaskPriority: true,
+        showFocusTimerInTab: true,
       },
     });
 
@@ -49,6 +53,7 @@ export const settingsRouter = new Hono()
       commandMenuPosition: updatedUser.commandMenuPosition,
       defaultFocusDuration: updatedUser.defaultFocusDuration,
       defaultTaskPriority: updatedUser.defaultTaskPriority,
+      showFocusTimerInTab: updatedUser.showFocusTimerInTab,
     });
   });
 
