@@ -34,7 +34,7 @@ export const CommandMenuContent = ({
           className="inset-0 z-70 max-h-none min-h-dvh w-full max-w-none! translate-x-0 translate-y-0 rounded-none border-0 p-0"
           onEscapeKeyDown={onEscapeKeyDown}
           showCloseButton={false}
-          overlayClassName="bg-background"
+          overlayClassName="bg-background opacity-100"
           contentClassName="pointer-events-auto overflow-y-auto"
           onInteractOutside={(e) => {
             const target = e.target as HTMLElement;
