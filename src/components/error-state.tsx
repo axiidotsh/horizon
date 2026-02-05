@@ -1,3 +1,4 @@
+import { cn } from '@/utils/utils';
 import { AlertCircleIcon, type LucideIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -13,6 +14,7 @@ interface ErrorStateProps {
   title?: string;
   description?: string;
   icon?: LucideIcon;
+  className?: string;
 }
 
 export const ErrorState = ({
@@ -20,9 +22,10 @@ export const ErrorState = ({
   title = 'Something went wrong',
   description = 'Failed to load data. Please try again.',
   icon: Icon = AlertCircleIcon,
+  className,
 }: ErrorStateProps) => {
   return (
-    <Empty className="bg-dashboard-card border">
+    <Empty className={cn('bg-dashboard-card border', className)}>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Icon className="text-destructive" />

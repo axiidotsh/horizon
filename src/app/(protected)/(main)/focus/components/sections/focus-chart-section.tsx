@@ -20,7 +20,7 @@ export const FocusChartSection = () => {
   const {
     data: rawChartData = [],
     isLoading,
-    isError,
+    error,
     refetch,
   } = useFocusChart(chartPeriod);
 
@@ -29,12 +29,12 @@ export const FocusChartSection = () => {
     duration: item.totalMinutes,
   }));
 
-  if (isError) {
+  if (error) {
     return (
       <ErrorState
         onRetry={refetch}
-        title="Failed to load chart"
-        description="Unable to fetch chart data. Please try again."
+        title="Failed to load session chart"
+        description="Unable to fetch focus session data. Please try again."
       />
     );
   }

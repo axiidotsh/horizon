@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorState } from '@/components/error-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -57,7 +58,7 @@ const PRIORITY_VARIANTS: Record<
 };
 
 export const TrashTasksTab = () => {
-  const { data, isLoading } = useTrashTasks();
+  const { data, isLoading, error, refetch } = useTrashTasks();
   const [selected, setSelected] = useAtom(selectedTrashTasksAtom);
   const restoreTask = useRestoreTask();
   const deleteTask = usePermanentDeleteTask();
@@ -97,6 +98,18 @@ export const TrashTasksTab = () => {
 
   function handleClearAll() {
     emptyTasks.mutate({}, { onSuccess: () => setSelected(new Set()) });
+  }
+
+  if (error) {
+    return (
+      <div className="w-full">
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load deleted tasks"
+          description="Unable to fetch deleted tasks. Please try again."
+        />
+      </div>
+    );
   }
 
   if (isLoading) {

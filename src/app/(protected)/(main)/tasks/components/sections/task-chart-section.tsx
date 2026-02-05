@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorState } from '@/components/error-state';
 import { ChartConfig } from '@/components/ui/chart';
 import { useState } from 'react';
 import { GenericAreaChart } from '../../../components/generic-area-chart';
@@ -14,7 +15,17 @@ const chartConfig = {
 
 export const TaskChartSection = () => {
   const [days, setDays] = useState(7);
-  const { data: chartData, isLoading } = useTaskChart(days);
+  const { data: chartData, isLoading, error, refetch } = useTaskChart(days);
+
+  if (error) {
+    return (
+      <ErrorState
+        onRetry={refetch}
+        title="Failed to load task chart"
+        description="Unable to fetch task chart data. Please try again."
+      />
+    );
+  }
 
   return (
     <GenericAreaChart

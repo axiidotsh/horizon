@@ -22,6 +22,7 @@ export const DashboardHabitList = () => {
           onRetry={refetch}
           title="Failed to load habits"
           description="Unable to fetch habits. Please try again."
+          className="mt-4"
         />
       );
     }

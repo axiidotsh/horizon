@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorState } from '@/components/error-state';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -39,7 +40,7 @@ import { EmptyTrashDialog } from './empty-trash-dialog';
 import { TrashToolbar } from './trash-toolbar';
 
 export const TrashHabitsTab = () => {
-  const { data, isLoading } = useTrashHabits();
+  const { data, isLoading, error, refetch } = useTrashHabits();
   const [selected, setSelected] = useAtom(selectedTrashHabitsAtom);
   const restoreHabit = useRestoreHabit();
   const deleteHabit = usePermanentDeleteHabit();
@@ -79,6 +80,18 @@ export const TrashHabitsTab = () => {
 
   function handleClearAll() {
     emptyHabits.mutate({}, { onSuccess: () => setSelected(new Set()) });
+  }
+
+  if (error) {
+    return (
+      <div className="w-full">
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load deleted habits"
+          description="Unable to fetch deleted habits. Please try again."
+        />
+      </div>
+    );
   }
 
   if (isLoading) {

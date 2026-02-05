@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorState } from '@/components/error-state';
 import { PageHeading } from '@/components/page-heading';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,7 +21,7 @@ import { TasksSettings } from './components/tasks-settings';
 import { useSettings } from './hooks/queries/use-settings';
 
 export default function SettingsPage() {
-  const { isLoading } = useSettings();
+  const { isLoading, error, refetch } = useSettings();
 
   const tabs = [
     {
@@ -80,7 +81,19 @@ export default function SettingsPage() {
         <div className="min-w-0 flex-1 md:px-10">
           {tabs.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-0">
-              {isLoading ? tab.skeleton : tab.content}
+              {error ? (
+                <div className="w-full">
+                  <ErrorState
+                    onRetry={refetch}
+                    title="Failed to fetch settings"
+                    description="Unable to fetch settings. Please try again."
+                  />
+                </div>
+              ) : isLoading ? (
+                tab.skeleton
+              ) : (
+                tab.content
+              )}
             </TabsContent>
           ))}
         </div>

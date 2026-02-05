@@ -23,6 +23,7 @@ export const DashboardTaskList = () => {
           onRetry={refetch}
           title="Failed to load tasks"
           description="Unable to fetch tasks. Please try again."
+          className="mt-4"
         />
       );
     }

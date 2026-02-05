@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorState } from '@/components/error-state';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -36,13 +37,20 @@ export const HabitsTable = () => {
 
   const setCreateDialogOpen = useSetAtom(createDialogOpenAtom);
 
-  const { habits, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useInfiniteHabits({
-      search: debouncedSearchQuery || undefined,
-      sortBy,
-      sortOrder,
-      status: statusFilter,
-    });
+  const {
+    habits,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
+  } = useInfiniteHabits({
+    search: debouncedSearchQuery || undefined,
+    sortBy,
+    sortOrder,
+    status: statusFilter,
+  });
 
   const { ref: sentinelRef } = useInView({
     onChange: (inView) => {
@@ -54,6 +62,18 @@ export const HabitsTable = () => {
   });
 
   const days = getLast7DaysUTC();
+
+  if (error) {
+    return (
+      <div className="mt-8 w-full">
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load tasks"
+          description="Unable to fetch tasks. Please try again."
+        />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorState } from '@/components/error-state';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -47,7 +48,7 @@ function formatDuration(minutes: number): string {
 }
 
 export const TrashSessionsTab = () => {
-  const { data, isLoading } = useTrashSessions();
+  const { data, isLoading, error, refetch } = useTrashSessions();
   const [selected, setSelected] = useAtom(selectedTrashSessionsAtom);
   const restoreSession = useRestoreSession();
   const deleteSession = usePermanentDeleteSession();
@@ -88,6 +89,18 @@ export const TrashSessionsTab = () => {
 
   function handleClearAll() {
     emptySessions.mutate({}, { onSuccess: () => setSelected(new Set()) });
+  }
+
+  if (error) {
+    return (
+      <div className="w-full">
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load deleted sessions"
+          description="Unable to fetch deleted sessions. Please try again."
+        />
+      </div>
+    );
   }
 
   if (isLoading) {

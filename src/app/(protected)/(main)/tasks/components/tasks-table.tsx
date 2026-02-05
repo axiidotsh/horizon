@@ -1,5 +1,6 @@
 'use client';
 
+import { ErrorState } from '@/components/error-state';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -35,14 +36,21 @@ export const TasksTable = () => {
 
   const setCreateTaskDialog = useSetAtom(createTaskDialogAtom);
 
-  const { tasks, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useInfiniteTasks({
-      search: debouncedSearchQuery || undefined,
-      sortBy,
-      sortOrder,
-      tags: selectedTags.length > 0 ? selectedTags : undefined,
-      projectIds: selectedProjects.length > 0 ? selectedProjects : undefined,
-    });
+  const {
+    tasks,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
+  } = useInfiniteTasks({
+    search: debouncedSearchQuery || undefined,
+    sortBy,
+    sortOrder,
+    tags: selectedTags.length > 0 ? selectedTags : undefined,
+    projectIds: selectedProjects.length > 0 ? selectedProjects : undefined,
+  });
 
   const { ref: sentinelRef } = useInView({
     onChange: (inView) => {
@@ -52,6 +60,18 @@ export const TasksTable = () => {
     },
     threshold: 0,
   });
+
+  if (error) {
+    return (
+      <div className="mt-8 flex w-full">
+        <ErrorState
+          onRetry={refetch}
+          title="Failed to load tasks"
+          description="Unable to fetch tasks. Please try again."
+        />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
