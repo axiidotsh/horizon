@@ -1,8 +1,12 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/utils/utils';
-import { CheckIcon, MinusIcon } from 'lucide-react';
+import { CheckIcon, CopyIcon, MinusIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import type { Task } from '../hooks/types';
 import { useTaskActions } from '../hooks/use-task-actions';
 import { formatDueDate, isOverdue } from '../utils/task-filters';
@@ -18,8 +22,16 @@ interface TaskTableRowProps {
 export const TaskTableRow = ({ task }: TaskTableRowProps) => {
   const { handleToggle, handleEdit, handleDelete, isToggling } =
     useTaskActions();
+  const [isCopied, setIsCopied] = useState(false);
 
   const onToggle = () => handleToggle(task.id);
+
+  const onCopy = async () => {
+    await navigator.clipboard.writeText(task.title);
+    setIsCopied(true);
+    toast.success('Task copied to clipboard');
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   return (
     <TableRow className={cn((task.completed || isToggling) && 'opacity-60')}>
@@ -107,10 +119,32 @@ export const TaskTableRow = ({ task }: TaskTableRowProps) => {
         )}
       </TableCell>
       <TableCell>
-        <TaskActionsMenu
-          onEdit={() => handleEdit(task)}
-          onDelete={() => handleDelete(task)}
-        />
+        <div className="flex items-center">
+          <Button
+            onClick={onCopy}
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Copy task content"
+            tooltip={isCopied ? 'Copied!' : 'Copy task content'}
+          >
+            <motion.div
+              key={isCopied ? 'check' : 'copy'}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            >
+              {isCopied ? (
+                <CheckIcon className="size-3.5" />
+              ) : (
+                <CopyIcon className="size-3.5" />
+              )}
+            </motion.div>
+          </Button>
+          <TaskActionsMenu
+            onEdit={() => handleEdit(task)}
+            onDelete={() => handleDelete(task)}
+          />
+        </div>
       </TableCell>
     </TableRow>
   );
