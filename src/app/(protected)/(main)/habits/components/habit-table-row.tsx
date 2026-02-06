@@ -87,7 +87,7 @@ export const HabitTableRow = ({ habit }: HabitTableRowProps) => {
               onSelect={() => handleDelete(habit)}
             >
               <TrashIcon />
-              Delete
+              Move to trash
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

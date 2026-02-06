@@ -33,7 +33,7 @@ export const TaskActionsMenu = ({ onEdit, onDelete }: TaskActionsMenuProps) => (
       </DropdownMenuItem>
       <DropdownMenuItem variant="destructive" onSelect={onDelete}>
         <TrashIcon />
-        Delete
+        Move to trash
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

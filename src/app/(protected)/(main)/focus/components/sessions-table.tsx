@@ -172,7 +172,7 @@ const SessionTableRow = ({ session }: SessionTableRowProps) => {
               onSelect={() => setDeletingSession(session)}
             >
               <TrashIcon />
-              Delete
+              Move to trash
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
