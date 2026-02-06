@@ -50,6 +50,7 @@ const listTasksSchema = z.object({
     .string()
     .transform((v) => v === 'true')
     .optional(),
+  priority: z.enum(['NO_PRIORITY', 'LOW', 'MEDIUM', 'HIGH']).optional(),
   sortBy: z
     .enum(['dueDate', 'priority', 'title', 'createdAt', 'completed'])
     .optional(),
@@ -168,6 +169,7 @@ export const tasksRouter = new Hono()
     const {
       projectIds,
       completed,
+      priority,
       sortBy,
       sortOrder,
       limit,
@@ -181,12 +183,14 @@ export const tasksRouter = new Hono()
       deletedAt: null;
       projectId?: { in: string[] };
       completed?: boolean;
+      priority?: TaskPriority;
       title?: { contains: string; mode: 'insensitive' };
       tags?: { hasSome: string[] };
     } = { userId: user.id, deletedAt: null };
 
     if (projectIds) where.projectId = { in: projectIds.split(',') };
     if (completed !== undefined) where.completed = completed;
+    if (priority) where.priority = priority;
     if (search) where.title = { contains: search, mode: 'insensitive' };
     if (tags) where.tags = { hasSome: tags.split(',') };
 
@@ -201,6 +205,11 @@ export const tasksRouter = new Hono()
       }
       if (where.completed !== undefined) {
         conditions.push(Prisma.sql`t.completed = ${where.completed}`);
+      }
+      if (where.priority) {
+        conditions.push(
+          Prisma.sql`t.priority = ${where.priority}::"TaskPriority"`
+        );
       }
       if (where.title) {
         conditions.push(

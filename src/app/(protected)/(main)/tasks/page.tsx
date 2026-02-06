@@ -2,14 +2,17 @@
 
 import { PageHeading } from '@/components/page-heading';
 import { SearchBar } from '@/components/search-bar';
-import { useAtom } from 'jotai';
-import { searchQueryAtom } from './atoms/task-atoms';
+import { useAtom, useAtomValue } from 'jotai';
+import { searchQueryAtom, taskViewAtom } from './atoms/task-atoms';
+import { TasksKanban } from './components/kanban/tasks-kanban';
 import { TaskMetricsBadges } from './components/sections/task-metrics-badges';
 import { TaskListActions } from './components/task-list/task-list-actions';
+import { TaskViewToggle } from './components/task-view-toggle';
 import { TasksTable } from './components/tasks-table';
 
 export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
+  const view = useAtomValue(taskViewAtom);
 
   return (
     <div className="flex flex-col gap-4">
@@ -26,11 +29,12 @@ export default function TasksPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border md:w-80 lg:w-96"
             />
+            <TaskViewToggle />
             <TaskListActions />
           </div>
         </div>
       </div>
-      <TasksTable />
+      {view === 'list' ? <TasksTable /> : <TasksKanban />}
     </div>
   );
 }

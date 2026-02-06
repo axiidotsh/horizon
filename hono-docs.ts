@@ -51,6 +51,11 @@ export default defineConfig({
       appTypePath: 'src/server/routes/user.ts',
     },
     {
+      name: 'Trash',
+      apiPrefix: '/trash',
+      appTypePath: 'src/server/routes/trash.ts',
+    },
+    {
       name: 'Settings',
       apiPrefix: '/settings',
       appTypePath: 'src/server/routes/settings.ts',
