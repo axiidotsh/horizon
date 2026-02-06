@@ -55,7 +55,20 @@ export const ProjectSelect = ({
               !selectedProject && 'text-muted-foreground'
             )}
           >
-            {selectedProject ? selectedProject.name : placeholder}
+            {selectedProject ? (
+              <div className="flex items-center gap-2">
+                <div
+                  className="size-2 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor:
+                      selectedProject.color || DEFAULT_PROJECT_COLOR,
+                  }}
+                />
+                <span>{selectedProject.name}</span>
+              </div>
+            ) : (
+              placeholder
+            )}
           </span>
           <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
@@ -86,7 +99,6 @@ export const ProjectSelect = ({
                 <DropdownMenuItem
                   key={project.id}
                   onSelect={(e) => {
-                    e.preventDefault();
                     onValueChange(value === project.id ? '' : project.id);
                   }}
                   className="justify-between"

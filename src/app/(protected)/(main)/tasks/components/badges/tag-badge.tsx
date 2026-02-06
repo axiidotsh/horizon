@@ -19,6 +19,7 @@ export const TagBadge = ({ tag, onRemove, className }: TagBadgeProps) => {
       >
         {tag}
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           onClick={(e) => {

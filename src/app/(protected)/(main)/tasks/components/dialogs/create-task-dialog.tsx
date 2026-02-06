@@ -26,8 +26,6 @@ export const CreateTaskDialog = () => {
   const [dialogState, setDialogState] = useAtom(createTaskDialogAtom);
   const open = !!dialogState;
 
-  console.log(dialogState);
-
   const createTask = useCreateTask();
   const form = useTaskForm();
   const { data: projects = [] } = useProjects();
