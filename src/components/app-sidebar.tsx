@@ -28,6 +28,7 @@ import { getInitials } from '@/utils/utils';
 import { useSetAtom } from 'jotai';
 import {
   BrainIcon,
+  CheckIcon,
   ClockPlusIcon,
   GoalIcon,
   LayoutDashboardIcon,
@@ -73,7 +74,7 @@ const navItems = [
 ];
 
 export function AppSidebar() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { user, isPending } = useUser();
   const setLogoutDialogOpen = useSetAtom(logoutDialogOpenAtom);
   const pathname = usePathname();
@@ -156,14 +157,21 @@ export function AppSidebar() {
                 <DropdownMenuItem onSelect={() => setTheme('light')}>
                   <SunIcon className="mr-2 size-4" />
                   <span>Light</span>
+                  {theme === 'light' && (
+                    <CheckIcon className="ml-auto size-4" />
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setTheme('dark')}>
                   <MoonIcon className="mr-2 size-4" />
                   <span>Dark</span>
+                  {theme === 'dark' && <CheckIcon className="ml-auto size-4" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setTheme('system')}>
                   <MonitorIcon className="mr-2 size-4" />
                   <span>System</span>
+                  {theme === 'system' && (
+                    <CheckIcon className="ml-auto size-4" />
+                  )}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
