@@ -38,10 +38,10 @@ export const DeleteProjectDialog = () => {
     >
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Delete Project</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Move to Trash</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Are you sure you want to delete &quot;{project?.name}&quot;? This
-            action cannot be undone.
+            &quot;{project?.name}&quot; will be moved to trash and automatically
+            deleted after 30 days. You can restore it anytime before then.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <ResponsiveDialogFooter>
@@ -59,9 +59,9 @@ export const DeleteProjectDialog = () => {
             onClick={handleDelete}
             disabled={deleteProject.isPending}
             isLoading={deleteProject.isPending}
-            loadingContent="Deleting..."
+            loadingContent="Moving..."
           >
-            Delete
+            Move to Trash
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

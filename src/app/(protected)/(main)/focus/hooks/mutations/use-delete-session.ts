@@ -17,5 +17,12 @@ export function useDeleteSession() {
     ],
     errorMessage: 'Failed to delete focus session',
     successMessage: 'Session moved to trash',
+    successAction: {
+      label: 'Undo',
+      onClick: (_data, variables) =>
+        api.trash.sessions[':id'].restore.$post({
+          param: { id: variables.param.id },
+        }),
+    },
   });
 }

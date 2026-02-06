@@ -38,10 +38,11 @@ export const DeleteHabitDialog = () => {
     >
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Delete Habit</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Move to Trash</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Are you sure you want to delete &ldquo;{habit?.title}&rdquo;? This
-            will archive the habit but keep your completion history.
+            &ldquo;{habit?.title}&rdquo; will be moved to trash and
+            automatically deleted after 30 days. You can restore it anytime
+            before then.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <ResponsiveDialogFooter>
@@ -57,9 +58,9 @@ export const DeleteHabitDialog = () => {
             onClick={handleDelete}
             disabled={deleteHabit.isPending}
             isLoading={deleteHabit.isPending}
-            loadingContent="Deleting..."
+            loadingContent="Moving..."
           >
-            Delete
+            Move to Trash
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

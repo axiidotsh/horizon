@@ -18,5 +18,12 @@ export function useDeleteHabit() {
     ],
     errorMessage: 'Failed to delete habit',
     successMessage: 'Habit moved to trash',
+    successAction: {
+      label: 'Undo',
+      onClick: (_data, variables) =>
+        api.trash.habits[':id'].restore.$post({
+          param: { id: variables.param.id },
+        }),
+    },
   });
 }

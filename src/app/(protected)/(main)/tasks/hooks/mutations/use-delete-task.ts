@@ -16,5 +16,12 @@ export function useDeleteTask() {
     ],
     errorMessage: 'Failed to delete task',
     successMessage: 'Task moved to trash',
+    successAction: {
+      label: 'Undo',
+      onClick: (_data, variables) =>
+        api.trash.tasks[':id'].restore.$post({
+          param: { id: variables.param.id },
+        }),
+    },
   });
 }

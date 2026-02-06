@@ -41,6 +41,13 @@ export function useApiMutation<
     ) => void;
     errorMessage?: string;
     successMessage?: string;
+    successAction?: {
+      label: string;
+      onClick: (
+        data: InferResponseType<TEndpoint>,
+        variables: InferRequestType<TEndpoint>
+      ) => void | Promise<unknown>;
+    };
     onMutate?: (
       variables: InferRequestType<TEndpoint>
     ) => Promise<TContext | void> | TContext | void;
@@ -68,7 +75,19 @@ export function useApiMutation<
         queryClient.invalidateQueries({ queryKey: key });
       });
       if (options?.successMessage) {
-        toast.success(options.successMessage);
+        toast.success(options.successMessage, {
+          ...(options.successAction && {
+            action: {
+              label: options.successAction.label,
+              onClick: async () => {
+                await options.successAction!.onClick(data, variables);
+                options.invalidateKeys?.forEach((key) => {
+                  queryClient.invalidateQueries({ queryKey: key });
+                });
+              },
+            },
+          }),
+        });
       }
       options?.onSuccess?.(data, variables);
     },

@@ -35,10 +35,10 @@ export const DeleteTaskDialog = () => {
     >
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Delete Task</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Move to Trash</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Are you sure you want to delete &quot;{task?.title}&quot;? This
-            action cannot be undone.
+            &quot;{task?.title}&quot; will be moved to trash and automatically
+            deleted after 30 days. You can restore it anytime before then.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <ResponsiveDialogFooter>
@@ -56,9 +56,9 @@ export const DeleteTaskDialog = () => {
             onClick={handleDelete}
             disabled={deleteTask.isPending}
             isLoading={deleteTask.isPending}
-            loadingContent="Deleting..."
+            loadingContent="Moving..."
           >
-            Delete
+            Move to Trash
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

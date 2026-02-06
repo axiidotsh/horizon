@@ -36,11 +36,11 @@ export const FocusSessionDeleteDialog = () => {
     >
       <ResponsiveDialogContent showCloseButton={false}>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Delete Session?</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Move to Trash</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Are you sure you want to delete this session
-            {session?.task ? ` "${session.task}"` : ''}? This action cannot be
-            undone.
+            This session{session?.task ? ` "${session.task}"` : ''} will be
+            moved to trash and automatically deleted after 30 days. You can
+            restore it anytime before then.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <ResponsiveDialogFooter>
@@ -54,9 +54,9 @@ export const FocusSessionDeleteDialog = () => {
             onClick={handleDelete}
             disabled={deleteSession.isPending}
             isLoading={deleteSession.isPending}
-            loadingContent="Deleting..."
+            loadingContent="Moving..."
           >
-            Delete Session
+            Move to Trash
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>
