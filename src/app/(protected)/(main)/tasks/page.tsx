@@ -22,7 +22,10 @@ export default function TasksPage() {
         {/* Mobile layout */}
         <div className="flex flex-col gap-3 sm:hidden">
           <div className="flex items-center justify-between">
-            <PageHeading>Tasks</PageHeading>
+            <div className="flex items-center gap-3">
+              <PageHeading>Tasks</PageHeading>
+              <TaskMetricsBadges />
+            </div>
             <TaskNewButton />
           </div>
           <div className="flex items-center gap-2">

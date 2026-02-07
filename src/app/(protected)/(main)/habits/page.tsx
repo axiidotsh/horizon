@@ -19,7 +19,10 @@ export default function HabitsPage() {
         {/* Mobile layout */}
         <div className="flex flex-col gap-3 sm:hidden">
           <div className="flex items-center justify-between">
-            <PageHeading>Habits</PageHeading>
+            <div className="flex items-center gap-3">
+              <PageHeading>Habits</PageHeading>
+              <HabitMetricsBadges />
+            </div>
             <HabitNewButton />
           </div>
           <div className="flex items-center gap-2">
