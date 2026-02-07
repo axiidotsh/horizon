@@ -1,14 +1,15 @@
 'use client';
 
 import { useSetAtom } from 'jotai';
-import { deletingTaskAtom, editingTaskAtom } from '../atoms/task-dialogs';
+import { editingTaskAtom } from '../atoms/task-dialogs';
+import { useDeleteTask } from './mutations/use-delete-task';
 import { useToggleTask } from './mutations/use-toggle-task';
 import type { Task } from './types';
 
 export function useTaskActions() {
   const setEditingTask = useSetAtom(editingTaskAtom);
-  const setDeletingTask = useSetAtom(deletingTaskAtom);
   const toggleTask = useToggleTask();
+  const deleteTask = useDeleteTask();
 
   function handleToggle(taskId: string) {
     toggleTask.mutate({ param: { id: taskId } });
@@ -19,7 +20,7 @@ export function useTaskActions() {
   }
 
   function handleDelete(task: Task) {
-    setDeletingTask(task);
+    deleteTask.mutate({ param: { id: task.id } });
   }
 
   return {

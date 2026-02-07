@@ -156,7 +156,7 @@ export const CommandActionsView = ({
             className="text-destructive!"
           >
             <TrashIcon className={cn('size-4', 'text-destructive!')} />
-            <span>Delete</span>
+            <span>Move to Trash</span>
           </CommandItem>
         </>
       );
@@ -174,7 +174,7 @@ export const CommandActionsView = ({
             className="text-destructive!"
           >
             <TrashIcon className={cn('size-4', 'text-destructive!')} />
-            <span>Delete</span>
+            <span>Move to Trash</span>
           </CommandItem>
         </>
       );
@@ -192,7 +192,7 @@ export const CommandActionsView = ({
             className="text-destructive!"
           >
             <TrashIcon className={cn('size-4', 'text-destructive!')} />
-            <span>Delete</span>
+            <span>Move to Trash</span>
           </CommandItem>
         </>
       );
@@ -210,7 +210,7 @@ export const CommandActionsView = ({
             className="text-destructive!"
           >
             <TrashIcon className={cn('size-4', 'text-destructive!')} />
-            <span>Delete</span>
+            <span>Move to Trash</span>
           </CommandItem>
         </>
       );

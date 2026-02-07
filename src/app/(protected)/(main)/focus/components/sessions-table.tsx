@@ -19,10 +19,8 @@ import {
 import { formatSessionDateTime } from '@/utils/date-format';
 import { useSetAtom } from 'jotai';
 import { EllipsisIcon, PencilIcon, TimerIcon, TrashIcon } from 'lucide-react';
-import {
-  deletingSessionAtom,
-  editingSessionAtom,
-} from '../atoms/session-dialogs';
+import { editingSessionAtom } from '../atoms/session-dialogs';
+import { useDeleteSession } from '../hooks/mutations/use-delete-session';
 import type { FocusSession } from '../hooks/types';
 
 interface SessionsTableProps {
@@ -133,7 +131,7 @@ interface SessionTableRowProps {
 
 const SessionTableRow = ({ session }: SessionTableRowProps) => {
   const setEditingSession = useSetAtom(editingSessionAtom);
-  const setDeletingSession = useSetAtom(deletingSessionAtom);
+  const deleteSession = useDeleteSession();
 
   return (
     <TableRow>
@@ -169,7 +167,9 @@ const SessionTableRow = ({ session }: SessionTableRowProps) => {
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
-              onSelect={() => setDeletingSession(session)}
+              onSelect={() =>
+                deleteSession.mutate({ param: { id: session.id } })
+              }
             >
               <TrashIcon />
               Move to trash

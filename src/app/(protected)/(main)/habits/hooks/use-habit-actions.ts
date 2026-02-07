@@ -1,14 +1,15 @@
 'use client';
 
 import { useSetAtom } from 'jotai';
-import { deletingHabitAtom, editingHabitAtom } from '../atoms/dialog-atoms';
+import { editingHabitAtom } from '../atoms/dialog-atoms';
+import { useDeleteHabit } from './mutations/use-delete-habit';
 import { useToggleHabit } from './mutations/use-toggle-habit';
 import type { Habit } from './types';
 
 export function useHabitActions(habitId?: string) {
   const setEditingHabit = useSetAtom(editingHabitAtom);
-  const setDeletingHabit = useSetAtom(deletingHabitAtom);
   const { toggleToday, toggleDate } = useToggleHabit(habitId);
+  const deleteHabit = useDeleteHabit();
 
   function handleToggle(id: string) {
     toggleToday.mutate({ param: { id } });
@@ -29,7 +30,7 @@ export function useHabitActions(habitId?: string) {
   }
 
   function handleDelete(habit: Habit) {
-    setDeletingHabit(habit);
+    deleteHabit.mutate({ param: { id: habit.id } });
   }
 
   return {

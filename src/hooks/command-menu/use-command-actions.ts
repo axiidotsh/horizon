@@ -1,22 +1,20 @@
 import {
   createCustomSessionAtom,
   customDurationSettingsDialogAtom,
-  deletingSessionAtom,
   editingSessionAtom,
 } from '@/app/(protected)/(main)/focus/atoms/session-dialogs';
+import { useDeleteSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-delete-session';
 import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/use-focus-session';
-import {
-  deletingHabitAtom,
-  editingHabitAtom,
-} from '@/app/(protected)/(main)/habits/atoms/dialog-atoms';
+import { editingHabitAtom } from '@/app/(protected)/(main)/habits/atoms/dialog-atoms';
+import { useDeleteHabit } from '@/app/(protected)/(main)/habits/hooks/mutations/use-delete-habit';
 import { useToggleHabit } from '@/app/(protected)/(main)/habits/hooks/mutations/use-toggle-habit';
 import { useUpdateSettings } from '@/app/(protected)/(main)/settings/hooks/mutations/use-update-settings';
 import {
   deletingProjectAtom,
-  deletingTaskAtom,
   editingProjectAtom,
   editingTaskAtom,
 } from '@/app/(protected)/(main)/tasks/atoms/task-dialogs';
+import { useDeleteTask } from '@/app/(protected)/(main)/tasks/hooks/mutations/use-delete-task';
 import { useToggleTask } from '@/app/(protected)/(main)/tasks/hooks/mutations/use-toggle-task';
 import type { CommandMenuItem } from '@/hooks/command-menu/types';
 import { useSetAtom } from 'jotai';
@@ -25,20 +23,20 @@ import { toast } from 'sonner';
 
 export function useCommandActions() {
   const setEditingTask = useSetAtom(editingTaskAtom);
-  const setDeletingTask = useSetAtom(deletingTaskAtom);
   const setEditingProject = useSetAtom(editingProjectAtom);
   const setDeletingProject = useSetAtom(deletingProjectAtom);
   const setEditingHabit = useSetAtom(editingHabitAtom);
-  const setDeletingHabit = useSetAtom(deletingHabitAtom);
   const setEditingSession = useSetAtom(editingSessionAtom);
-  const setDeletingSession = useSetAtom(deletingSessionAtom);
   const setCreateCustomSession = useSetAtom(createCustomSessionAtom);
   const setCustomDurationSettingsDialogOpen = useSetAtom(
     customDurationSettingsDialogAtom
   );
 
   const toggleTask = useToggleTask();
+  const deleteTask = useDeleteTask();
   const toggleHabit = useToggleHabit();
+  const deleteHabit = useDeleteHabit();
+  const deleteSession = useDeleteSession();
   const { start } = useFocusSession();
   const { mutate: updateSettings } = useUpdateSettings();
 
@@ -100,23 +98,26 @@ export function useCommandActions() {
           if (item.type === 'session') setEditingSession(item.data);
           break;
         case 'delete':
-          if (item.type === 'todo') setDeletingTask(item.data);
+          if (item.type === 'todo')
+            deleteTask.mutate({ param: { id: item.data.id } });
           if (item.type === 'project') setDeletingProject(item.data);
-          if (item.type === 'habit') setDeletingHabit(item.data);
-          if (item.type === 'session') setDeletingSession(item.data);
+          if (item.type === 'habit')
+            deleteHabit.mutate({ param: { id: item.data.id } });
+          if (item.type === 'session')
+            deleteSession.mutate({ param: { id: item.data.id } });
           break;
       }
     },
     [
       toggleTask,
+      deleteTask,
       setEditingTask,
-      setDeletingTask,
       setEditingProject,
       setDeletingProject,
       setEditingHabit,
-      setDeletingHabit,
+      deleteHabit,
       setEditingSession,
-      setDeletingSession,
+      deleteSession,
       setCreateCustomSession,
       setCustomDurationSettingsDialogOpen,
       updateSettings,

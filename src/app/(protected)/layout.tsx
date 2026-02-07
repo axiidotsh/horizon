@@ -1,19 +1,16 @@
 import { CustomDurationSettingsDialog } from '@/app/(protected)/(main)/focus/components/dialogs/custom-duration-settings-dialog';
 import { FocusSessionCancelDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-cancel-dialog';
 import { FocusSessionCreateDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-create-dialog';
-import { FocusSessionDeleteDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-delete-dialog';
 import { FocusSessionDiscardDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-discard-dialog';
 import { FocusSessionEditDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-edit-dialog';
 import { FocusSessionEndEarlyDialog } from '@/app/(protected)/(main)/focus/components/dialogs/focus-session-end-early-dialog';
 import { FocusSessionTabTitle } from '@/app/(protected)/(main)/focus/components/focus-session-tab-title';
 import { CreateHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/create-habit-dialog';
-import { DeleteHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/delete-habit-dialog';
 import { EditHabitDialog } from '@/app/(protected)/(main)/habits/components/dialogs/edit-habit-dialog';
 import { BulkAddTasksSheet } from '@/app/(protected)/(main)/tasks/components/dialogs/bulk-add-tasks-sheet';
 import { CreateProjectDialog } from '@/app/(protected)/(main)/tasks/components/dialogs/create-project-dialog';
 import { CreateTaskDialog } from '@/app/(protected)/(main)/tasks/components/dialogs/create-task-dialog';
 import { DeleteProjectDialog } from '@/app/(protected)/(main)/tasks/components/dialogs/delete-project-dialog';
-import { DeleteTaskDialog } from '@/app/(protected)/(main)/tasks/components/dialogs/delete-task-dialog';
 import { EditProjectDialog } from '@/app/(protected)/(main)/tasks/components/dialogs/edit-project-dialog';
 import { EditTaskDialog } from '@/app/(protected)/(main)/tasks/components/dialogs/edit-task-dialog';
 import { AppHeader } from '@/components/app-header';
@@ -57,14 +54,12 @@ export default async function ProtectedLayout({
       <FocusSessionEndEarlyDialog />
       <FocusSessionDiscardDialog />
       <FocusSessionEditDialog />
-      <FocusSessionDeleteDialog />
       <FocusSessionCreateDialog />
       <CustomDurationSettingsDialog />
 
       {/* Task Dialogs */}
       <CreateTaskDialog />
       <EditTaskDialog />
-      <DeleteTaskDialog />
       <BulkAddTasksSheet />
 
       {/* Project Dialogs */}
@@ -75,7 +70,6 @@ export default async function ProtectedLayout({
       {/* Habit Dialogs */}
       <CreateHabitDialog />
       <EditHabitDialog />
-      <DeleteHabitDialog />
 
       <FocusSessionTabTitle />
     </>

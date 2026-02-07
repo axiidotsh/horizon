@@ -1,20 +1,18 @@
 import { useSetAtom } from 'jotai';
-import {
-  deletingSessionAtom,
-  editingSessionAtom,
-} from '../atoms/session-dialogs';
+import { editingSessionAtom } from '../atoms/session-dialogs';
+import { useDeleteSession } from './mutations/use-delete-session';
 import type { FocusSession } from './types';
 
 export function useSessionActions() {
   const setEditingSession = useSetAtom(editingSessionAtom);
-  const setDeletingSession = useSetAtom(deletingSessionAtom);
+  const deleteSession = useDeleteSession();
 
   function handleEdit(session: FocusSession) {
     setEditingSession(session);
   }
 
   function handleDelete(session: FocusSession) {
-    setDeletingSession(session);
+    deleteSession.mutate({ param: { id: session.id } });
   }
 
   return {
