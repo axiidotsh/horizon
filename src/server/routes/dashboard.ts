@@ -32,6 +32,7 @@ export const dashboardRouter = new Hono()
       where: {
         userId: user.id,
         deletedAt: null,
+        completed: false,
         dueDate: {
           not: null,
           lt: tomorrow,
@@ -150,6 +151,7 @@ export const dashboardRouter = new Hono()
         where: {
           userId: user.id,
           deletedAt: null,
+          completed: false,
           dueDate: {
             not: null,
             lt: tomorrowKey,
@@ -190,9 +192,25 @@ export const dashboardRouter = new Hono()
       getOverallStats(user.id),
     ]);
 
-    const tasksCompletedToday = tasks.filter((t) => t.completed).length;
-    const totalPendingTasks = tasks.filter((t) => !t.completed).length;
-    const totalTasks = tasks.length;
+    const totalPendingTasks = tasks.length;
+
+    const tasksCompletedToday = await db.task.count({
+      where: {
+        userId: user.id,
+        deletedAt: null,
+        completed: true,
+        completedAt: {
+          gte: todayKey,
+          lt: tomorrowKey,
+        },
+        dueDate: {
+          not: null,
+          lt: tomorrowKey,
+        },
+      },
+    });
+
+    const totalTasks = totalPendingTasks + tasksCompletedToday;
 
     const totalActiveHabits = Number(habitCounts[0].total_active);
     const habitsCompletedToday = Number(habitCounts[0].completed_today);
