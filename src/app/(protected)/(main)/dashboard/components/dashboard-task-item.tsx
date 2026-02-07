@@ -3,6 +3,7 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/utils/utils';
 import { DotIcon } from 'lucide-react';
+import { useState } from 'react';
 import { PriorityBadge } from '../../tasks/components/badges/priority-badge';
 import { ProjectBadge } from '../../tasks/components/badges/project-badge';
 import { TagBadge } from '../../tasks/components/badges/tag-badge';
@@ -18,22 +19,41 @@ interface DashboardTaskItemProps {
 export const DashboardTaskItem = ({ task }: DashboardTaskItemProps) => {
   const { handleToggle, handleEdit, handleDelete, isToggling } =
     useTaskActions();
+  const [isOptimisticCompleted, setIsOptimisticCompleted] = useState(
+    task.completed
+  );
+
+  const onToggle = () => {
+    const prevCompleted = isOptimisticCompleted;
+    setIsOptimisticCompleted(!prevCompleted);
+
+    handleToggle(task.id, {
+      onError: () => {
+        setIsOptimisticCompleted(prevCompleted);
+      },
+      onSuccess: (data) => {
+        if ('task' in data) {
+          setIsOptimisticCompleted(data.task.completed);
+        }
+      },
+    });
+  };
 
   return (
     <li className="border-border flex items-start gap-3 border-b pb-3 last:border-0 last:pb-0">
       <Checkbox
-        checked={task.completed}
-        onCheckedChange={() => handleToggle(task.id)}
+        checked={isOptimisticCompleted}
+        onCheckedChange={onToggle}
         disabled={isToggling}
         className="mt-0.5"
-        aria-label={`Mark task "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
+        aria-label={`Mark task "${task.title}" as ${isOptimisticCompleted ? 'incomplete' : 'complete'}`}
       />
       <div className="flex flex-1 items-start justify-between gap-3">
         <div className="flex-1 space-y-1">
           <p
             className={cn(
               'text-sm',
-              task.completed && 'text-muted-foreground line-through'
+              isOptimisticCompleted && 'text-muted-foreground line-through'
             )}
           >
             {task.title}
@@ -66,12 +86,12 @@ export const DashboardTaskItem = ({ task }: DashboardTaskItemProps) => {
               <span
                 className={cn(
                   'shrink-0 text-xs',
-                  isOverdue(task.dueDate) && !task.completed
+                  isOverdue(task.dueDate) && !isOptimisticCompleted
                     ? 'text-destructive'
                     : 'text-muted-foreground'
                 )}
               >
-                {formatDueDate(task.dueDate, task.completed)}
+                {formatDueDate(task.dueDate, isOptimisticCompleted)}
               </span>
             )}
           </div>
