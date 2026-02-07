@@ -21,14 +21,18 @@ export const KanbanTaskCard = ({ task }: KanbanTaskCardProps) => {
 
   return (
     <div
+      onClick={() => handleEdit(task)}
       className={cn(
-        'bg-card border-border space-y-2 rounded-lg border p-3 shadow-sm',
+        'bg-card border-border cursor-pointer space-y-2 rounded-lg border p-3 shadow-sm transition-shadow hover:shadow-md',
         (task.completed || isToggling) && 'opacity-60'
       )}
     >
       <div className="flex items-start gap-2">
         <button
-          onClick={() => handleToggle(task.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggle(task.id);
+          }}
           disabled={isToggling}
           className={cn(
             'mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all',
@@ -48,13 +52,18 @@ export const KanbanTaskCard = ({ task }: KanbanTaskCardProps) => {
         >
           {task.title}
         </span>
-        <TaskActionsMenu
-          onEdit={() => handleEdit(task)}
-          onDelete={() => handleDelete(task)}
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <TaskActionsMenu
+            onEdit={() => handleEdit(task)}
+            onDelete={() => handleDelete(task)}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex flex-wrap items-center gap-1.5"
+      >
         {task.dueDate && (
           <span
             className={cn(
@@ -76,7 +85,10 @@ export const KanbanTaskCard = ({ task }: KanbanTaskCardProps) => {
       </div>
 
       {task.tags && task.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="flex flex-wrap gap-1"
+        >
           {task.tags.slice(0, MAX_VISIBLE_TAGS).map((tag) => (
             <TagBadge key={tag} tag={tag} className="text-xs" />
           ))}
