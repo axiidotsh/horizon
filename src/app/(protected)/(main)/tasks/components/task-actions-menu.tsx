@@ -12,14 +12,20 @@ import { EllipsisIcon, PencilIcon, TrashIcon } from 'lucide-react';
 interface TaskActionsMenuProps {
   onEdit: () => void;
   onDelete: () => void;
+  disabled?: boolean;
 }
 
-export const TaskActionsMenu = ({ onEdit, onDelete }: TaskActionsMenuProps) => (
+export const TaskActionsMenu = ({
+  onEdit,
+  onDelete,
+  disabled,
+}: TaskActionsMenuProps) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button
         size="icon-sm"
         variant="ghost"
+        disabled={disabled}
         aria-label="Task options"
         tooltip="Task options"
       >
@@ -27,11 +33,15 @@ export const TaskActionsMenu = ({ onEdit, onDelete }: TaskActionsMenuProps) => (
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      <DropdownMenuItem onSelect={onEdit}>
+      <DropdownMenuItem onSelect={onEdit} disabled={disabled}>
         <PencilIcon />
         Edit
       </DropdownMenuItem>
-      <DropdownMenuItem variant="destructive" onSelect={onDelete}>
+      <DropdownMenuItem
+        variant="destructive"
+        onSelect={onDelete}
+        disabled={disabled}
+      >
         <TrashIcon />
         Move to trash
       </DropdownMenuItem>

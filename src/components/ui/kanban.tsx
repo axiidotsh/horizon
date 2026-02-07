@@ -32,6 +32,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Slot } from '@radix-ui/react-slot';
 import * as React from 'react';
+import { ScrollArea } from './scroll-area';
 
 interface KanbanContextProps<T> {
   columns: Record<string, T[]>;
@@ -577,12 +578,9 @@ function KanbanColumnContent({
 
   return (
     <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
-      <div
-        data-slot="kanban-column-content"
-        className={cn('flex flex-col gap-2', className)}
-      >
-        {children}
-      </div>
+      <ScrollArea data-slot="kanban-column-content" className={className}>
+        <div className="flex flex-col gap-2">{children}</div>
+      </ScrollArea>
     </SortableContext>
   );
 }

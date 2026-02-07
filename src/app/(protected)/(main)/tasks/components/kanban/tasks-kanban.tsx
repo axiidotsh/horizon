@@ -10,6 +10,7 @@ import {
   KanbanOverlay,
   type KanbanMoveEvent,
 } from '@/components/ui/kanban';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useCallback, useMemo, useState } from 'react';
@@ -230,7 +231,7 @@ const KanbanColumnWithHeader = ({
 }) => (
   <KanbanColumn
     value={config.id}
-    className="bg-muted border-border/50 rounded-xl border px-2 pt-2 opacity-100 transition-opacity data-[over]:opacity-60"
+    className="bg-muted border-border/50 rounded-xl border pt-2 opacity-100 transition-opacity data-[over]:opacity-60"
   >
     <KanbanColumnHeader
       label={config.label}
@@ -240,7 +241,7 @@ const KanbanColumnWithHeader = ({
     />
     <KanbanColumnContent
       value={config.id}
-      className="h-[calc(100vh-16rem)] min-h-[200px] overflow-y-auto sm:h-[calc(100vh-14rem)]"
+      className="h-[calc(100vh-16rem)] min-h-[200px] overflow-y-auto px-2 sm:h-[calc(100vh-14rem)]"
     >
       <KanbanColumnData
         config={config}
@@ -388,8 +389,9 @@ export const TasksKanban = () => {
   );
 
   return (
-    <div className="mt-4 overflow-x-auto">
-      <div className="min-w-[1200px]">
+    <ScrollArea className="mt-4">
+      <ScrollBar orientation="horizontal" className="z-10" />
+      <div className="min-w-6xl">
         <Kanban
           value={displayColumns}
           onValueChange={handleValueChange}
@@ -423,6 +425,6 @@ export const TasksKanban = () => {
           </KanbanOverlay>
         </Kanban>
       </div>
-    </div>
+    </ScrollArea>
   );
 };

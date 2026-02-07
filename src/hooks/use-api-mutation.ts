@@ -71,9 +71,6 @@ export function useApiMutation<
     },
     onMutate: options?.onMutate,
     onSuccess: (data, variables) => {
-      options?.invalidateKeys?.forEach((key) => {
-        queryClient.invalidateQueries({ queryKey: key });
-      });
       if (options?.successMessage) {
         toast.success(options.successMessage, {
           ...(options.successAction && {
@@ -99,6 +96,11 @@ export function useApiMutation<
 
       toast.error(errorMessage);
       options?.onError?.(error, variables, context as TContext | undefined);
+    },
+    onSettled: () => {
+      options?.invalidateKeys?.forEach((key) => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
     },
   });
 }

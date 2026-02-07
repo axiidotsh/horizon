@@ -11,16 +11,22 @@ export function useTaskActions() {
   const toggleTask = useToggleTask();
   const deleteTask = useDeleteTask();
 
-  function handleToggle(taskId: string) {
-    toggleTask.mutate({ param: { id: taskId } });
+  function handleToggle(
+    taskId: string,
+    options?: Parameters<typeof toggleTask.mutate>[1]
+  ) {
+    toggleTask.mutate({ param: { id: taskId } }, options);
   }
 
   function handleEdit(task: Task) {
     setEditingTask(task);
   }
 
-  function handleDelete(task: Task) {
-    deleteTask.mutate({ param: { id: task.id } });
+  function handleDelete(
+    task: Task,
+    options?: Parameters<typeof deleteTask.mutate>[1]
+  ) {
+    deleteTask.mutate({ param: { id: task.id } }, options);
   }
 
   return {
@@ -28,5 +34,6 @@ export function useTaskActions() {
     handleEdit,
     handleDelete,
     isToggling: toggleTask.isPending,
+    isDeleting: deleteTask.isPending,
   };
 }

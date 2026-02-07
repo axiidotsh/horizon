@@ -11,26 +11,39 @@ export function useHabitActions(habitId?: string) {
   const { toggleToday, toggleDate } = useToggleHabit(habitId);
   const deleteHabit = useDeleteHabit();
 
-  function handleToggle(id: string) {
-    toggleToday.mutate({ param: { id } });
+  function handleToggle(
+    id: string,
+    options?: Parameters<typeof toggleToday.mutate>[1]
+  ) {
+    toggleToday.mutate({ param: { id } }, options);
   }
 
-  function handleToggleDate(id: string, date: Date) {
+  function handleToggleDate(
+    id: string,
+    date: Date,
+    options?: Parameters<typeof toggleDate.mutate>[1]
+  ) {
     const utcDate = new Date(
       Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
     );
-    toggleDate.mutate({
-      param: { id },
-      json: { date: utcDate.toISOString() },
-    });
+    toggleDate.mutate(
+      {
+        param: { id },
+        json: { date: utcDate.toISOString() },
+      },
+      options
+    );
   }
 
   function handleEdit(habit: Habit) {
     setEditingHabit(habit);
   }
 
-  function handleDelete(habit: Habit) {
-    deleteHabit.mutate({ param: { id: habit.id } });
+  function handleDelete(
+    habit: Habit,
+    options?: Parameters<typeof deleteHabit.mutate>[1]
+  ) {
+    deleteHabit.mutate({ param: { id: habit.id } }, options);
   }
 
   return {
@@ -39,5 +52,6 @@ export function useHabitActions(habitId?: string) {
     handleEdit,
     handleDelete,
     isToggling: toggleToday.isPending || toggleDate.isPending,
+    isDeleting: deleteHabit.isPending,
   };
 }

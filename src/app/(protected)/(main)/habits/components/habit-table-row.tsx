@@ -8,8 +8,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { isSameDayUTC } from '@/utils/date-utc';
 import { cn } from '@/utils/utils';
 import { EllipsisIcon, FlameIcon, PencilIcon, TrashIcon } from 'lucide-react';
+import { useState } from 'react';
 import type { Habit } from '../hooks/types';
 import { useHabitActions } from '../hooks/use-habit-actions';
 import { getStreakColor } from '../utils/streak-helpers';
@@ -20,15 +22,43 @@ interface HabitTableRowProps {
 }
 
 export const HabitTableRow = ({ habit }: HabitTableRowProps) => {
-  const { handleToggleDate, handleEdit, handleDelete, isToggling } =
+  const { handleToggleDate, handleEdit, handleDelete, isToggling, isDeleting } =
     useHabitActions(habit.id);
+  const [optimisticCompletions, setOptimisticCompletions] = useState(
+    habit.completions
+  );
 
   function handleToggleDay(date: Date) {
-    handleToggleDate(habit.id, date);
+    if (isToggling) return;
+
+    const prev = optimisticCompletions;
+    const exists = prev.some((c) => isSameDayUTC(new Date(c.date), date));
+
+    setOptimisticCompletions(
+      exists
+        ? prev.filter((c) => !isSameDayUTC(new Date(c.date), date))
+        : [...prev, { date: date.toISOString() }]
+    );
+
+    handleToggleDate(habit.id, date, {
+      onError: () => setOptimisticCompletions(prev),
+      onSuccess: (data) => {
+        if ('completed' in data) {
+          setOptimisticCompletions(
+            data.completed && data.completion
+              ? [
+                  ...prev.filter((c) => !isSameDayUTC(new Date(c.date), date)),
+                  data.completion,
+                ]
+              : prev.filter((c) => !isSameDayUTC(new Date(c.date), date))
+          );
+        }
+      },
+    });
   }
 
   return (
-    <TableRow>
+    <TableRow className={cn(isDeleting && 'opacity-60')}>
       <TableCell className="max-w-[400px]">
         <span
           className={cn(
@@ -42,9 +72,9 @@ export const HabitTableRow = ({ habit }: HabitTableRowProps) => {
       <TableCell>
         <div className="flex items-center justify-center">
           <WeekDayToggle
-            completions={habit.completions}
+            completions={optimisticCompletions}
             onToggleDay={handleToggleDay}
-            disabled={isToggling}
+            disabled={isToggling || isDeleting}
           />
         </div>
       </TableCell>
@@ -71,6 +101,7 @@ export const HabitTableRow = ({ habit }: HabitTableRowProps) => {
             <Button
               size="icon-sm"
               variant="ghost"
+              disabled={isDeleting}
               aria-label="Habit options"
               tooltip="Habit options"
             >
@@ -78,13 +109,17 @@ export const HabitTableRow = ({ habit }: HabitTableRowProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => handleEdit(habit)}>
+            <DropdownMenuItem
+              onSelect={() => handleEdit(habit)}
+              disabled={isDeleting}
+            >
               <PencilIcon />
               Edit
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
               onSelect={() => handleDelete(habit)}
+              disabled={isDeleting}
             >
               <TrashIcon />
               Move to trash

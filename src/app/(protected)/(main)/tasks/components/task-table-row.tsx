@@ -20,11 +20,28 @@ interface TaskTableRowProps {
 }
 
 export const TaskTableRow = ({ task }: TaskTableRowProps) => {
-  const { handleToggle, handleEdit, handleDelete, isToggling } =
+  const { handleToggle, handleEdit, handleDelete, isToggling, isDeleting } =
     useTaskActions();
   const [isCopied, setIsCopied] = useState(false);
+  const [isOptimisticCompleted, setIsOptimisticCompleted] = useState(
+    task.completed
+  );
 
-  const onToggle = () => handleToggle(task.id);
+  const onToggle = () => {
+    const prevCompleted = isOptimisticCompleted;
+    setIsOptimisticCompleted(true);
+
+    handleToggle(task.id, {
+      onError: () => {
+        setIsOptimisticCompleted(prevCompleted);
+      },
+      onSuccess: (data) => {
+        if ('task' in data) {
+          setIsOptimisticCompleted(data.task.completed);
+        }
+      },
+    });
+  };
 
   const onCopy = async () => {
     await navigator.clipboard.writeText(task.title);
@@ -34,33 +51,37 @@ export const TaskTableRow = ({ task }: TaskTableRowProps) => {
   };
 
   return (
-    <TableRow className={cn((task.completed || isToggling) && 'opacity-60')}>
+    <TableRow
+      className={cn((isOptimisticCompleted || isDeleting) && 'opacity-60')}
+    >
       <TableCell>
         <button
           onClick={onToggle}
-          disabled={isToggling}
+          disabled={isToggling || isDeleting}
           className={cn(
             'flex size-4 cursor-pointer items-center justify-center rounded-full border transition-all',
-            task.completed
+            isOptimisticCompleted
               ? 'border-primary bg-primary text-primary-foreground'
               : 'border-muted-foreground/30 hover:border-muted-foreground/50'
           )}
-          aria-label={`Mark task "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
+          aria-label={`Mark task "${task.title}" as ${isOptimisticCompleted ? 'incomplete' : 'complete'}`}
         >
-          {task.completed && <CheckIcon className="size-2.5" strokeWidth={3} />}
+          {isOptimisticCompleted && (
+            <CheckIcon className="size-2.5" strokeWidth={3} />
+          )}
         </button>
       </TableCell>
       <TableCell
         className={cn(
           'min-w-[200px] whitespace-normal',
-          !isToggling && 'cursor-pointer'
+          !isToggling && !isDeleting && 'cursor-pointer'
         )}
-        onClick={isToggling ? undefined : onToggle}
+        onClick={isToggling || isDeleting ? undefined : onToggle}
       >
         <span
           className={cn(
             'text-sm',
-            task.completed && 'text-muted-foreground line-through'
+            isOptimisticCompleted && 'text-muted-foreground line-through'
           )}
         >
           {task.title}
@@ -71,12 +92,12 @@ export const TaskTableRow = ({ task }: TaskTableRowProps) => {
           <span
             className={cn(
               'text-xs',
-              isOverdue(task.dueDate) && !task.completed
+              isOverdue(task.dueDate) && !isOptimisticCompleted
                 ? 'text-destructive'
                 : 'text-muted-foreground'
             )}
           >
-            {formatDueDate(task.dueDate, task.completed)}
+            {formatDueDate(task.dueDate, isOptimisticCompleted)}
           </span>
         ) : (
           <span className="text-muted-foreground text-xs">
@@ -124,6 +145,7 @@ export const TaskTableRow = ({ task }: TaskTableRowProps) => {
             onClick={onCopy}
             variant="ghost"
             size="icon-sm"
+            disabled={isDeleting}
             aria-label="Copy task content"
             tooltip={isCopied ? 'Copied!' : 'Copy task content'}
           >
@@ -143,6 +165,7 @@ export const TaskTableRow = ({ task }: TaskTableRowProps) => {
           <TaskActionsMenu
             onEdit={() => handleEdit(task)}
             onDelete={() => handleDelete(task)}
+            disabled={isDeleting}
           />
         </div>
       </TableCell>

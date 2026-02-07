@@ -12,5 +12,6 @@ export function useToggleTask() {
       DASHBOARD_QUERY_KEYS.heatmap,
     ],
     errorMessage: 'Failed to toggle task',
+    // simulateError: true,
   });
 }

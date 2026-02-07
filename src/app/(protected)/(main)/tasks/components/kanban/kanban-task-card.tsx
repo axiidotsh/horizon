@@ -2,6 +2,7 @@
 
 import { cn } from '@/utils/utils';
 import { CheckIcon } from 'lucide-react';
+import { useState } from 'react';
 import type { Task } from '../../hooks/types';
 import { useTaskActions } from '../../hooks/use-task-actions';
 import { formatDueDate, isOverdue } from '../../utils/task-filters';
@@ -16,38 +17,59 @@ interface KanbanTaskCardProps {
 }
 
 export const KanbanTaskCard = ({ task }: KanbanTaskCardProps) => {
-  const { handleToggle, handleEdit, handleDelete, isToggling } =
+  const { handleToggle, handleEdit, handleDelete, isToggling, isDeleting } =
     useTaskActions();
+  const [isOptimisticCompleted, setIsOptimisticCompleted] = useState(
+    task.completed
+  );
+
+  const onToggle = () => {
+    const prevCompleted = isOptimisticCompleted;
+    setIsOptimisticCompleted(true);
+
+    handleToggle(task.id, {
+      onError: () => {
+        setIsOptimisticCompleted(prevCompleted);
+      },
+      onSuccess: (data) => {
+        if ('task' in data) {
+          setIsOptimisticCompleted(data.task.completed);
+        }
+      },
+    });
+  };
 
   return (
     <div
       onClick={() => handleEdit(task)}
       className={cn(
         'bg-card border-border cursor-pointer space-y-2 rounded-lg border p-3 shadow-sm transition-shadow hover:shadow-md',
-        (task.completed || isToggling) && 'opacity-60'
+        (isOptimisticCompleted || isToggling || isDeleting) && 'opacity-60'
       )}
     >
       <div className="flex items-start gap-2">
         <button
           onClick={(e) => {
             e.stopPropagation();
-            handleToggle(task.id);
+            onToggle();
           }}
-          disabled={isToggling}
+          disabled={isToggling || isDeleting}
           className={cn(
             'mt-0.5 flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all',
-            task.completed
+            isOptimisticCompleted
               ? 'border-primary bg-primary text-primary-foreground'
               : 'border-muted-foreground/30 hover:border-muted-foreground/50'
           )}
-          aria-label={`Mark task "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
+          aria-label={`Mark task "${task.title}" as ${isOptimisticCompleted ? 'incomplete' : 'complete'}`}
         >
-          {task.completed && <CheckIcon className="size-2.5" strokeWidth={3} />}
+          {isOptimisticCompleted && (
+            <CheckIcon className="size-2.5" strokeWidth={3} />
+          )}
         </button>
         <span
           className={cn(
             'line-clamp-2 flex-1 text-sm leading-snug',
-            task.completed && 'text-muted-foreground line-through'
+            isOptimisticCompleted && 'text-muted-foreground line-through'
           )}
         >
           {task.title}
@@ -56,6 +78,7 @@ export const KanbanTaskCard = ({ task }: KanbanTaskCardProps) => {
           <TaskActionsMenu
             onEdit={() => handleEdit(task)}
             onDelete={() => handleDelete(task)}
+            disabled={isDeleting}
           />
         </div>
       </div>
@@ -68,12 +91,12 @@ export const KanbanTaskCard = ({ task }: KanbanTaskCardProps) => {
           <span
             className={cn(
               'text-xs',
-              isOverdue(task.dueDate) && !task.completed
+              isOverdue(task.dueDate) && !isOptimisticCompleted
                 ? 'text-destructive'
                 : 'text-muted-foreground'
             )}
           >
-            {formatDueDate(task.dueDate, task.completed)}
+            {formatDueDate(task.dueDate, isOptimisticCompleted)}
           </span>
         )}
         {task.project && (
