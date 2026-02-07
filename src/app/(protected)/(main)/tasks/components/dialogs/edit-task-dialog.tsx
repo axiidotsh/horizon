@@ -1,8 +1,8 @@
 'use client';
 
+import { AutosizeInput } from '@/components/ui/autosize-input';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
@@ -77,7 +77,7 @@ export const EditTaskDialog = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-title">Title</Label>
-            <Input
+            <AutosizeInput
               id="edit-title"
               placeholder="Task title..."
               value={form.title}

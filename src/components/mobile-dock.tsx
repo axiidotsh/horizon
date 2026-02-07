@@ -189,7 +189,7 @@ export const MobileDock = () => {
                     exit={{ opacity: 0, rotate: -90 }}
                     transition={{ duration: 0.2, ease: 'easeInOut' }}
                   >
-                    <SearchIcon className="size-5" />
+                    <SearchIcon className="size-4" />
                   </motion.div>
                 )}
               </AnimatePresence>
