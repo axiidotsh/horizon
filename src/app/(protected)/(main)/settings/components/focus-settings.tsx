@@ -33,6 +33,17 @@ export const FocusSettings = () => {
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [customValue, setCustomValue] = useState('');
   const [error, setError] = useState('');
+  const [optimisticFocusDuration, setOptimisticFocusDuration] = useState<
+    number | null
+  >(null);
+  const [optimisticShowTimerInTab, setOptimisticShowTimerInTab] = useState<
+    boolean | null
+  >(null);
+
+  const focusDuration =
+    optimisticFocusDuration ?? settings?.defaultFocusDuration;
+  const showTimerInTab =
+    optimisticShowTimerInTab ?? settings?.showFocusTimerInTab;
 
   useEffect(() => {
     if (settings) {
@@ -49,25 +60,34 @@ export const FocusSettings = () => {
   if (!settings || !('defaultFocusDuration' in settings)) return null;
 
   const isCustomDuration = !DURATION_OPTIONS.some(
-    (option) => option.value === settings.defaultFocusDuration
+    (option) => option.value === focusDuration
   );
 
   const selectValue =
     isCustomMode || isCustomDuration
       ? 'custom'
-      : (settings?.defaultFocusDuration?.toString() ?? '');
+      : (focusDuration?.toString() ?? '');
 
   function handleFocusDurationChange(value: string) {
     if (!settings || !('defaultFocusDuration' in settings)) return;
 
     if (value === 'custom') {
       setIsCustomMode(true);
-      setCustomValue(settings?.defaultFocusDuration?.toString() ?? '');
+      setCustomValue(focusDuration?.toString() ?? '');
       setError('');
     } else {
       setIsCustomMode(false);
       const duration = parseInt(value, 10);
-      updateSettings({ json: { defaultFocusDuration: duration } });
+      const prevFocusDuration = optimisticFocusDuration;
+      setOptimisticFocusDuration(duration);
+      updateSettings(
+        { json: { defaultFocusDuration: duration } },
+        {
+          onError: () => setOptimisticFocusDuration(prevFocusDuration),
+          onSuccess: (data) =>
+            setOptimisticFocusDuration(data.defaultFocusDuration),
+        }
+      );
       setError('');
     }
   }
@@ -93,11 +113,29 @@ export const FocusSettings = () => {
     }
 
     setError('');
-    updateSettings({ json: { defaultFocusDuration: numValue } });
+    const prevFocusDuration = optimisticFocusDuration;
+    setOptimisticFocusDuration(numValue);
+    updateSettings(
+      { json: { defaultFocusDuration: numValue } },
+      {
+        onError: () => setOptimisticFocusDuration(prevFocusDuration),
+        onSuccess: (data) =>
+          setOptimisticFocusDuration(data.defaultFocusDuration),
+      }
+    );
   }
 
   function handleShowTimerInTabChange(value: boolean) {
-    updateSettings({ json: { showFocusTimerInTab: value } });
+    const prevShowTimerInTab = optimisticShowTimerInTab;
+    setOptimisticShowTimerInTab(value);
+    updateSettings(
+      { json: { showFocusTimerInTab: value } },
+      {
+        onError: () => setOptimisticShowTimerInTab(prevShowTimerInTab),
+        onSuccess: (data) =>
+          setOptimisticShowTimerInTab(data.showFocusTimerInTab),
+      }
+    );
   }
 
   return (
@@ -113,9 +151,8 @@ export const FocusSettings = () => {
               <SelectValue>
                 {isCustomMode || isCustomDuration
                   ? 'Custom'
-                  : DURATION_OPTIONS.find(
-                      (opt) => opt.value === settings.defaultFocusDuration
-                    )?.label}
+                  : DURATION_OPTIONS.find((opt) => opt.value === focusDuration)
+                      ?.label}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -160,7 +197,7 @@ export const FocusSettings = () => {
           </Label>
           <Switch
             id="show-timer-in-tab"
-            checked={settings.showFocusTimerInTab}
+            checked={showTimerInTab ?? false}
             onCheckedChange={handleShowTimerInTabChange}
             disabled={isPending}
           />
