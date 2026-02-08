@@ -22,6 +22,7 @@ export const TagBadge = ({ tag, onRemove, className }: TagBadgeProps) => {
           type="button"
           variant="ghost"
           size="icon"
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
             onRemove(e);
