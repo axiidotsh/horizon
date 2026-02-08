@@ -113,7 +113,7 @@ export const DashboardHabitItem = ({ habit }: DashboardHabitItemProps) => {
                   onClick={() => handleDelete(habit)}
                 >
                   <TrashIcon />
-                  Delete
+                  Move to trash
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -162,7 +162,7 @@ const MobileContextMenu = ({
       </ContextMenuItem>
       <ContextMenuItem variant="destructive" onSelect={onDelete}>
         <TrashIcon />
-        Delete
+        Move to trash
       </ContextMenuItem>
     </ContextMenuContent>
   </ContextMenu>
