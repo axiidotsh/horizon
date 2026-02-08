@@ -115,12 +115,12 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === '/trash'}
-                  tooltip="Trash"
+                  isActive={pathname === '/settings'}
+                  tooltip="Settings"
                 >
-                  <Link href="/trash">
-                    <TrashIcon />
-                    <span>Trash</span>
+                  <Link href="/settings">
+                    <SettingsIcon />
+                    <span>Settings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -176,9 +176,9 @@ export function AppSidebar() {
               </DropdownMenuSubContent>
             </DropdownMenuSub>
             <DropdownMenuItem asChild>
-              <Link href="/settings">
-                <SettingsIcon className="mr-2 size-4" />
-                <span>Settings</span>
+              <Link href="/trash">
+                <TrashIcon className="mr-2 size-4" />
+                <span>Trash</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem

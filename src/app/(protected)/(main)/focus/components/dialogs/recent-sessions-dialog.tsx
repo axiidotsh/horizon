@@ -98,7 +98,7 @@ export const RecentSessionsDialog = () => {
                   currentSortBy={sortBy}
                   currentSortOrder={sortOrder}
                   onChange={(by, order) => {
-                    setSortBy(by as typeof sortBy);
+                    setSortBy(by);
                     setSortOrder(order);
                   }}
                   options={[
@@ -112,7 +112,7 @@ export const RecentSessionsDialog = () => {
                   currentSortBy={sortBy}
                   currentSortOrder={sortOrder}
                   onChange={(by, order) => {
-                    setSortBy(by as typeof sortBy);
+                    setSortBy(by);
                     setSortOrder(order);
                   }}
                   options={[
@@ -126,7 +126,7 @@ export const RecentSessionsDialog = () => {
                   currentSortBy={sortBy}
                   currentSortOrder={sortOrder}
                   onChange={(by, order) => {
-                    setSortBy(by as typeof sortBy);
+                    setSortBy(by);
                     setSortOrder(order);
                   }}
                   options={[
