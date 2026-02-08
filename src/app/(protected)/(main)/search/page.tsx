@@ -102,7 +102,7 @@ export default function SearchPage() {
   const accountCommands = commands.filter((cmd) => cmd.category === 'account');
 
   return (
-    <div className="bg-background fixed inset-0 z-50 flex flex-col">
+    <div className="bg-background fixed inset-0 z-50 flex flex-col md:hidden">
       <Command
         className="bg-background flex h-full flex-col"
         shouldFilter={true}
