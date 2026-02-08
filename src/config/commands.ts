@@ -150,16 +150,16 @@ export const ACCOUNT_ACTIONS: ActionCommand[] = [
 
 export const CREATE_COMMANDS: ActionCommand[] = [
   {
-    name: 'Create new todo',
+    name: 'Create new task',
     action: 'add-task',
     icon: PlusIcon,
-    searchWords: ['add', 'new', 'task'],
+    searchWords: ['add', 'todo'],
   },
   {
     name: 'Bulk add todos',
     action: 'bulk-add-tasks',
     icon: ListPlusIcon,
-    searchWords: ['add', 'multiple', 'tasks', 'batch', 'bulk'],
+    searchWords: ['multiple', 'tasks', 'batch'],
   },
   {
     name: 'Create new project',
