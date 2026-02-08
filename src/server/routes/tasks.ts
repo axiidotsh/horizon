@@ -256,7 +256,8 @@ export const tasksRouter = new Hono()
               WHEN 'LOW' THEN 2
               WHEN 'NO_PRIORITY' THEN 3
             END ${orderDirection},
-            t.id ${orderDirection}
+            t."createdAt" DESC,
+            t.id DESC
           LIMIT ${limit}
           OFFSET ${offset}
         `,
@@ -275,7 +276,7 @@ export const tasksRouter = new Hono()
     }
 
     const orderBy: Record<string, 'asc' | 'desc'>[] = sortBy
-      ? [{ [sortBy]: sortOrder }, { id: sortOrder }]
+      ? [{ [sortBy]: sortOrder }, { createdAt: 'desc' }, { id: 'desc' }]
       : [{ createdAt: 'desc' }, { id: 'desc' }];
 
     const [tasks, totalCount] = await Promise.all([
