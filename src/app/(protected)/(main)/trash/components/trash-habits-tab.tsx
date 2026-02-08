@@ -127,7 +127,68 @@ export const TrashHabitsTab = () => {
         isClearing={emptyHabits.isPending}
         typeName="habits"
       />
-      <Table>
+      <div className="md:hidden">
+        {habits.map((habit) => (
+          <div
+            key={habit.id}
+            className="flex items-start gap-3 border-b px-4 py-3"
+          >
+            <Checkbox
+              className="mt-0.5"
+              checked={selected.has(habit.id)}
+              onCheckedChange={() => handleToggle(habit.id)}
+            />
+            <div className="min-w-0 flex-1">
+              <span className="text-sm font-medium">{habit.title}</span>
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                {habit.category && (
+                  <span className="text-muted-foreground text-xs">
+                    {habit.category}
+                  </span>
+                )}
+                {habit.category && habit.deletedAt && (
+                  <span className="text-muted-foreground text-xs">·</span>
+                )}
+                {habit.deletedAt && (
+                  <span className="text-muted-foreground text-xs">
+                    {formatDistanceToNow(new Date(habit.deletedAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7"
+                onClick={() => restoreHabit.mutate({ param: { id: habit.id } })}
+                disabled={restoreHabit.isPending}
+              >
+                <RotateCcwIcon className="size-3.5" />
+              </Button>
+              <EmptyTrashDialog
+                title="Delete habit permanently?"
+                description="This action cannot be undone. All completion history will be lost."
+                onConfirm={() =>
+                  deleteHabit.mutate({ param: { id: habit.id } })
+                }
+                isPending={deleteHabit.isPending}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive size-7"
+                >
+                  <TrashIcon className="size-3.5" />
+                </Button>
+              </EmptyTrashDialog>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Table className="hidden md:table">
         <TableHeader className="bg-background">
           <TableRow>
             <TableHead className="w-10" />
@@ -214,7 +275,21 @@ export const TrashHabitsTab = () => {
 
 const TrashTabSkeleton = () => (
   <div className="w-full">
-    <Table>
+    <div className="md:hidden">
+      {Array.from({ length: 5 }, (_, i) => (
+        <div key={i} className="flex items-start gap-3 border-b px-4 py-3">
+          <Skeleton className="mt-0.5 size-4 shrink-0 rounded-sm" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-5 w-full max-w-xs" />
+            <div className="flex gap-1.5">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <Table className="hidden md:table">
       <TableHeader className="bg-background">
         <TableRow>
           <TableHead className="w-10" />

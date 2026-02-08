@@ -3,14 +3,28 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/utils/utils';
-import { EllipsisIcon, FlameIcon, PencilIcon, TrashIcon } from 'lucide-react';
-import { useState } from 'react';
+import {
+  CopyIcon,
+  EllipsisIcon,
+  FlameIcon,
+  PencilIcon,
+  TrashIcon,
+} from 'lucide-react';
+import { type ReactNode, useState } from 'react';
+import { toast } from 'sonner';
 import type { Habit } from '../../habits/hooks/types';
 import { useHabitActions } from '../../habits/hooks/use-habit-actions';
 import { getStreakColor } from '../../habits/utils/streak-helpers';
@@ -22,6 +36,7 @@ interface DashboardHabitItemProps {
 export const DashboardHabitItem = ({ habit }: DashboardHabitItemProps) => {
   const { handleToggle, handleEdit, handleDelete, isToggling } =
     useHabitActions(habit.id);
+  const isMobile = useIsMobile();
   const [isOptimisticCompleted, setIsOptimisticCompleted] = useState(
     habit.completed
   );
@@ -42,7 +57,12 @@ export const DashboardHabitItem = ({ habit }: DashboardHabitItemProps) => {
     });
   };
 
-  return (
+  const onCopy = async () => {
+    await navigator.clipboard.writeText(habit.title);
+    toast.success('Habit copied to clipboard');
+  };
+
+  const content = (
     <li className="border-border flex items-start gap-3 border-b pb-3 last:border-0 last:pb-0">
       <Checkbox
         checked={isOptimisticCompleted}
@@ -72,28 +92,78 @@ export const DashboardHabitItem = ({ habit }: DashboardHabitItemProps) => {
               <span className="font-mono">{habit.currentStreak}</span>
             </div>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon-sm" variant="ghost" aria-label="Habit options">
-                <EllipsisIcon className="text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleEdit(habit)}>
-                <PencilIcon />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => handleDelete(habit)}
-              >
-                <TrashIcon />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {!isMobile && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label="Habit options"
+                >
+                  <EllipsisIcon className="text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleEdit(habit)}>
+                  <PencilIcon />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => handleDelete(habit)}
+                >
+                  <TrashIcon />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
     </li>
   );
+
+  if (!isMobile) return content;
+
+  return (
+    <MobileContextMenu
+      onCopy={onCopy}
+      onEdit={() => handleEdit(habit)}
+      onDelete={() => handleDelete(habit)}
+    >
+      {content}
+    </MobileContextMenu>
+  );
 };
+
+interface MobileContextMenuProps {
+  children: ReactNode;
+  onCopy: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+const MobileContextMenu = ({
+  children,
+  onCopy,
+  onEdit,
+  onDelete,
+}: MobileContextMenuProps) => (
+  <ContextMenu>
+    <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+    <ContextMenuContent>
+      <ContextMenuItem onSelect={onCopy}>
+        <CopyIcon />
+        Copy
+      </ContextMenuItem>
+      <ContextMenuItem onSelect={onEdit}>
+        <PencilIcon />
+        Edit
+      </ContextMenuItem>
+      <ContextMenuItem variant="destructive" onSelect={onDelete}>
+        <TrashIcon />
+        Delete
+      </ContextMenuItem>
+    </ContextMenuContent>
+  </ContextMenu>
+);

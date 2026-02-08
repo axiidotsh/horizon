@@ -25,6 +25,7 @@ import {
 } from '../atoms/task-atoms';
 import { createTaskDialogAtom } from '../atoms/task-dialogs';
 import { useInfiniteTasks } from '../hooks/queries/use-infinite-tasks';
+import { TaskMobileCard } from './task-mobile-card';
 import { TaskTableRow } from './task-table-row';
 
 export const TasksTable = () => {
@@ -77,7 +78,25 @@ export const TasksTable = () => {
   if (isLoading) {
     return (
       <div className="w-full">
-        <Table>
+        <div className="space-y-0 md:hidden">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-3 border-b px-4 py-3"
+            >
+              <Skeleton className="mt-0.5 size-4 shrink-0 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-5 w-full max-w-xs" />
+                <div className="flex gap-1.5">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <Table className="hidden md:table">
           <TableHeader className="bg-background">
             <TableRow>
               <TableHead className="w-12"></TableHead>
@@ -153,46 +172,59 @@ export const TasksTable = () => {
   }
 
   return (
-    <ScrollArea className="w-full">
-      <ScrollBar orientation="horizontal" />
-      <Table>
-        <TableHeader className="bg-background">
-          <TableRow>
-            <TableHead className="w-12"></TableHead>
-            <TableHead className="text-muted-foreground min-w-[200px] text-xs font-normal">
-              Task
-            </TableHead>
-            <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
-              Due Date
-            </TableHead>
-            <TableHead className="text-muted-foreground w-[100px] text-xs font-normal">
-              Priority
-            </TableHead>
-            <TableHead className="text-muted-foreground w-[150px] text-xs font-normal">
-              Project
-            </TableHead>
-            <TableHead className="text-muted-foreground text-xs font-normal">
-              Tags
-            </TableHead>
-            <TableHead className="w-12"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tasks.map((task) => (
-            <TaskTableRow key={task.id} task={task} />
-          ))}
-          {isFetchingNextPage && (
+    <>
+      <div className="w-full md:hidden">
+        {tasks.map((task) => (
+          <TaskMobileCard key={task.id} task={task} />
+        ))}
+        {isFetchingNextPage && (
+          <div className="flex justify-center py-4">
+            <Skeleton className="h-5 w-full max-w-xs px-4" />
+          </div>
+        )}
+        <div ref={sentinelRef} className="h-px" />
+      </div>
+      <ScrollArea className="hidden w-full md:block">
+        <ScrollBar orientation="horizontal" />
+        <Table>
+          <TableHeader className="bg-background">
             <TableRow>
-              <TableCell colSpan={7}>
-                <div className="flex justify-center py-4">
-                  <Skeleton className="h-5 w-full max-w-xs" />
-                </div>
-              </TableCell>
+              <TableHead className="w-12"></TableHead>
+              <TableHead className="text-muted-foreground min-w-[200px] text-xs font-normal">
+                Task
+              </TableHead>
+              <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
+                Due Date
+              </TableHead>
+              <TableHead className="text-muted-foreground w-[100px] text-xs font-normal">
+                Priority
+              </TableHead>
+              <TableHead className="text-muted-foreground w-[150px] text-xs font-normal">
+                Project
+              </TableHead>
+              <TableHead className="text-muted-foreground text-xs font-normal">
+                Tags
+              </TableHead>
+              <TableHead className="w-12"></TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-      <div ref={sentinelRef} className="h-px" />
-    </ScrollArea>
+          </TableHeader>
+          <TableBody>
+            {tasks.map((task) => (
+              <TaskTableRow key={task.id} task={task} />
+            ))}
+            {isFetchingNextPage && (
+              <TableRow>
+                <TableCell colSpan={7}>
+                  <div className="flex justify-center py-4">
+                    <Skeleton className="h-5 w-full max-w-xs" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+        <div ref={sentinelRef} className="h-px" />
+      </ScrollArea>
+    </>
   );
 };

@@ -35,24 +35,25 @@ export const TrashToolbar = ({
   if (totalCount === 0) return null;
 
   return (
-    <div className="flex items-center gap-3 border-b px-2 py-2">
+    <div className="flex items-center gap-1.5 border-b px-4 py-2 md:gap-3 md:px-2">
       <Checkbox
         checked={isAllSelected}
         onCheckedChange={(checked) => onSelectAll(!!checked)}
       />
       {selectedCount > 0 ? (
         <>
-          <span className="text-muted-foreground text-sm">
+          <span className="text-muted-foreground truncate text-sm">
             {selectedCount} selected
           </span>
           <Button
             variant="ghost"
             size="sm"
+            className="shrink-0"
             onClick={onRestoreSelected}
             disabled={isRestoring}
           >
             <RotateCcwIcon className="size-4" />
-            Restore
+            <span className="hidden sm:inline">Restore</span>
           </Button>
           <EmptyTrashDialog
             title={`Delete ${selectedCount} ${typeName}?`}
@@ -63,20 +64,20 @@ export const TrashToolbar = ({
             <Button
               variant="ghost"
               size="sm"
-              className="text-destructive"
+              className="text-destructive shrink-0"
               disabled={isDeleting}
             >
               <TrashIcon className="size-4" />
-              Delete
+              <span className="hidden sm:inline">Delete</span>
             </Button>
           </EmptyTrashDialog>
         </>
       ) : (
-        <span className="text-muted-foreground text-sm">
+        <span className="text-muted-foreground truncate text-sm">
           {totalCount} {typeName}
         </span>
       )}
-      <div className="ml-auto">
+      <div className="ml-auto shrink-0">
         <EmptyTrashDialog
           title={`Delete all ${typeName}?`}
           description={`This action cannot be undone. All ${totalCount} ${typeName} will be permanently deleted.`}

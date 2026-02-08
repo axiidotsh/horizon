@@ -129,7 +129,62 @@ export const TrashTasksTab = () => {
         isClearing={emptyTasks.isPending}
         typeName="tasks"
       />
-      <Table>
+      <div className="md:hidden">
+        {tasks.map((task) => (
+          <div
+            key={task.id}
+            className="flex items-start gap-3 border-b px-4 py-3"
+          >
+            <Checkbox
+              className="mt-0.5"
+              checked={selected.has(task.id)}
+              onCheckedChange={() => handleToggle(task.id)}
+            />
+            <div className="min-w-0 flex-1">
+              <span className="text-sm font-medium">{task.title}</span>
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                {task.priority !== 'NO_PRIORITY' && (
+                  <PriorityBadge priority={task.priority} />
+                )}
+                {task.project && <ProjectBadge project={task.project} />}
+                {task.deletedAt && (
+                  <span className="text-muted-foreground text-xs">
+                    {formatDistanceToNow(new Date(task.deletedAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7"
+                onClick={() => restoreTask.mutate({ param: { id: task.id } })}
+                disabled={restoreTask.isPending}
+              >
+                <RotateCcwIcon className="size-3.5" />
+              </Button>
+              <EmptyTrashDialog
+                title="Delete task permanently?"
+                description="This action cannot be undone."
+                onConfirm={() => deleteTask.mutate({ param: { id: task.id } })}
+                isPending={deleteTask.isPending}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive size-7"
+                >
+                  <TrashIcon className="size-3.5" />
+                </Button>
+              </EmptyTrashDialog>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Table className="hidden md:table">
         <TableHeader className="bg-background">
           <TableRow>
             <TableHead className="w-10" />
@@ -222,7 +277,22 @@ export const TrashTasksTab = () => {
 
 const TrashTabSkeleton = () => (
   <div className="w-full">
-    <Table>
+    <div className="md:hidden">
+      {Array.from({ length: 5 }, (_, i) => (
+        <div key={i} className="flex items-start gap-3 border-b px-4 py-3">
+          <Skeleton className="mt-0.5 size-4 shrink-0 rounded-sm" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-5 w-full max-w-xs" />
+            <div className="flex gap-1.5">
+              <Skeleton className="h-5 w-12 rounded-full" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <Table className="hidden md:table">
       <TableHeader className="bg-background">
         <TableRow>
           <TableHead className="w-10" />

@@ -1,9 +1,17 @@
 'use client';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/utils/utils';
-import { DotIcon } from 'lucide-react';
-import { useState } from 'react';
+import { CopyIcon, DotIcon, PencilIcon, TrashIcon } from 'lucide-react';
+import { type ReactNode, useState } from 'react';
+import { toast } from 'sonner';
 import { PriorityBadge } from '../../tasks/components/badges/priority-badge';
 import { ProjectBadge } from '../../tasks/components/badges/project-badge';
 import { TagBadge } from '../../tasks/components/badges/tag-badge';
@@ -19,6 +27,7 @@ interface DashboardTaskItemProps {
 export const DashboardTaskItem = ({ task }: DashboardTaskItemProps) => {
   const { handleToggle, handleEdit, handleDelete, isToggling } =
     useTaskActions();
+  const isMobile = useIsMobile();
   const [isOptimisticCompleted, setIsOptimisticCompleted] = useState(
     task.completed
   );
@@ -39,7 +48,12 @@ export const DashboardTaskItem = ({ task }: DashboardTaskItemProps) => {
     });
   };
 
-  return (
+  const onCopy = async () => {
+    await navigator.clipboard.writeText(task.title);
+    toast.success('Task copied to clipboard');
+  };
+
+  const content = (
     <li className="border-border flex items-start gap-3 border-b pb-3 last:border-0 last:pb-0">
       <Checkbox
         checked={isOptimisticCompleted}
@@ -97,12 +111,58 @@ export const DashboardTaskItem = ({ task }: DashboardTaskItemProps) => {
           </div>
         </div>
       </div>
-      <div className="shrink-0">
-        <TaskActionsMenu
-          onEdit={() => handleEdit(task)}
-          onDelete={() => handleDelete(task)}
-        />
-      </div>
+      {!isMobile && (
+        <div className="shrink-0">
+          <TaskActionsMenu
+            onEdit={() => handleEdit(task)}
+            onDelete={() => handleDelete(task)}
+          />
+        </div>
+      )}
     </li>
   );
+
+  if (!isMobile) return content;
+
+  return (
+    <MobileContextMenu
+      onCopy={onCopy}
+      onEdit={() => handleEdit(task)}
+      onDelete={() => handleDelete(task)}
+    >
+      {content}
+    </MobileContextMenu>
+  );
 };
+
+interface MobileContextMenuProps {
+  children: ReactNode;
+  onCopy: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+const MobileContextMenu = ({
+  children,
+  onCopy,
+  onEdit,
+  onDelete,
+}: MobileContextMenuProps) => (
+  <ContextMenu>
+    <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+    <ContextMenuContent>
+      <ContextMenuItem onSelect={onCopy}>
+        <CopyIcon />
+        Copy
+      </ContextMenuItem>
+      <ContextMenuItem onSelect={onEdit}>
+        <PencilIcon />
+        Edit
+      </ContextMenuItem>
+      <ContextMenuItem variant="destructive" onSelect={onDelete}>
+        <TrashIcon />
+        Delete
+      </ContextMenuItem>
+    </ContextMenuContent>
+  </ContextMenu>
+);

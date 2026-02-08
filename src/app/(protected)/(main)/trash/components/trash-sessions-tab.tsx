@@ -138,7 +138,70 @@ export const TrashSessionsTab = () => {
         isClearing={emptySessions.isPending}
         typeName="sessions"
       />
-      <Table>
+      <div className="md:hidden">
+        {sessions.map((session) => (
+          <div
+            key={session.id}
+            className="flex items-start gap-3 border-b px-4 py-3"
+          >
+            <Checkbox
+              className="mt-0.5"
+              checked={selected.has(session.id)}
+              onCheckedChange={() => handleToggle(session.id)}
+            />
+            <div className="min-w-0 flex-1">
+              <span className="text-sm font-medium">
+                {session.task ?? 'Untitled session'}
+              </span>
+              <div className="mt-1.5 flex items-center gap-3 text-xs">
+                <span className="text-muted-foreground font-mono font-medium">
+                  {formatDuration(session.durationMinutes)}
+                </span>
+                {session.deletedAt && (
+                  <>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground">
+                      {formatDistanceToNow(new Date(session.deletedAt), {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7"
+                onClick={() =>
+                  restoreSession.mutate({ param: { id: session.id } })
+                }
+                disabled={restoreSession.isPending}
+              >
+                <RotateCcwIcon className="size-3.5" />
+              </Button>
+              <EmptyTrashDialog
+                title="Delete session permanently?"
+                description="This action cannot be undone."
+                onConfirm={() =>
+                  deleteSession.mutate({ param: { id: session.id } })
+                }
+                isPending={deleteSession.isPending}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive size-7"
+                >
+                  <TrashIcon className="size-3.5" />
+                </Button>
+              </EmptyTrashDialog>
+            </div>
+          </div>
+        ))}
+      </div>
+      <Table className="hidden md:table">
         <TableHeader className="bg-background">
           <TableRow>
             <TableHead className="w-10" />
@@ -229,7 +292,21 @@ export const TrashSessionsTab = () => {
 
 const TrashTabSkeleton = () => (
   <div className="w-full">
-    <Table>
+    <div className="md:hidden">
+      {Array.from({ length: 5 }, (_, i) => (
+        <div key={i} className="flex items-start gap-3 border-b px-4 py-3">
+          <Skeleton className="mt-0.5 size-4 shrink-0 rounded-sm" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-5 w-48" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <Table className="hidden md:table">
       <TableHeader className="bg-background">
         <TableRow>
           <TableHead className="w-10" />

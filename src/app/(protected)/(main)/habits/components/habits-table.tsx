@@ -27,6 +27,7 @@ import {
   statusFilterAtom,
 } from '../atoms/habit-atoms';
 import { useInfiniteHabits } from '../hooks/queries/use-infinite-habits';
+import { HabitMobileCard } from './habit-mobile-card';
 import { HabitTableRow } from './habit-table-row';
 
 export const HabitsTable = () => {
@@ -79,7 +80,25 @@ export const HabitsTable = () => {
   if (isLoading) {
     return (
       <div className="w-full">
-        <Table>
+        <div className="md:hidden">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between gap-3 border-b px-4 py-3"
+            >
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton className="h-5 w-full max-w-xs" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="flex gap-1">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <Skeleton key={i} className="size-3.5 rounded-full" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <Table className="hidden md:table">
           <TableHeader className="bg-background">
             <TableRow>
               <TableHead className="text-muted-foreground max-w-[400px] min-w-[250px] text-xs font-normal">
@@ -154,51 +173,64 @@ export const HabitsTable = () => {
   }
 
   return (
-    <ScrollArea className="w-full">
-      <ScrollBar orientation="horizontal" />
-      <Table>
-        <TableHeader className="bg-background">
-          <TableRow>
-            <TableHead className="text-muted-foreground max-w-[400px] min-w-[250px] text-xs font-normal">
-              Habit
-            </TableHead>
-            <TableHead className="text-muted-foreground text-center text-xs font-normal">
-              <div className="flex items-center justify-center gap-1">
-                {days.map((day, index) => (
-                  <span
-                    key={index}
-                    className={cn(
-                      'w-3.5 text-center',
-                      isTodayUTC(day) && 'font-semibold'
-                    )}
-                  >
-                    {formatDayLabel(day)}
-                  </span>
-                ))}
-              </div>
-            </TableHead>
-            <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
-              Streak
-            </TableHead>
-            <TableHead className="w-12"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {habits.map((habit) => (
-            <HabitTableRow key={habit.id} habit={habit} />
-          ))}
-          {isFetchingNextPage && (
+    <>
+      <div className="w-full md:hidden">
+        {habits.map((habit) => (
+          <HabitMobileCard key={habit.id} habit={habit} />
+        ))}
+        {isFetchingNextPage && (
+          <div className="flex justify-center py-4">
+            <Skeleton className="h-5 w-full max-w-xs px-4" />
+          </div>
+        )}
+        <div ref={sentinelRef} className="h-px" />
+      </div>
+      <ScrollArea className="hidden w-full md:block">
+        <ScrollBar orientation="horizontal" />
+        <Table>
+          <TableHeader className="bg-background">
             <TableRow>
-              <TableCell colSpan={4}>
-                <div className="flex justify-center py-4">
-                  <Skeleton className="h-5 w-full max-w-xs" />
+              <TableHead className="text-muted-foreground max-w-[400px] min-w-[250px] text-xs font-normal">
+                Habit
+              </TableHead>
+              <TableHead className="text-muted-foreground text-center text-xs font-normal">
+                <div className="flex items-center justify-center gap-1">
+                  {days.map((day, index) => (
+                    <span
+                      key={index}
+                      className={cn(
+                        'w-3.5 text-center',
+                        isTodayUTC(day) && 'font-semibold'
+                      )}
+                    >
+                      {formatDayLabel(day)}
+                    </span>
+                  ))}
                 </div>
-              </TableCell>
+              </TableHead>
+              <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
+                Streak
+              </TableHead>
+              <TableHead className="w-12"></TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-      <div ref={sentinelRef} className="h-px" />
-    </ScrollArea>
+          </TableHeader>
+          <TableBody>
+            {habits.map((habit) => (
+              <HabitTableRow key={habit.id} habit={habit} />
+            ))}
+            {isFetchingNextPage && (
+              <TableRow>
+                <TableCell colSpan={4}>
+                  <div className="flex justify-center py-4">
+                    <Skeleton className="h-5 w-full max-w-xs" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+        <div ref={sentinelRef} className="h-px" />
+      </ScrollArea>
+    </>
   );
 };
