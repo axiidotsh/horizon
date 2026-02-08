@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
   ResponsiveDialogFooter,
@@ -54,7 +55,7 @@ export const CreateHabitDialog = () => {
             Add a new habit to track daily.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="space-y-4">
+        <ResponsiveDialogBody className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -87,7 +88,7 @@ export const CreateHabitDialog = () => {
               maxLength={50}
             />
           </div>
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <Button
             variant="outline"

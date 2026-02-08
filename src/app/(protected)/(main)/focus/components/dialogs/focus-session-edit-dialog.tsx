@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
@@ -75,7 +76,7 @@ export const FocusSessionEditDialog = () => {
             Update the session details below.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="space-y-4 py-4">
+        <ResponsiveDialogBody className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="task">Task</Label>
             <Input
@@ -98,7 +99,7 @@ export const FocusSessionEditDialog = () => {
               onKeyDown={handleKeyDown}
             />
           </div>
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <ResponsiveDialogClose asChild>
             <Button variant="outline" disabled={editSession.isPending}>

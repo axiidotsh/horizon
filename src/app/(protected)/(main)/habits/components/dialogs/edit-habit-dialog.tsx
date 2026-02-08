@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
   ResponsiveDialogFooter,
@@ -67,7 +68,7 @@ export const EditHabitDialog = () => {
             Update your habit details.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="space-y-4">
+        <ResponsiveDialogBody className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="edit-title">Title</Label>
             <Input
@@ -97,7 +98,7 @@ export const EditHabitDialog = () => {
               maxLength={50}
             />
           </div>
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <Button
             variant="outline"

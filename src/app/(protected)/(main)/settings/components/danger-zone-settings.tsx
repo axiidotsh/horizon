@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
@@ -81,7 +82,7 @@ export const DangerZoneSettings = () => {
                 account and remove all your data from our servers.
               </ResponsiveDialogDescription>
             </ResponsiveDialogHeader>
-            <div className="space-y-3 pb-2">
+            <ResponsiveDialogBody className="space-y-3 pb-2">
               <Label htmlFor="delete-confirmation">
                 Type <span className="font-mono font-semibold">DELETE</span> to
                 confirm
@@ -92,7 +93,7 @@ export const DangerZoneSettings = () => {
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
                 placeholder="Type DELETE here"
               />
-            </div>
+            </ResponsiveDialogBody>
             <ResponsiveDialogFooter>
               <ResponsiveDialogClose asChild>
                 <Button variant="outline">Cancel</Button>

@@ -6,6 +6,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogContent,
   ResponsiveDialogFooter,
   ResponsiveDialogHeader,
@@ -65,51 +66,53 @@ export const CreateTaskDialog = () => {
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Create Task</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <AutosizeInput
-              id="title"
-              placeholder="Task title..."
-              value={form.title}
-              onChange={(e) => form.setTitle(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <ResponsiveDialogBody className="space-y-4">
             <div className="space-y-2">
-              <Label>Due Date</Label>
-              <DatePicker
-                date={form.dueDate}
-                setDate={form.setDueDate}
-                triggerClassName="w-full"
+              <Label htmlFor="title">Title</Label>
+              <AutosizeInput
+                id="title"
+                placeholder="Task title..."
+                value={form.title}
+                onChange={(e) => form.setTitle(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Due Date</Label>
+                <DatePicker
+                  date={form.dueDate}
+                  setDate={form.setDueDate}
+                  triggerClassName="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority</Label>
+                <PrioritySelect
+                  id="priority"
+                  value={form.priority}
+                  onValueChange={form.setPriority}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project">Project</Label>
+              <ProjectSelect
+                id="project"
+                projects={projects}
+                value={form.projectId}
+                onValueChange={form.setProjectId}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
-              <PrioritySelect
-                id="priority"
-                value={form.priority}
-                onValueChange={form.setPriority}
+              <Label>Tags</Label>
+              <TagInput
+                tags={form.tags}
+                onChange={form.setTags}
+                suggestions={existingTags}
               />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="project">Project</Label>
-            <ProjectSelect
-              id="project"
-              projects={projects}
-              value={form.projectId}
-              onValueChange={form.setProjectId}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Tags</Label>
-            <TagInput
-              tags={form.tags}
-              onChange={form.setTags}
-              suggestions={existingTags}
-            />
-          </div>
+          </ResponsiveDialogBody>
           <ResponsiveDialogFooter>
             <Button
               type="button"

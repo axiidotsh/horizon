@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
@@ -104,7 +105,7 @@ export const CustomDurationSettingsDialog = () => {
             Enter a custom default duration for focus sessions.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="space-y-2 py-4">
+        <ResponsiveDialogBody className="space-y-2 py-4">
           <Label htmlFor="custom-duration">Duration (minutes)</Label>
           <Input
             id="custom-duration"
@@ -123,7 +124,7 @@ export const CustomDurationSettingsDialog = () => {
             Range: {MIN_DURATION} - {MAX_DURATION} minutes ({MIN_DURATION} min -{' '}
             {MAX_DURATION / 60} hours)
           </p>
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <ResponsiveDialogClose asChild>
             <Button variant="outline">Cancel</Button>

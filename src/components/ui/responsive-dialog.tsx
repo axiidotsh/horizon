@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 
+import { cn } from '@/utils/utils';
+
 import {
   Dialog,
   DialogClose,
@@ -123,6 +125,31 @@ export const ResponsiveDialogTitle = ({
   }
 
   return <DialogTitle {...props}>{children}</DialogTitle>;
+};
+
+export const ResponsiveDialogBody = ({
+  children,
+  className,
+  ...props
+}: React.ComponentProps<'div'>) => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div
+        className={cn('min-h-0 flex-1 overflow-y-auto', className)}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn('mb-4', className)} {...props}>
+      {children}
+    </div>
+  );
 };
 
 export const ResponsiveDialogDescription = ({

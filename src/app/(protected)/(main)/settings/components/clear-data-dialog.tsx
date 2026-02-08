@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
@@ -115,7 +116,7 @@ export const ClearDataDialog = () => {
             cannot be undone.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="space-y-4">
+        <ResponsiveDialogBody className="space-y-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="date-range">Date range</Label>
             <Select value={dateRange} onValueChange={setDateRange}>
@@ -183,7 +184,7 @@ export const ClearDataDialog = () => {
               </div>
             </div>
           </div>
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <ResponsiveDialogClose asChild>
             <Button variant="outline">Cancel</Button>

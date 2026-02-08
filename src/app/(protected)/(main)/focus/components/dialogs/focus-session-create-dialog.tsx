@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
@@ -77,7 +78,7 @@ export const FocusSessionCreateDialog = () => {
             Set a custom duration and task name for your focus session.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <div className="space-y-4 py-4">
+        <ResponsiveDialogBody className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="duration">Duration (minutes)</Label>
             <Input
@@ -102,7 +103,7 @@ export const FocusSessionCreateDialog = () => {
               onKeyDown={handleKeyDown}
             />
           </div>
-        </div>
+        </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           <ResponsiveDialogClose asChild>
             <Button variant="outline" disabled={start.isPending}>
