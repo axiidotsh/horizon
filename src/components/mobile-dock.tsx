@@ -2,7 +2,6 @@
 
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
 import {
-  commandMenuOpenAtom,
   commandSearchValueAtom,
   selectedItemAtom,
 } from '@/atoms/command-menu-atoms';
@@ -20,7 +19,7 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useRef } from 'react';
 import { FocusTimerWidget } from './focus-timer-widget';
 
@@ -54,11 +53,26 @@ const navItems = [
 
 export const MobileDock = () => {
   const pathname = usePathname();
-  const [commandMenuOpen, setCommandMenuOpen] = useAtom(commandMenuOpenAtom);
+  const router = useRouter();
+  const isSearchPage = pathname === '/search';
   const [searchValue, setSearchValue] = useAtom(commandSearchValueAtom);
   const [selectedItem, setSelectedItem] = useAtom(selectedItemAtom);
   const { data: session } = useActiveSession();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleSearchButtonClick = () => {
+    if (isSearchPage) {
+      setSearchValue('');
+      setSelectedItem(null);
+      router.back();
+    } else {
+      router.push('/search');
+    }
+  };
+
+  const handleBackClick = () => {
+    setSelectedItem(null);
+  };
 
   return (
     <>
@@ -73,7 +87,7 @@ export const MobileDock = () => {
             className="shiny-dock-border bg-sidebar/40 dark:bg-accent/60 flex h-14 w-full items-center gap-1 rounded-full px-2 shadow-lg backdrop-blur-md"
           >
             <AnimatePresence mode="wait" initial={false}>
-              {commandMenuOpen ? (
+              {isSearchPage ? (
                 <motion.div
                   key="search-container"
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -90,9 +104,7 @@ export const MobileDock = () => {
                         animate={{ opacity: 1, scale: 1, x: 0 }}
                         exit={{ opacity: 0, scale: 0.8, x: -10 }}
                         transition={{ duration: 0.2, ease: 'easeInOut' }}
-                        onClick={() => {
-                          setSelectedItem(null);
-                        }}
+                        onClick={handleBackClick}
                         className="text-foreground hover:bg-foreground/10 flex size-8 shrink-0 items-center justify-center rounded-full transition-colors"
                       >
                         <ChevronLeftIcon className="size-5" />
@@ -154,24 +166,18 @@ export const MobileDock = () => {
             </AnimatePresence>
           </motion.div>
           <AnimatePresence mode="popLayout">
-            {session && !commandMenuOpen && <FocusTimerWidget />}
+            {session && !isSearchPage && <FocusTimerWidget />}
           </AnimatePresence>
           <motion.div
             layout
             className="shiny-dock-border bg-sidebar/40 dark:bg-accent/60 flex h-14 items-center rounded-full px-2 shadow-lg backdrop-blur-md"
           >
             <button
-              onClick={() => {
-                setCommandMenuOpen((prev) => !prev);
-                if (commandMenuOpen) {
-                  setSearchValue('');
-                  setSelectedItem(null);
-                }
-              }}
+              onClick={handleSearchButtonClick}
               className="text-foreground hover:bg-foreground/10 hover:text-accent-foreground flex size-10 cursor-pointer items-center justify-center rounded-full transition-colors"
             >
               <AnimatePresence mode="wait" initial={false}>
-                {commandMenuOpen ? (
+                {isSearchPage ? (
                   <motion.div
                     key="close-icon"
                     initial={{ opacity: 0, rotate: -90 }}
@@ -194,7 +200,7 @@ export const MobileDock = () => {
                 )}
               </AnimatePresence>
               <span className="sr-only">
-                {commandMenuOpen ? 'Close' : 'Search'}
+                {isSearchPage ? 'Close' : 'Search'}
               </span>
             </button>
           </motion.div>

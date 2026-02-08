@@ -1,9 +1,9 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PopoverContent } from '@/components/ui/popover';
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface CommandMenuContentProps {
-  mode: 'dialog' | 'popover' | 'mobile';
+  mode: 'dialog' | 'popover';
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEscapeKeyDown?: (e: KeyboardEvent) => void;
@@ -17,39 +17,6 @@ export const CommandMenuContent = ({
   onEscapeKeyDown,
   children,
 }: CommandMenuContentProps) => {
-  useEffect(() => {
-    if (mode === 'mobile' && open) {
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = '';
-      };
-    }
-  }, [mode, open]);
-
-  if (mode === 'mobile') {
-    return (
-      <Dialog modal={false} open={open} onOpenChange={onOpenChange}>
-        <DialogContent
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className="inset-0 z-50 max-h-none min-h-dvh w-full max-w-none! translate-x-0 translate-y-0 rounded-none border-0 p-0"
-          onEscapeKeyDown={onEscapeKeyDown}
-          showCloseButton={false}
-          overlayClassName="bg-background opacity-100"
-          contentClassName="pointer-events-auto overflow-y-auto"
-          onInteractOutside={(e) => {
-            const target = e.target as HTMLElement;
-            if (target.closest('[data-mobile-dock]')) {
-              e.preventDefault();
-            }
-          }}
-        >
-          {children}
-          <div className="h-14 w-full" />
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   if (mode === 'dialog') {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
