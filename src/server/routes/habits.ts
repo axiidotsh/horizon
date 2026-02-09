@@ -327,33 +327,34 @@ export const habitsRouter = new Hono()
 
       const now = new Date();
 
-      const totalHabits = await db.habit.count({
-        where: { userId: user.id, deletedAt: null },
-      });
-
       const chartData = await Promise.all(
         Array.from({ length: days }, async (_, i) => {
           const daysAgo = days - 1 - i;
           const date = getUTCStartOfDaysAgo(daysAgo);
           const nextDate = addUTCDays(date, 1);
 
-          const completedCount = await db.habitCompletion.count({
-            where: {
-              userId: user.id,
-              date: { gte: date, lt: nextDate },
-            },
-          });
-
-          const completionRate =
-            totalHabits > 0
-              ? Math.round((completedCount / totalHabits) * 100)
-              : 0;
-
-          const dateLabel = formatChartDateLabel(date, days);
+          const [totalHabits, completedCount] = await Promise.all([
+            db.habit.count({
+              where: {
+                userId: user.id,
+                deletedAt: null,
+                createdAt: { lt: nextDate },
+              },
+            }),
+            db.habitCompletion.count({
+              where: {
+                userId: user.id,
+                date: { gte: date, lt: nextDate },
+              },
+            }),
+          ]);
 
           return {
-            date: dateLabel,
-            completionRate,
+            date: formatChartDateLabel(date, days),
+            completionRate:
+              totalHabits > 0
+                ? Math.round((completedCount / totalHabits) * 100)
+                : 0,
           };
         })
       );

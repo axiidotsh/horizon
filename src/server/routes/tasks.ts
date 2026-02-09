@@ -138,27 +138,22 @@ export const tasksRouter = new Hono()
             where: {
               userId: user.id,
               deletedAt: null,
-              createdAt: { lt: nextDate },
+              dueDate: { gte: date, lt: nextDate },
             },
           }),
           db.task.count({
             where: {
               userId: user.id,
               deletedAt: null,
-              completedAt: { gte: date, lt: nextDate },
+              completed: true,
+              dueDate: { gte: date, lt: nextDate },
             },
           }),
-        ]).then(([totalTasks, completedTasks]) => {
-          const dateLabel = formatChartDateLabel(date, days);
-
-          return {
-            date: dateLabel,
-            completionRate:
-              totalTasks > 0
-                ? Math.round((completedTasks / totalTasks) * 100)
-                : 0,
-          };
-        });
+        ]).then(([dueTasks, completedTasks]) => ({
+          date: formatChartDateLabel(date, days),
+          completionRate:
+            dueTasks > 0 ? Math.round((completedTasks / dueTasks) * 100) : 0,
+        }));
       })
     );
 

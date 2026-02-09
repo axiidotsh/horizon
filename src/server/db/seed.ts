@@ -158,25 +158,35 @@ async function createTasks() {
         taskTags.push(...shuffled.slice(0, numTags));
       }
 
-      const isCompleted = i % 5 === 0;
-      const daysAgoCompleted = i % 7;
-      const completedAt = isCompleted
-        ? new Date(
-            Date.UTC(
-              now.getUTCFullYear(),
-              now.getUTCMonth(),
-              now.getUTCDate() - daysAgoCompleted
-            )
-          )
-        : null;
-
+      const daysAgoCreated = Math.floor(i / 3) + (i % 10);
       const createdAt = new Date(
         Date.UTC(
           now.getUTCFullYear(),
           now.getUTCMonth(),
-          now.getUTCDate() - (daysAgoCompleted + (i % 10))
+          now.getUTCDate() - daysAgoCreated
         )
       );
+
+      const hasDueDate = i % 3 !== 0;
+      const isFutureDue = i % 7 === 0;
+      const daysAgoDue = Math.max(0, daysAgoCreated - (i % 5));
+      const dueDate = hasDueDate
+        ? new Date(
+            Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate() + (isFutureDue ? (i % 10) + 1 : -daysAgoDue)
+            )
+          )
+        : null;
+
+      const isCompleted = i % 5 !== 0;
+      const completedAt =
+        isCompleted && dueDate
+          ? new Date(dueDate.getTime() + (i % 3) * 86400000)
+          : isCompleted
+            ? new Date(createdAt.getTime() + (i % 4) * 86400000)
+            : null;
 
       tasks.push({
         userId: user.id,
@@ -187,10 +197,7 @@ async function createTasks() {
         completedAt,
         tags: taskTags,
         createdAt,
-        dueDate:
-          i % 4 === 0
-            ? new Date(Date.now() + (i % 2 === 0 ? 1 : -1) * i * 86400000)
-            : null,
+        dueDate,
       });
     }
 
@@ -214,12 +221,21 @@ async function createHabits() {
 
   for (const user of users) {
     const habits = [];
+    const now = new Date();
     for (let i = 1; i <= 75; i++) {
+      const daysAgo = Math.floor((i - 1) / 2);
       habits.push({
         userId: user.id,
         title: `Habit ${i}`,
         description: i % 2 === 0 ? `Description for habit ${i}` : null,
         category: i % 3 === 0 ? 'Health' : i % 3 === 1 ? 'Productivity' : null,
+        createdAt: new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate() - daysAgo
+          )
+        ),
       });
     }
 
@@ -228,11 +244,14 @@ async function createHabits() {
     const completions = [];
     for (const habit of createdHabits) {
       const habitIndex = createdHabits.indexOf(habit);
-      const daysBack = 30;
+      const habitCreatedAt = habit.createdAt;
+      const now = new Date();
+      const daysSinceCreation = Math.floor(
+        (now.getTime() - habitCreatedAt.getTime()) / 86400000
+      );
 
-      for (let day = 0; day < daysBack; day++) {
+      for (let day = 0; day <= daysSinceCreation; day++) {
         if (day % ((habitIndex % 3) + 2) === 0) {
-          const now = new Date();
           const date = new Date(
             Date.UTC(
               now.getUTCFullYear(),
