@@ -1,8 +1,11 @@
 'use client';
 
+import { commandMenuOpenAtom } from '@/atoms/command-menu-atoms';
 import { PageHeading } from '@/components/page-heading';
 import { SearchBar } from '@/components/search-bar';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
+import { useRef } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { searchQueryAtom } from './atoms/habit-atoms';
 import { HabitFilters } from './components/habit-filters';
 import { HabitListActions } from './components/habit-list-actions';
@@ -12,6 +15,18 @@ import { HabitMetricsBadges } from './components/sections/habit-metrics-badges';
 
 export default function HabitsPage() {
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
+  const isCommandMenuOpen = useAtomValue(commandMenuOpenAtom);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useHotkeys(
+    'slash',
+    (e) => {
+      if (isCommandMenuOpen) return;
+      e.preventDefault();
+      searchRef.current?.focus();
+    },
+    { enableOnFormTags: false }
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -27,6 +42,7 @@ export default function HabitsPage() {
           </div>
           <div className="flex items-center gap-2">
             <SearchBar
+              ref={searchRef}
               placeholder="Search habits..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -44,6 +60,7 @@ export default function HabitsPage() {
           </div>
           <div className="flex items-center gap-2">
             <SearchBar
+              ref={searchRef}
               placeholder="Search habits..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
