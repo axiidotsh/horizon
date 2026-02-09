@@ -27,6 +27,7 @@ import { formatSessionDateTime } from '@/utils/date-format';
 import { useSetAtom } from 'jotai';
 import {
   CopyIcon,
+  DotIcon,
   EllipsisIcon,
   PencilIcon,
   TimerIcon,
@@ -182,8 +183,9 @@ const SessionMobileCard = ({ session }: SessionMobileCardProps) => {
       <ContextMenuTrigger asChild>
         <div className="border-b px-4 py-3">
           <span className="text-sm">{session.task || 'Focus session'}</span>
-          <div className="text-muted-foreground mt-1.5 flex items-center gap-3 text-xs">
+          <div className="text-muted-foreground mt-1.5 flex items-center gap-1 text-xs">
             <span>{formatSessionDateTime(session.startedAt)}</span>
+            <DotIcon className="size-4" />
             <span className="font-mono font-medium">
               {session.durationMinutes} min
             </span>

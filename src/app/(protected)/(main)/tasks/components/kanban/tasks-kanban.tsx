@@ -398,7 +398,7 @@ export const TasksKanban = () => {
   );
 
   return (
-    <ScrollArea className="mt-4">
+    <ScrollArea className="mt-4 grid">
       <ScrollBar orientation="horizontal" className="z-10" />
       <div className="min-w-6xl">
         <Kanban

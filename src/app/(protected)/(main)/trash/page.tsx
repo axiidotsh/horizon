@@ -100,7 +100,7 @@ export default function TrashPage() {
         <div className="min-w-0 flex-1 md:px-10">
           {tabs.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-0">
-              <ScrollArea className="md:h-[calc(100vh-12rem)]">
+              <ScrollArea className="grid md:h-[calc(100vh-12rem)]">
                 {tab.content}
                 <ScrollBar orientation="horizontal" />
                 <ScrollBar orientation="vertical" />

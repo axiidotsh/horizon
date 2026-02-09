@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { useAtom } from 'jotai';
-import { InboxIcon, RotateCcwIcon, TrashIcon } from 'lucide-react';
+import { DotIcon, InboxIcon, RotateCcwIcon, TrashIcon } from 'lucide-react';
 import { selectedTrashHabitsAtom } from '../atoms/trash-atoms';
 import {
   useBulkDelete,
@@ -140,14 +140,14 @@ export const TrashHabitsTab = () => {
             />
             <div className="min-w-0 flex-1">
               <span className="text-sm font-medium">{habit.title}</span>
-              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <div className="mt-1.5 flex flex-wrap items-center gap-1">
                 {habit.category && (
                   <span className="text-muted-foreground text-xs">
                     {habit.category}
                   </span>
                 )}
                 {habit.category && habit.deletedAt && (
-                  <span className="text-muted-foreground text-xs">·</span>
+                  <DotIcon className="text-muted-foreground size-4" />
                 )}
                 {habit.deletedAt && (
                   <span className="text-muted-foreground text-xs">
@@ -198,7 +198,7 @@ export const TrashHabitsTab = () => {
             <TableHead className="text-muted-foreground w-[150px] text-xs font-normal">
               Category
             </TableHead>
-            <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
+            <TableHead className="text-muted-foreground w-34 text-xs font-normal">
               Deleted
             </TableHead>
             <TableHead className="w-12" />

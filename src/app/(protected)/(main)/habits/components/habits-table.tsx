@@ -185,7 +185,7 @@ export const HabitsTable = () => {
         )}
         <div ref={sentinelRef} className="h-px" />
       </div>
-      <ScrollArea className="hidden w-full md:block">
+      <ScrollArea className="hidden w-full md:grid">
         <ScrollBar orientation="horizontal" />
         <Table>
           <TableHeader className="bg-background">

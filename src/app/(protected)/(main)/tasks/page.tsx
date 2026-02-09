@@ -35,7 +35,7 @@ export default function TasksPage() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
         {/* Mobile layout */}
-        <div className="flex flex-col gap-3 sm:hidden">
+        <div className="flex flex-col gap-3 lg:hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <PageHeading>Tasks</PageHeading>
@@ -57,7 +57,7 @@ export default function TasksPage() {
         </div>
 
         {/* Desktop layout */}
-        <div className="hidden flex-col justify-between gap-3 sm:flex sm:flex-row sm:items-center">
+        <div className="hidden flex-col justify-between gap-3 lg:flex lg:flex-row lg:items-center">
           <div className="flex flex-row items-center gap-3">
             <PageHeading>Tasks</PageHeading>
             <TaskMetricsBadges />

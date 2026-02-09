@@ -198,7 +198,7 @@ export const TrashTasksTab = () => {
               <TableHead className="text-muted-foreground w-28 text-xs font-normal">
                 Project
               </TableHead>
-              <TableHead className="text-muted-foreground w-24 text-xs font-normal">
+              <TableHead className="text-muted-foreground w-34 text-xs font-normal">
                 Deleted
               </TableHead>
               <TableHead className="w-20" />

@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { useAtom } from 'jotai';
-import { InboxIcon, RotateCcwIcon, TrashIcon } from 'lucide-react';
+import { DotIcon, InboxIcon, RotateCcwIcon, TrashIcon } from 'lucide-react';
 import { selectedTrashSessionsAtom } from '../atoms/trash-atoms';
 import {
   useBulkDelete,
@@ -153,13 +153,13 @@ export const TrashSessionsTab = () => {
               <span className="text-sm font-medium">
                 {session.task ?? 'Untitled session'}
               </span>
-              <div className="mt-1.5 flex items-center gap-3 text-xs">
+              <div className="mt-1.5 flex items-center gap-1 text-xs">
                 <span className="text-muted-foreground font-mono font-medium">
                   {formatDuration(session.durationMinutes)}
                 </span>
                 {session.deletedAt && (
                   <>
-                    <span className="text-muted-foreground">·</span>
+                    <DotIcon className="text-muted-foreground size-4" />
                     <span className="text-muted-foreground">
                       {formatDistanceToNow(new Date(session.deletedAt), {
                         addSuffix: true,
@@ -211,7 +211,7 @@ export const TrashSessionsTab = () => {
             <TableHead className="text-muted-foreground w-[100px] text-xs font-normal">
               Duration
             </TableHead>
-            <TableHead className="text-muted-foreground w-[120px] text-xs font-normal">
+            <TableHead className="text-muted-foreground w-34 text-xs font-normal">
               Deleted
             </TableHead>
             <TableHead className="w-12" />
