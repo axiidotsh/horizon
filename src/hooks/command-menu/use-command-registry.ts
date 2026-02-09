@@ -7,6 +7,7 @@ import { useFocusSession } from '@/app/(protected)/(main)/focus/hooks/mutations/
 import { useActiveSession } from '@/app/(protected)/(main)/focus/hooks/queries/use-active-session';
 import { createDialogOpenAtom } from '@/app/(protected)/(main)/habits/atoms/dialog-atoms';
 import { useUpdateSettings } from '@/app/(protected)/(main)/settings/hooks/mutations/use-update-settings';
+import { useSettings } from '@/app/(protected)/(main)/settings/hooks/queries/use-settings';
 import {
   bulkAddTasksSheetAtom,
   createProjectDialogAtom,
@@ -31,6 +32,7 @@ import {
   PlayIcon,
   SaveIcon,
   SquareIcon,
+  ToggleLeftIcon,
   TrashIcon,
   XIcon,
 } from 'lucide-react';
@@ -43,6 +45,7 @@ export function useCommandRegistry() {
   const { setTheme } = useTheme();
   const { data: activeSession } = useActiveSession();
   const { pause, resume, complete } = useFocusSession();
+  const { data: settings } = useSettings();
   const { mutate: updateSettings } = useUpdateSettings();
 
   const setCreateTaskDialogOpen = useSetAtom(createTaskDialogAtom);
@@ -214,6 +217,26 @@ export function useCommandRegistry() {
           }),
       })),
       {
+        id: 'toggle-reduce-motion',
+        name: settings?.reduceMotion
+          ? 'Disable reduced motion'
+          : 'Enable reduced motion',
+        icon: ToggleLeftIcon,
+        keywords: [
+          'animation',
+          'animations',
+          'motion',
+          'reduce',
+          'accessibility',
+          'a11y',
+        ],
+        category: 'settings' as const,
+        handler: () =>
+          updateSettings({
+            json: { reduceMotion: !settings?.reduceMotion },
+          }),
+      },
+      {
         id: 'trash-empty-tasks',
         name: 'Clear trashed tasks',
         icon: LayoutListIcon,
@@ -267,6 +290,7 @@ export function useCommandRegistry() {
       router,
       focusCommands,
       setTheme,
+      settings,
       updateSettings,
       setCreateTaskDialogOpen,
       setBulkAddTasksSheetOpen,
