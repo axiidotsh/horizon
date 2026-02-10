@@ -169,7 +169,7 @@ const NaturalLanguageDatePicker = ({
                     key={label}
                     variant="outline"
                     size="sm"
-                    className="text-xs"
+                    className="rounded-sm text-xs"
                     onClick={() => {
                       const d = getDate();
                       setDate(d);
